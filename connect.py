@@ -41,41 +41,48 @@ class PrologConnecter:
                 os.remove('connect_files\\' + file)
         return res
 
-    # TODO: write this
     def get_all_ans(self, instructions):
-        ...
+        functors, vars = self.parse_ins(instructions)
+        q = Query(*(functors[i](*vars[i]) for i in range(len(functors))))
+        while q.nextSolution():
+            pass
+        q.closeQuery()
+        return vars
 
-    # TODO: write this
     @staticmethod
     def parse_ins(instruction):
-        ...
+        preds = re.findall('(\w[\S]+|\w)\(([\w\d\,\ ]+)\)', instruction)
+        functors = []
+        vars = []
+        for pred, atoms in preds:
+            v = []
+            functors.append(Functor(pred, len(atoms.split(','))))
+            for atom in atoms.split(','):
+                atom = atom.strip()
+                if atom[0].isupper():
+                    v.append(Variable())
+                elif atom.isdigit():
+                    v.append(int(atom))
+                else:
+                    try:
+                        v.append(float(atom))
+                    except ValueError:
+                        v.append(atom)
+            vars.append(v)
+        return functors, vars
 
 # test1
-# code = '''parent(ash, cat).
-# parent(kilo, mom).
-# parent(ash, tom).
-# f(1, 1).
-# f(2, 1).
-# f(X, Y):-
-#     T1 is X - 1,
-#     T2 is X - 2,
-#     f(T1, R1),
-#     f(T2, R2),
-#     Y is R1 + R2.'''
-# con = PrologConnecter()
-# con.consult_code(code, delete=False)
-# con.consult_file('../coins.pl', delete=False)
-# con.consult_file('../lst1.pl', delete=False)
-# con.consult_file('../lst2.pl', delete=False)
-# con.consult_file('../fib.pl', delete=False)
-# con.consult_file('../puzzle1.pro', delete=False)
-# # instructions = 'parent(ash, X),f(10, Y),solve(Z)'
-# instructions = 'coins(X,100,500),solve(Y)'
-# ans = con.get_n_ans(instructions)
-# print(ans)
-
-
-# test0
+instructions1 = 'fi(10, X), f(10, Y), qsort([1,2,9,5,3], Z), coins(A, 100, 500), solve(B)'
+instructions = 'parent(ash, X), f(10, Y), solve(Z)'
+p = PrologConnecter()
+p.consult_file('../coins.pl', delete=False)
+p.consult_file('../lst1.pl', delete=False)
+p.consult_file('../lst2.pl', delete=False)
+p.consult_file('../fib.pl', delete=False)
+p.consult_file('../puzzle1.pro', delete=False)
+print(p.get_all_ans(instructions1))
+from random import shuffle
+# # test0
 # prolog = Prolog()
 # prolog.consult('coins.pl')
 # prolog.consult('lst1.pl')
@@ -90,6 +97,7 @@ class PrologConnecter:
 # puzzle1 = Functor('solve', 1)
 # a = list(range(10))
 # shuffle(a)
+# print(fib(0, vars[0]))
 # qmfib = Query(mfib(0, vars[0]), fib(10, vars[1]), qsort(a, vars[2]), coins(vars[3], 100, 500), puzzle1(vars[4]))
 # while qmfib.nextSolution():
 #     print(*map(lambda x: x.value, vars))
