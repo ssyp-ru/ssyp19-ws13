@@ -82,19 +82,19 @@ class PrologConnecter:
         return functors, items, vars
 
 # tests 1-3
-# instructions1 = 'fi(10, X), f(10, X2), qsort([1,2,9,5,3], X1), coins(A, 100, 500), solve(B)'
-# instructions = 'parent(ash, X), f(10, Y), solve(Z)'
-# instructions2 = 'qsort([1,2,9,5,3], X1)'
-# p = PrologConnecter()
-# p.consult_file('../coins.pl', delete=False)
-# p.consult_file('../lst1.pl', delete=False)
-# p.consult_file('../lst2.pl', delete=False)
-# p.consult_file('../fib.pl', delete=False)
-# p.consult_file('../puzzle1.pro', delete=False)
-# p.consult_code('''parent(ash, more).
-# parent(ash, mast).''')
+instructions1 = 'fi(10, X), f(10, X2), qsort([1,2,9,5,3], X1), coins(A, 100, 500), solve(B)'
+instructions = 'parent(ash, X), f(10, Y), solve(Z)'
+instructions2 = 'qsort([1,2,9,5,3], X1)'
+p = PrologConnecter()
+p.consult_file('../coins.pl', delete=False)
+p.consult_file('../lst1.pl', delete=False)
+p.consult_file('../lst2.pl', delete=False)
+p.consult_file('../fib.pl', delete=False)
+p.consult_file('../puzzle1.pro', delete=False)
+p.consult_code('''parent(ash, more).
+parent(ash, mast).''')
 # a = p.get_all_ans(instructions1, maxresults=1)
 # print(a)
-# a = p.get_n_ans(instructions1, maxresult=1)
-# print(a)
+a = p.get_n_ans(instructions1, maxresult=-1)
+print(a)
 # a = p.get_all_ans('parent(ash, X)')
