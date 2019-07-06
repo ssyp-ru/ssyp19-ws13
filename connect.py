@@ -27,10 +27,10 @@ class PrologConnecter:
         return file.name[file.name.rfind('\\') + 1::]
 
     def consult_code(self, code, delete=True):
-        self.consult_file(self.create_temp_file(code), delete)
+        self.consult_file('connect_files/' + self.create_temp_file(code), delete)
 
-    def consult_file(self, file_name: str, delete=True):
-        self.prolog.consult('connect_files/' + file_name)
+    def consult_file(self, file_name: str, delete=False):
+        self.prolog.consult(file_name)
         self.files_name.append((file_name, delete))
 
     def get_n_ans(self, instructions: str, maxresult=1, **kwargs):  # warning! can be broken
