@@ -25,6 +25,6 @@ class Translator:
     @staticmethod
     def connect_to_prolog(instructions: str, results=-1) -> [dict]:
         pc = PrologConnecter()
-        pc.consult_file('Prolog/Axioms.pro')
-        pc.consult_file('Prolog/Something')
+        pc.consult_file('axiomsTarski.pl')
+        # pc.consult_file('Prolog/Something.pl')
         return pc.get_all_ans(instructions, maxresults=results)  # FIXME: may be unfinished(and broken)
