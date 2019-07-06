@@ -18,14 +18,14 @@ congruent(X, Y, Y, X).
 congruent(X, Y, X, Y).
 congruent(Y, Y, X, X).
 
-congruent(x, y, z, u).
-congruent(x, y, v, w).
-congruent(z, u, v, w).
+congruent(x, v, x, u).
+congruent(y, v, y, u).
+congruent(z, v, z, u).
 
 laysBetween(u, y, a).
 laysBetween(v, x, a).
 
-laysBetween(x, z, u).
+laysBetween(z, x, y).
 laysBetween(y, z, v).
 /*
 point(a).
@@ -62,24 +62,33 @@ axiomPasch(U, Y, A, V, X):-
 					laysBetween(X, Z, U),
 					laysBetween(Y, Z, V), !.
 
-%the sixth axiom Axiom schema of Continuity
-%schemaContinuity():-
+%the sixth axiom Axiom schema of Continuity --not works now
+schemaContinuity():-
+				laysBetween(A, Y, X),
+				laysBetween(X, Y, B).
 
+%the seventh axiom Lower Dimension --not works now
 lowerDimention():-
 				not(laysBetween(A, B, C)),
 				not(laysBetween(B, C, A)),
-				not(laysBetween(C, A, B)).
+				not(laysBetween(C, A, B)), !.
 
-upperDimension(X, Y, Z, V, U):-
-/*				point(X),
-				point(Y),
-				point(Z),
-				point(V),
-				point(U),
-*/				not(V = U),
-					congruent(X, U, X, V),
-					congruent(Y, V, Y, U),
-					congruent(Z, V, Z, U), !.
+%the eighth axiom Upper Dimension
+upperDimension(X, Y, Z):-
+					laysBetween(X, Y, Z);
+					laysBetween(X, Z, Y);
+					laysBetween(Z, Y, X);
+						congruent(X, U, X, V),
+						congruent(Y, V, Y, U),
+						congruent(Z, V, Z, U), !.
+
+%the ninth axiom Axiom of Euclid
+axiomEuclid(X, Y, Z):-
+				laysBetween(X, Y, Z), !;
+				laysBetween(Y, Z, X), !;
+				laysBetween(Z, X, y), !;
+					congruent(X, A, Y, A),
+					congruent(X, A, Z, A), !.
 
 fiveSegment(X, Y, U, Z, X_, Y_, U_, Z_):-	
 /*				point(X),
@@ -91,7 +100,7 @@ fiveSegment(X, Y, U, Z, X_, Y_, U_, Z_):-
 				point(U_),
 				point(Z_),
 */					congruent(X, Y, X_, Y_),
-						%not(I is 0), dist betw X and Y
+						%not(I is 0), --dist betw X and Y needs to be fixed
 					congruent(X, U, X_, U_),
 					congruent(U, Y, U_, Y_),
 					congruent(Y, Z, Y_, Z_),
