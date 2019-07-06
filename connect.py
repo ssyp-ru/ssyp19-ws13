@@ -2,6 +2,7 @@ from pyswip import Prolog, Query, Variable, Functor
 import tempfile
 import re
 import os
+from ast import literal_eval
 
 
 class PrologConnecter:
@@ -41,64 +42,59 @@ class PrologConnecter:
                 os.remove('connect_files\\' + file)
         return res
 
-    def get_all_ans(self, instructions):
-        functors, vars = self.parse_ins(instructions)
-        q = Query(*(functors[i](*vars[i]) for i in range(len(functors))))
-        while q.nextSolution():
-            pass
+    def get_all_ans(self, instructions, maxresults=-1):
+        functors, items, vars = self.parse_ins(instructions)
+        ans = []
+        q = Query(*(functors[i](*items[i]) for i in range(len(functors))))
+        while q.nextSolution() and maxresults:
+            maxresults -= 1
+            ans.append({k: v.value for k, v in vars})
         q.closeQuery()
-        return vars
+        return ans
 
     @staticmethod
     def parse_ins(instruction):
-        preds = re.findall('(\w[\S]+|\w)\(([\w\d\,\ ]+)\)', instruction)
+        preds = re.findall('(\w[\S]+|\w)\(([\w\d\,\ \[\]]+)\)', instruction)
         functors = []
+        items = []
         vars = []
         for pred, atoms in preds:
-            v = []
-            functors.append(Functor(pred, len(atoms.split(','))))
-            for atom in atoms.split(','):
+            atoms = re.findall('\[[\d\w\,]+\]|[\w\d]+',atoms)
+            citems = []
+            functors.append(Functor(pred, len(atoms)))
+            # print(re.findall('\[[\d\w\,]+\]|[\w\d]+',atoms))
+            for atom in atoms:
                 atom = atom.strip()
                 if atom[0].isupper():
-                    v.append(Variable())
+                    any_var = Variable()
+                    citems.append(any_var)
+                    vars.append((atom, any_var))
                 elif atom.isdigit():
-                    v.append(int(atom))
+                    citems.append(int(atom))
+                elif atom[0] == '[' and atom[-1] == ']':
+                    citems.append(literal_eval(atom))
                 else:
                     try:
-                        v.append(float(atom))
+                        citems.append(float(atom))
                     except ValueError:
-                        v.append(atom)
-            vars.append(v)
-        return functors, vars
+                        citems.append(atom)
+            items.append(citems)
+        return functors, items, vars
 
-# test1
-instructions1 = 'fi(10, X), f(10, Y), qsort([1,2,9,5,3], Z), coins(A, 100, 500), solve(B)'
-instructions = 'parent(ash, X), f(10, Y), solve(Z)'
-p = PrologConnecter()
-p.consult_file('../coins.pl', delete=False)
-p.consult_file('../lst1.pl', delete=False)
-p.consult_file('../lst2.pl', delete=False)
-p.consult_file('../fib.pl', delete=False)
-p.consult_file('../puzzle1.pro', delete=False)
-print(p.get_all_ans(instructions1))
-from random import shuffle
-# # test0
-# prolog = Prolog()
-# prolog.consult('coins.pl')
-# prolog.consult('lst1.pl')
-# prolog.consult('lst2.pl')
-# prolog.consult('fib.pl')
-# prolog.consult('puzzle1.pro')
-# vars = [Variable() for _ in range(10)]
-# fib = Functor('f', 2)
-# coins = Functor('coins', 3)
-# mfib = Functor('fi', 2)
-# qsort = Functor('qsort', 2)
-# puzzle1 = Functor('solve', 1)
-# a = list(range(10))
-# shuffle(a)
-# print(fib(0, vars[0]))
-# qmfib = Query(mfib(0, vars[0]), fib(10, vars[1]), qsort(a, vars[2]), coins(vars[3], 100, 500), puzzle1(vars[4]))
-# while qmfib.nextSolution():
-#     print(*map(lambda x: x.value, vars))
-# qmfib.closeQuery()
+# tests 1-3
+# instructions1 = 'fi(10, X), f(10, X2), qsort([1,2,9,5,3], X1), coins(A, 100, 500), solve(B)'
+# instructions = 'parent(ash, X), f(10, Y), solve(Z)'
+# instructions2 = 'qsort([1,2,9,5,3], X1)'
+# p = PrologConnecter()
+# p.consult_file('../coins.pl', delete=False)
+# p.consult_file('../lst1.pl', delete=False)
+# p.consult_file('../lst2.pl', delete=False)
+# p.consult_file('../fib.pl', delete=False)
+# p.consult_file('../puzzle1.pro', delete=False)
+# p.consult_code('''parent(ash, more).
+# parent(ash, mast).''')
+# a = p.get_all_ans(instructions1, maxresults=1)
+# print(a)
+# a = p.get_n_ans(instructions1, maxresult=1)
+# print(a)
+# a = p.get_all_ans('parent(ash, X)')
