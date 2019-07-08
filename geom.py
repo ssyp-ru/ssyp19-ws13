@@ -25,6 +25,11 @@ class Circle:
 		self.radius = radius
 
 class Point:
+	def isInCircle(self, circleslist):
+		for i in circleslist:
+			if (self.distToPoint(circleslist[i].center) < circleslist[i].radius):
+				#Here i need Vsevolod's code for request in prolog
+
 	def distToPoint(self, point):
 		X = self.x - point.x
 		Y = self.y - point.y
