@@ -1,4 +1,4 @@
-from pyswip import Prolog, Query, Variable, Functor
+from pyswip import Prolog, Query, Variable, Functor, call
 import tempfile
 import re
 import os
@@ -39,45 +39,54 @@ class PrologConnecter:
 
         for file, delete in self.files_name:  # deleting temp files
             if delete:
-                os.remove('connect_files\\' + file)
+                os.remove(file)
         return res
 
     # rewrite old way
-    def get_all_ans(self, instructions, maxresults=-1) -> list(dict):  # warning! can be broken(x9000)
-        functors, items, vars = self.parse_ins(instructions)  # functors and items of predicates, variables
-        ans = []  # list of variable values
-        q = Query(*(functors[i](*items[i]) for i in range(len(functors))))  # make query
-        while q.nextSolution() and maxresults:  # find solutions
-            maxresults -= 1
-            ans.append({k: v.value for k, v in vars})  # append values
-        q.closeQuery()
-        return ans
+    def get_all_ans(self, instructions, maxresults=-1) -> list:  # warning! can be broken(x9000)
+        terms, vars, statements = self.parse_ins(instructions)  # functors and items of predicates, variables
+        # print(terms,vars,statements)
+        vars_ans = []  # list of variable values
+        statements_ans = {}  # list of statements
+        if terms:
+            q = Query(*terms)  # make query
+            while q.nextSolution() and maxresults:  # find solutions
+                maxresults -= 1
+                vars_ans.append({k: v.value for k, v in vars})  # append values
+            q.closeQuery()
+        if statements:
+            for statement in statements:
+                statements_ans.update({statement[1]: call(statement[0])})
+        return vars_ans, statements_ans
 
     @staticmethod
     def parse_ins(instruction) -> list and list and list:  # parsing instruction.
-        preds = re.findall('(\w[\S]+|\w)\(([\w\d\,\ \[\]]+)\)', instruction)  # find predirects
-        functors = []
-        items = []
+        preds = re.findall('([^\(\)\,\s]+|\S)(\([\w\d\,\ \[\]]+\))', instruction)  # find predirects
+        terms = []  # if need var(s)
         vars = []
+        statements = []  # if need True or False
         for pred, atoms in preds:
-            atoms = re.findall('\[[\d\w\,]+\]|[\w\d]+',atoms)  # find names(vars|lists|strings|ints) in atoms
-            citems = []
-            functors.append(Functor(pred, len(atoms)))
-            # print(re.findall('\[[\d\w\,]+\]|[\w\d]+',atoms))
-            for atom in atoms:
+            names = re.findall('\[[\d\w\,]+\]|[\w\d]+', atoms)  # find names(vars|lists|strings|ints) in atoms
+            items = []
+            there_is_var = False
+            for atom in names:
                 atom = atom.strip()
                 if atom[0].isupper():  # check for var
-                    any_var = Variable()  # link to Prologs var
-                    citems.append(any_var)
+                    any_var = Variable()  # link to Prolog var
+                    items.append(any_var)
                     vars.append((atom, any_var))
+                    there_is_var = True
                 elif atom.isdigit():  # check for int
-                    citems.append(int(atom))
+                    items.append(int(atom))
                 elif atom[0] == '[' and atom[-1] == ']':  # check for list
-                    citems.append(literal_eval(atom))
+                    items.append(literal_eval(atom))
                 else:
                     try:  # check for float
-                        citems.append(float(atom))
+                        items.append(float(atom))
                     except ValueError:
-                        citems.append(atom)
-            items.append(citems)
-        return functors, items, vars
+                        items.append(atom)
+            if there_is_var:
+                terms.append(Functor(pred, len(names))(*items))
+            else:
+                statements.append((Functor(pred, len(names))(*items), pred + atoms))
+        return terms, vars, statements

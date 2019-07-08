@@ -7,7 +7,7 @@ class Translator:
         pass
 
     def eat(self, something):
-        # TODO: Parse ↑↑↑ this
+        # TODO: Parse ↑↑↑
         parsed = self.parse_food(something)
         instructions: str = parsed
         out = self.connect_to_prolog(instructions)
