@@ -4,7 +4,8 @@ from connect import PrologConnector
 class Translator:
 
     def __init__(self):
-        pass
+        self.connector = PrologConnector()
+        self.connector.consult_file('Prolog/axiomsTarski.pl')
 
     def eat(self, something):
         # TODO: Parse ↑↑↑(maybe)
@@ -21,9 +22,12 @@ class Translator:
     def feedback(self, cls):
         pass
 
-    @staticmethod
-    def connect_to_prolog(instructions: str, results=-1) -> [dict]:
-        pc = PrologConnector()
-        pc.consult_file('Prolog/axiomsTarski.pl')
-        # pc.consult_file('Prolog/Something.pl')
-        return pc.get_n_ans_new(instructions, maxresults=results)  # FIXME: may be unfinished(and broken)
+    # @staticmethod
+    # def connect_to_prolog(instructions: str, results=-1) -> [dict]:
+    #     # pc.consult_file('Prolog/Something.pl')
+    #     return pc.get_n_ans_new(instructions, maxresults=results)  # FIXME: may be unfinished(and broken)
+
+    def make_request(self, req):
+        return self.connector.get_n_ans_new(req)
+
+    # TODO: doit write this class!

@@ -8,7 +8,6 @@ from ast import literal_eval
 class PrologConnector:
 
     def __init__(self):
-        self.files_name = []
         self.prolog = Prolog()
 
     @staticmethod
@@ -29,20 +28,16 @@ class PrologConnector:
 
     def consult_file(self, file_name: str, delete=False):
         self.prolog.consult(file_name)
-        self.files_name.append((file_name, delete))
+        if delete:
+            os.remove(file_name)
 
-    def get_n_ans(self, instructions: str, maxresult=1, **kwargs):  # warning! can be broken if maxresult != 1
+    def get_n_ans(self, instructions: str, maxresult=1, **kwargs) -> [dict]:  # warning! can be broken if maxresult != 1
 
         res = list(self.prolog.query(instructions, maxresult=maxresult, **kwargs))  # old simple way
         return res
 
-    def del_temp_files(self):
-        for file, delete in self.files_name:  # deleting temp files
-            if delete:
-                os.remove(file)
-
     # rewrite old way
-    def get_n_ans_new(self, instructions, maxresults=-1) -> list:  # warning! can be broken(x9000)
+    def get_n_ans_new(self, instructions: str, maxresults=-1) -> list:  # warning! can be broken(x9000)
         terms, vars, statements = self.parse_ins(instructions)  # functors and items of predicates, variables
         vars_ans = []  # list of variable values
         statements_ans = {}  # list of statements
@@ -91,3 +86,11 @@ class PrologConnector:
             else:
                 statements.append((Functor(pred, len(names))(*items), pred + atoms))
         return terms, vars, statements
+
+    def call(self, command):
+        a = self.get_n_ans_new(command, maxresults=-1)
+        if a[0]:
+            return a[0]
+        else:
+            for i in a[1].values():
+                return i
