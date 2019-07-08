@@ -5,7 +5,7 @@ import os
 from ast import literal_eval
 
 
-class PrologConnecter:
+class PrologConnector:
 
     def __init__(self):
         self.files_name = []
@@ -20,11 +20,9 @@ class PrologConnecter:
             except PermissionError:
                 raise PermissionError("Don't have permission for create a dir")
 
-        file = tempfile.NamedTemporaryFile('w', delete=False, suffix='.pro', dir='connect_files')
-        with file as f:
-            f.write(code)
-
-        return file.name[file.name.rfind('\\') + 1::]
+        with tempfile.NamedTemporaryFile('w', delete=False, suffix='.pro', dir='connect_files') as file:
+            file.write(code)
+            return file.name[file.name.rfind('\\') + 1::]
 
     def consult_code(self, code: str, delete=True):  # consult Prolog code via temp file
         self.consult_file('connect_files/' + self.create_temp_file(code), delete)
@@ -36,16 +34,16 @@ class PrologConnecter:
     def get_n_ans(self, instructions: str, maxresult=1, **kwargs):  # warning! can be broken if maxresult != 1
 
         res = list(self.prolog.query(instructions, maxresult=maxresult, **kwargs))  # old simple way
+        return res
 
+    def del_temp_files(self):
         for file, delete in self.files_name:  # deleting temp files
             if delete:
                 os.remove(file)
-        return res
 
     # rewrite old way
-    def get_all_ans(self, instructions, maxresults=-1) -> list:  # warning! can be broken(x9000)
+    def get_n_ans_new(self, instructions, maxresults=-1) -> list:  # warning! can be broken(x9000)
         terms, vars, statements = self.parse_ins(instructions)  # functors and items of predicates, variables
-        # print(terms,vars,statements)
         vars_ans = []  # list of variable values
         statements_ans = {}  # list of statements
         if terms:
@@ -61,25 +59,28 @@ class PrologConnecter:
 
     @staticmethod
     def parse_ins(instruction) -> list and list and list:  # parsing instruction.
-        preds = re.findall('([^\(\)\,\s]+|\S)(\([\w\d\,\ \[\]]+\))', instruction)  # find predirects
         terms = []  # if need var(s)
         vars = []
         statements = []  # if need True or False
-        for pred, atoms in preds:
+        for pred, atoms in re.findall('([^\(\)\,\s]+|\S)(\([\w\d\,\ \[\]]+\))', instruction):  # find predirects
             names = re.findall('\[[\d\w\,]+\]|[\w\d]+', atoms)  # find names(vars|lists|strings|ints) in atoms
             items = []
             there_is_var = False
             for atom in names:
                 atom = atom.strip()
+
                 if atom[0].isupper():  # check for var
-                    any_var = Variable()  # link to Prolog var
+                    any_var = Variable()  # link to Prologs var
                     items.append(any_var)
                     vars.append((atom, any_var))
                     there_is_var = True
+
                 elif atom.isdigit():  # check for int
                     items.append(int(atom))
+
                 elif atom[0] == '[' and atom[-1] == ']':  # check for list
                     items.append(literal_eval(atom))
+
                 else:
                     try:  # check for float
                         items.append(float(atom))

@@ -1,4 +1,4 @@
-from connect import PrologConnecter
+from connect import PrologConnector
 
 
 class Translator:
@@ -7,10 +7,9 @@ class Translator:
         pass
 
     def eat(self, something):
-        # TODO: Parse ↑↑↑
-        parsed = self.parse_food(something)
-        instructions: str = parsed
-        out = self.connect_to_prolog(instructions)
+        # TODO: Parse ↑↑↑(maybe)
+        instructions: str = self.parse_food(something)
+        out = self.connect_to._prolog(instructions)
         self.feedback(...)
         return out
 
@@ -24,7 +23,7 @@ class Translator:
 
     @staticmethod
     def connect_to_prolog(instructions: str, results=-1) -> [dict]:
-        pc = PrologConnecter()
-        pc.consult_file('axiomsTarski.pl')
+        pc = PrologConnector()
+        pc.consult_file('Prolog/axiomsTarski.pl')
         # pc.consult_file('Prolog/Something.pl')
-        return pc.get_all_ans(instructions, maxresults=results)  # FIXME: may be unfinished(and broken)
+        return pc.get_n_ans_new(instructions, maxresults=results)  # FIXME: may be unfinished(and broken)
