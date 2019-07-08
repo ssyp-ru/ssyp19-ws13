@@ -12,7 +12,13 @@ class Point:
 	def	distToStraight(self, straight):
 		inclined = Vector(Point(straight.point1.x - self.x, straight.point1.y - self.y))
 		cross = inclined.crossProduct(Vector(Point(straight.point2.x - straight.point1.x, straight.point2.y - straight.point1.y)))
-		return abs((cross * 2) / Vector(Point(straight.point2.x - straight.point1.x, straight.point2.y - straight.point1.y)).length)
+		return abs(cross  / Vector(Point(straight.point2.x - straight.point1.x, straight.point2.y - straight.point1.y)).length)
+	def distToSegment(self, segment):
+		inclined = Vector(Point(self.x - segment.point1.x, self.y - segment.point1.y))
+		if (inclined.dotproduct(Vector(Point(segment.point2.x - segment.point1.x, segment.point2.y - segment.point1.y))) < 0):
+			return (min(self.distToPoint(segment.point1), self.distToPoint(segment.point2)))
+		else:
+			return self.distToStraight(segment)
 	def __init__ (self, x, y):
 		self.x = x
 		self.y = y
