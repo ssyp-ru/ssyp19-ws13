@@ -42,40 +42,33 @@ class Square(Rectangle):
 
 
 class Scheme:
-    points = {}
-    intersection = {}
-    segments = {}
-    circle = {}
-    global points, intersection, segments, circle
+
+    def __init__(self):
+        self.points = {}
+        self.intersections = {}
+        self.segments = {}
+        self. circles = {}
 
     def add_point(self, name, x, y, parent):
-        global points
-        points[name] = [x, y, parent]
+        self.points[name] = [x, y, parent]
 
     def add_intersection(self, name, x, y, parent):
-        global intersection
-        intersection[name] = [x, y, parent]
+        self.intersection[name] = [x, y, parent]
 
     def add_segments(self, a, b):
-        global segments, points
-        segments[a, b] = [points[a][0], points[a][1], points[b][0], points[b][1]]
+        self.segments[a, b] = [self.points[a][0], self.points[a][1], self.points[b][0], self.points[b][1]]
 
     def add_circle(self, a, radius):
-        global circle
-        circle[a] = "Radius {}".format(radius)
+        self.circle[a] = "Radius {}".format(radius)
 
     def get_points(self, name):
-        global points
-        return points[name]
+        return self.points[name]
 
     def get_intersection(self, name):
-        global intersection
-        return intersection[name]
+        return self.intersection[name]
 
     def get_segment(self, a, b):
-        global segments
-        return segments[a, b]
+        return self.segments[a, b]
 
     def get_circle(self, a):
-        global circle
-        return circle[a]
+        return self.circle[a]
