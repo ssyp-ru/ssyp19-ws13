@@ -44,31 +44,39 @@ class Square(Rectangle):
 class Scheme:
 
     def __init__(self):
-        self.points = {}
-        self.intersections = {}
-        self.segments = {}
-        self. circles = {}
+        self.points = []
+        self.intersections = []
+        self.segments = []
+        self. circles = []
 
     def add_point(self, name, x, y, parent):
-        self.points[name] = [x, y, parent]
+        self.points.append(Point(name, x, y, parent))
 
-    def add_intersection(self, name, x, y, parent):
-        self.intersection[name] = [x, y, parent]
+    def add_intersection(self, name, x, y, parent1, parent2):
+        self.intersection.append(Intersection(name, x, y, parent1, parent2))
 
     def add_segments(self, a, b):
-        self.segments[a, b] = [self.points[a][0], self.points[a][1], self.points[b][0], self.points[b][1]]
+        self.segments.append((self.points[a][0], self.points[a][1]), (self.points[b][0], self.points[b][1]))
 
     def add_circle(self, a, radius):
-        self.circle[a] = "Radius {}".format(radius)
+        self.circle.append(Circle(a, radius))
 
     def get_points(self, name):
-        return self.points[name]
+        for point in self.points:
+            if name == point.name:
+                return point
 
     def get_intersection(self, name):
-        return self.intersection[name]
+        for intersection in self.intersections:
+            if intersection.name == name:
+                return intersection
 
     def get_segment(self, a, b):
-        return self.segments[a, b]
+        for segment in self.segments:
+            if segment.point1 == a and segment.point2 == b:
+                return segment
 
     def get_circle(self, a):
-        return self.circle[a]
+        for circle in self.circles:
+            if circle.point == a:
+                return circle
