@@ -33,19 +33,22 @@ class PrologConnector:
 
     def get_n_ans(self, instructions: str, maxresult=1, **kwargs) -> [dict]:  # warning! can be broken if maxresult != 1
 
-        res = list(self.prolog.query(instructions, maxresult=maxresult, **kwargs))  # old simple way
-        return res
+        return self.prolog.query(instructions, maxresult=maxresult, **kwargs)  # old simple way
 
     # rewrite old way
-    def get_n_ans_new(self, instructions: str, maxresults=-1) -> list:  # warning! can be broken(x9000)
+    def get_n_ans_new(self, instructions: str, maxresults=-1, solves=True) -> list:  # warning! can be broken(x9000)
         terms, vars, statements = self.parse_ins(instructions)  # functors and items of predicates, variables
-        vars_ans = []  # list of variable values
+        vars_ans = [] if solves else {i[0]: [] for i in vars}  # list of variable values
         statements_ans = {}  # list of statements
         if terms:
             q = Query(*terms)  # make query
             while q.nextSolution() and maxresults:  # find solutions
                 maxresults -= 1
-                vars_ans.append({k: v.value for k, v in vars})  # append values
+                if solves:
+                    vars_ans.append({k: v.value for k, v in vars})  # append values
+                else:
+                    for k, v in vars:
+                        vars_ans[k].append(v.value)
             q.closeQuery()
         if statements:
             for statement in statements:
@@ -87,10 +90,14 @@ class PrologConnector:
                 statements.append((Functor(pred, len(names))(*items), pred + atoms))
         return terms, vars, statements
 
-    def call(self, command):
-        a = self.get_n_ans_new(command, maxresults=-1)
+    def make_req(self, command, solve=False):
+        a = self.get_n_ans_new(command, maxresults=-1, solve=solve)
         if a[0]:
             return a[0]
         else:
             for i in a[1].values():
                 return i
+
+    def assert_code(self, ins):
+        for i in ins.split(','):
+            self.prolog.assertz(i)
