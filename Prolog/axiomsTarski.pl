@@ -12,12 +12,18 @@ permute(Pred, A, B, C) :-
 	Perm2 =.. [Pred, B, C, A],
 	assert(Perm2).
 */
+
+% Review: Almost two hundred lines is quite a lot for Prolog.
+% Consider separating definitions from axioms.
+% Also delete the commented code.
+
 %axiom 1 Reflexivity of Congruence
 congruent(X, Y, Y, X).
 
 congruent(X, Y, X, Y).
 congruent(Y, Y, X, X).
 
+% Review: Ahem. Why does you geometry include 14 axiomatic points?
 congruent(a, b, a_, b_).
 congruent(b, c, b_, c_).
 congruent(a, c, a_, c_).
@@ -61,6 +67,7 @@ equalityArcs(A, B, C, D, F, O):-
 equalityAngles1(A, B, C, A_, B_, C_):-
 		equalityTriangles3(A, B, C, A_, B_, C_), !.
 
+% Review: An octary relation? Are there really that many points?
 equalityAngles2(A, B, C, A_, B_, C_, F, O):-
 		isOnCircle(A, F, O),
 		isOnCircle(B, F, O),
@@ -70,11 +77,13 @@ equalityAngles2(A, B, C, A_, B_, C_, F, O):-
 		isOnCircle(C_, F, O),
 			equalityArcs(A, C, A_, C_, F, O), !.
 
-equalityTriangles1(A, B, C, A_, B_, C_, F, O):-
+equalityTriangles1(A, B, C, A_, B_, C_, F, O) :-
 			isCongruent(A, B, A_, B_),
 			isCongruent(C, B, C_, B_),
-				equalityAngles2(A, B, C, A_, B_, C_, F, O), !.
+            equalityAngles2(A, B, C, A_, B_, C_, F, O), !.
 
+
+% Review: I'm pretty sure you could write this as three separate rules.
 equalityTriangles2(A, B, C, A_, B_, C_, F, O):-
 		isCongruent(A, B, A_, B_),
 				equalityAngles2(B, A, C, B_, A_, C_, F, O),
@@ -169,6 +178,8 @@ axiomEuclid2(X, Y, W, U, V, Z):-
 					isCongruent(V, Z, Z, W), !.
 
 %axiom 10 Five Segment
+% Review: Five segment is considered to prove congruency between
+% two given segments. The other eight should be found automatically.
 fiveSegment(X, Y, U, Z, X_, Y_, U_, Z_):-	
 				laysBetweenLaw(X, Z ,Y),
 				laysBetweenLaw(X_, Z_, Y_),

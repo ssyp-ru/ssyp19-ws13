@@ -1,6 +1,7 @@
 from Translator import Translator
 from geom import *
 
+# Review: I thought you like type hints.
 
 class Model:
 
@@ -13,6 +14,7 @@ class Model:
     def add_point(self, x, y):
         self.points[self.generate_name(Point)] = Point(x, y)
 
+    # Review: What the hell does that fixme mean?
     def add_segment(self, a, b):  # FIXME: watch this if strange results!
         self.segments[self.generate_name(Segment)] = Segment(a, b)
 
@@ -28,7 +30,9 @@ class Model:
             return self.generate_name_by_number(len(self.points))
 
     @staticmethod
+    # Review: Why should it be static? 
     def generate_name_by_number(num):
+        # Review: This list is called strings.ascii_uppercase
         dictionary = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
                       "T", "U", "V", "W", "X", "Y", "Z"]
         if num <= 25:

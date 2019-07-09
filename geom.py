@@ -7,17 +7,21 @@ import math
 class StraightError(ValueError):
 	pass
 
+# Review: I like tabs. But I like consistency much more.
 	
 class Circle:
 
+        # Review: Mai Ingrish iz weary bed.
 	def interseptionStraight(self, straight):
 		Discriminant = ((2 * (straight.A * self.radius) ** 2) + ((straight.B * self.radius) ** 2) - (straight.C ** 2))
 		if (Discriminant < 0):
 			return False
-		elif (Discriminant == 0):
+                elif (Discriminant == 0): # Review: You'll never get here. 
 			return (Point((straight.A * straight.C) / ((straight.A ** 2) + (straight.B ** 2)),
 			 ((straight.B * straight.C) / ((straight.A ** 2) + (straight.B ** 2)))))
 		else:
+                        # Review: You recalculate a lot of values. Local variables are cheap.
+                        # And long lines suck.
 			points = [Point((straight.A * straight.C) + (straight.A * math.sqrt(Discriminant)) / ((straight.A ** 2) + (straight.B ** 2)),
 							((straight.B * straight.C + (straight.A * math.sqrt(Discriminant))) / ((straight.A ** 2) + (straight.B ** 2)))),
 							Point((straight.A * straight.C) - (straight.A * math.sqrt(Discriminant)) / ((straight.A ** 2) + (straight.B ** 2)),
@@ -26,7 +30,7 @@ class Circle:
 	def __init__(self, point, radius):
 		self.center = point
 		self.radius = radius
-
+# Review: I believe you can inherit Point from Vector. Consider this.
 class Point:
 	def isInCircle(self, circleslist):
 		for i in circleslist:
@@ -36,6 +40,7 @@ class Point:
 				#Here i need Vsevolod's code for request in prolog
 
 	def distToPoint(self, point):
+                # Review: Have you heard about math.hypot?
 		X = self.x - point.x
 		Y = self.y - point.y
 		return math.sqrt((X ** 2) + (Y ** 2))
@@ -58,6 +63,7 @@ class Point:
 
 class Segment():
 
+        # Review: Mai Ingrish iz weary bed.
 	def isPointBelongs(self, point):
 		if (point.distToPoint(self.point1) + point.distToPoint(self.point2) <= self.point1.distToPoint(self.point2) + 1):
 			return True
@@ -90,9 +96,11 @@ class Straight():
 			return False
 
 	def intersection(self, straight):
+                # Review: I see a cross product here. Do you?
 		if (((self.A * straight.B) - (self.B * straight.A)) == 0):
 			return False
 		else:
+                        # Review: Believe me: long lines really do suck.
 			return (Point(((self.C * straight.B) - (self.B * straight.C)) / ((self.A * straight.B) - (self.B * straight.A)), 
 						((self.A * straight.C) - (self.C * straight.A)) / ((self.A * straight.B) - (self.B * straight.A))))
 
@@ -122,7 +130,7 @@ class Vector :
 	def __productVecByNum__(self, num):
 		return Vector(Point(self.x * num, self.y * num))
 
-	def singleDirectedVector(self):
+        def singleDirectedVector(self): # Review: It's not single, it's unit.
 		return Vector(Point((self.x / self. length), (self.y / self.length)))
 
 	def crossProduct(self, vector):
@@ -131,7 +139,9 @@ class Vector :
 	def __init__ (self, point):
 		self.x = point.x
 		self.y = point.y
-		point00 = Point(0, 0)
+                # Review: Why? WHY?!!!
+		point00 = Point(0 , 0) 
+                # Review: Shouldn't this be a method? 
 		self.length = point00.distToPoint(point)
 
 
