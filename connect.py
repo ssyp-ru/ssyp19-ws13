@@ -90,8 +90,8 @@ class PrologConnector:
                 statements.append((Functor(pred, len(names))(*items), pred + atoms))
         return terms, vars, statements
 
-    def call(self, command):
-        a = self.get_n_ans_new(command, maxresults=-1)
+    def make_req(self, command, solve=False):
+        a = self.get_n_ans_new(command, maxresults=-1, solve=solve)
         if a[0]:
             return a[0]
         else:
