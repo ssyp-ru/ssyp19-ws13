@@ -3,7 +3,7 @@ from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen
 from PyQt5.QtCore import Qt, QPoint
 from random import *
 import sys
-from geom import Point, Segment
+import geom as geometry
 import math
 from model import Model
 
@@ -33,18 +33,14 @@ class MainWidget(QMainWindow):
 
     def newPoint(self, x, y):
         self.model.add_point(x, y)
+        self.model.operations.append(geometry.Point(x, y))
 
-    def newSegment(self, a, b):
-        self.model.add_segment(a, b)
+    def newSegment(self, pointstart, pointend):
+        self.model.add_segment(pointstart, pointend)
+        self.model.operations.append(geometry.Segment(pointstart, pointend))
 
     def newCircle(self, a, radius):
         self.model.add_circle(a, radius)
-    #
-    # def newPoint(self, point):
-    #     self.points.append(point)
-    #     self.operations.append(point)
-    #     self.pointsValue += 1
-    #
     # def newSegment(self, segment):
     #     self.segments.append(segment)
     #     self.operations.append(segment)
@@ -77,18 +73,17 @@ class MainWidget(QMainWindow):
     def paintEvent(self, event):
         paint = QPainter(self)
         paint.drawImage(0,0, self.image)
-        for point in self.points:
+        for _, point in self.model.points.items():
             self.paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
-        for segment in self.segments:
+        for _, segment in self.model.segments.items():
             self.paint.drawLine(QPoint(segment.point1.x, segment.point1.y), QPoint(segment.point2.x, segment.point2.y))
-        for circle in self.circles:
-            circleSettings = circle.split("-")
-            circleX = circleSettings[0]
-            circleY = circleSettings[1]
-            distance = circleSettings[2]
+        for _, circle in self.model.circles.items():
+            circleX = circle.center.x
+            circleY = circle.center.y
+            distance = circle.radius
             alphaColor = QColor.fromRgbF(0, 0, 0, 0)
             self.paint.setBrush(alphaColor)
-            self.paint.drawEllipse(float(circleX), float(circleY), float(distance), float(distance))
+            self.paint.drawEllipse(float(circleX) - distance, float(circleY) - distance, float(distance) * 2, float(distance) * 2)
             self.paint.setBrush(QColor("black"))
         self.update()
 
@@ -101,6 +96,7 @@ class MainWidget(QMainWindow):
         self.paint.setFont(QFont("Decorative", 10))
         self.update()
         if self.brushtype == "point":
+            self.pointCoords = [event.x(), event.y()]
             self.newPoint(event.x(), event.y())
             if self.brushundertype == "point":
                 self.paint.drawEllipse(self.pointCoords[0], self.pointCoords[1], 2, 2)
@@ -119,19 +115,20 @@ class MainWidget(QMainWindow):
                     pointCoords = self.pointCoords
                     self.pointCoords = [event.x(), event.y()]
                     
-                    point1 = Point(pointCoords[0], pointCoords[1])
-                    point2 = Point(self.pointCoords[0], self.pointCoords[1])
-                    list = self.correctingSegments(point1, point2, self.model.points)
-                    newSegment = Segment(list[0], list[1])
+                    point1 = geometry.Point(pointCoords[0], pointCoords[1])
+                    point2 = geometry.Point(self.pointCoords[0], self.pointCoords[1])
+                    list = self.correctingPoints(point1, point2, self.model.points)
+                    if list:
+                        newSegment = geometry.Segment(list[0], list[1])
+                    else:
+                        newSegment = geometry.Segment(point1, point2)
                     if self.brushundertype == "segment":
-                        self.newSegment(newSegment)
-                        self.paint.drawLine(pointCoords[0], pointCoords[1], self.pointCoords[0], self.pointCoords[1])
+                        self.newSegment(newSegment.point1, newSegment.point2)
                         self.messageSend("Segment succesfully placed")
                     elif self.brushundertype == "segmentwithpoints":
-                        self.model.newPoint(point1)
-                        self.newPoint(point2)
-                        self.model.newSegment(newSegment)
-                        self.paint.drawLine(pointCoords[0], pointCoords[1], self.pointCoords[0], self.pointCoords[1])
+                        self.newPoint(point1.x, point1.y)
+                        self.newPoint(point2.x, point2.y)
+                        self.newSegment(newSegment.point1, newSegment.point2)
                         self.paint.drawEllipse(QPoint(pointCoords[0], pointCoords[1]), 2, 2)
                         self.paint.drawEllipse(QPoint(self.pointCoords[0], self.pointCoords[1]), 2, 2)
                         self.messageSend("Segment With Points succesfully placed")
@@ -148,23 +145,23 @@ class MainWidget(QMainWindow):
                 #print(pointCoords)
                 #print(self.pointCoords)
 
-                coords1 = pointCoords
-                coords2 = self.pointCoords
-                x = pointCoords[0] - self.pointCoords[0]
-                y = pointCoords[1] - self.pointCoords[1]
-                distance = math.sqrt((x**2)+(y**2))
+                center = geometry.Point(pointCoords[0], pointCoords[1])
+                list = self.correctingPoints(center, geometry.Point(self.pointCoords[0], self.pointCoords[1]), self.model.points)
+                if list:
+                    center = list[0]
+                    radius = center.distToPoint(list[1])
+                else:
+                    radius = center.distToPoint(geometry.Point(self.pointCoords[0], self.pointCoords[1]))
 
                 alphaColor = QColor.fromRgbF(0, 0, 0, 0)
                 self.paint.setBrush(alphaColor)
 
                 if self.brushundertype == "radius":
-                    self.paint.drawEllipse(pointCoords[0]-distance, pointCoords[1]-distance, distance*2, distance*2)
+                    #self.paint.drawEllipse(pointCoords[0] - radius, pointCoords[1] - radius, radius*2, radius*2)
+                    self.newCircle(center, radius)
                     self.messageSend("Circle succesfully placed")
-                    self.newCircle(str(pointCoords[0]-distance) + "-" + str(pointCoords[1]-distance) + "-" + str(distance*2))
                 
                 self.paint.setBrush(QColor("black"))
-
-                self.newCircle(Point(pointCoords[0]-distance, pointCoords[1]-distance), distance)
 
                 self.update()
                 self.pointCoords = []
@@ -466,6 +463,20 @@ class MainWidget(QMainWindow):
 
         self.setBrushType("point", self.pointBrush)
         self.messageSend("Paint")
+    @staticmethod
+    def correctingPoints(start, end, points):
+        error = 4
+        if points:
+            for _, i in points.items():
+                #print(start.x, start.y, end.x, end.y, i.x, i.y)
+                if ((start.x <= i.x + error) and (start.x >= i.x - error)) and ((start.y <= i.y + error) and (start.y >= i.y - error)):
+                    start.x = i.x
+                    start.y = i.y
+                if ((end.x <= i.x + error) and (end.x >= i.x - error)) and ((end.y <= i.y + error) and (end.y >= i.y - error)):
+                    end.x = i.x
+                    end.y = i.y
+            list = [start, end]
+            return list
 
 app = QApplication(sys.argv)
 interface = MainWidget()

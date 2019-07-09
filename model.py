@@ -8,6 +8,7 @@ class Model:
         self.points = {}
         self.segments = {}
         self.circles = {}
+        self.operations = []
 
     def add_point(self, x, y):
         self.points[self.generate_name(Point)] = Point(x, y)
@@ -30,7 +31,7 @@ class Model:
     def generate_name_by_number(num):
         dictionary = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
                       "T", "U", "V", "W", "X", "Y", "Z"]
-        if num <= 26:
+        if num <= 25:
             return dictionary[num]
         else:
             firstletter = dictionary[(num // 26)]
