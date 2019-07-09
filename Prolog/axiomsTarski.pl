@@ -1,5 +1,5 @@
 %:- dynamic изменяет предикат во время его чтения, вставляет факт
-
+/*
 permute(Pred, A, B) :-
 	Perm1 =.. [Pred, A, B],
 	assert(Perm1),
@@ -11,7 +11,7 @@ permute(Pred, A, B, C) :-
 	assert(Perm1),
 	Perm2 =.. [Pred, B, C, A],
 	assert(Perm2).
-
+*/
 %axiom 1 Reflexivity of Congruence
 congruent(X, Y, Y, X).
 
@@ -40,8 +40,6 @@ laysBetween(x, y, b).
 laysBetweenLaw(A, B, C):-
 			laysBetween(B, A, C);
 			laysBetween(A, B, C).
-
-circle(F, O).
 
 %equality of triangles on three sides
 equalityTriangles3(A, B, C, A_, B_, C_):-
@@ -90,7 +88,6 @@ equalityTriangles2(A, B, C, A_, B_, C_, F, O):-
 				equalityAngles2(B, A, C, B_, A_, C_, F, O),
 				equalityAngles2(A, C, B, A_, C_, B_, F, O), !.
 
-isInsideCircle():-
 
 
 intersectCircle(A, B, F, O):-
@@ -139,11 +136,11 @@ axiomPasch(U, Y, A, V, X):-
 schemaContinuity(A, B):-
 				laysBetweenLaw(X, Y, B),
 				laysBetweenLaw(A, Y, X).
-
-%axiom 7 Lower Dimension --isnt works now
+/*
+%axiom 7 Lower Dimension --we dont need this
 lowerDimension():-
 				laysBetweenLaw(A, B, C).
-
+*/
 %axiom 8 Upper Dimension
 upperDimension(X, Y, Z):-
 					laysBetweenLaw(X, Y, Z);
