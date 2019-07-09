@@ -1,7 +1,7 @@
 import math
-from Translator import Translator
+#from Translator import Translator
 
-translator = Translator()
+#translator = Translator()
 
 
 class StraightError(ValueError):
@@ -31,7 +31,8 @@ class Point:
 	def isInCircle(self, circleslist):
 		for i in circleslist:
 			if (self.distToPoint(circleslist[i].center) < circleslist[i].radius):
-				translator.connector.call(...)
+				pass
+				#translator.connector.call(...)
 				#Here i need Vsevolod's code for request in prolog
 
 	def distToPoint(self, point):

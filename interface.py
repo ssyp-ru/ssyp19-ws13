@@ -71,7 +71,7 @@ class MainWidget(QMainWindow):
         self.paint.setFont(QFont("Decorative", 10))
         if self.brushtype == "point":
             self.newPoint(geometry.Point(event.x(), event.y()))
-            self.paint.drawEllipse(event.pos(), 3, 3)
+            self.paint.drawEllipse(event.pos(), 2, 2)
             self.update()
             self.messageSend("Point succesfully placed")
         if self.brushtype == "segment":
