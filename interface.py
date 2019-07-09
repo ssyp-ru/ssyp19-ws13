@@ -3,24 +3,20 @@ from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen
 from PyQt5.QtCore import Qt, QPoint
 from random import *
 import sys
-import geom as geometry
+from geom import Point
 import math
+from model import Model
+
 
 class MainWidget(QMainWindow):
     def __init__(self):
         super().__init__()
-
+        self.model = Model()
         self.brushes = []
         self.brushtype = "point"
         self.flag = False
         self.brushColor = Qt.black
         self.backgorundColor = Qt.white
-        self.points = []
-        self.pointsValue = 0
-        self.segments = []
-        self.segmentsValue = 0
-        self.circles = []
-        self.circlesValue = 0
         self.lastname = -1
         self.pointCoords = []
         self.fieldWidth = 400
@@ -31,26 +27,14 @@ class MainWidget(QMainWindow):
         self.initUI()
         self.grabKeyboard()
 
+    def newPoint(self, x, y):
+        self.model.add_point(x, y)
 
+    def newSegment(self, a, b):
+        self.model.add_segment(a, b)
 
-    def generatePointName(self):
-        dictionary = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
-                      "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
-                      "W", "X", "Y", "Z"]
-        return dictionary[self.lastname-1]
-
-    def newPoint(self, point):
-        self.points.append(point)
-        self.pointsValue += 1
-
-    def newSegment(self, segment):
-        self.segments.append(segment)
-        self.segmentsValue += 1
-
-    def newCircle(self, circle):
-        self.circles.append(circle)
-        self.circlesValue += 1
-
+    def newCircle(self, a, radius):
+        self.model.add_circle(a, radius)
 
     def newBrush(self, brush):
         self.brushes.append(brush)
@@ -70,12 +54,12 @@ class MainWidget(QMainWindow):
         self.paint.setPen(QPen(Qt.black, 3))
         self.paint.setFont(QFont("Decorative", 10))
         if self.brushtype == "point":
-            self.newPoint(geometry.Point(event.x(), event.y()))
+            self.newPoint(event.x(), event.y())
             self.paint.drawEllipse(event.pos(), 3, 3)
             self.update()
             self.messageSend("Point succesfully placed")
         if self.brushtype == "segment":
-            if self.pointCoords == []:
+            if not self.pointCoords:
                 self.pointCoords = [event.x(), event.y()]
             else:
                 if self.pointCoords == [event.x(), event.y()]:
@@ -85,10 +69,10 @@ class MainWidget(QMainWindow):
                     self.pointCoords = [event.x(), event.y()]
                     self.paint.drawLine(pointCoords[0], pointCoords[1], self.pointCoords[0], self.pointCoords[1])
                     
-                    point1 = geometry.Point(pointCoords[0], pointCoords[1])
-                    point2 = geometry.Point(self.pointCoords[0], self.pointCoords[1])
-                    newSegment = geometry.Segment(point1, point2)
-                    self.newSegment(newSegment)
+                    point1 = Point(pointCoords[0], pointCoords[1])
+                    point2 = Point(self.pointCoords[0], self.pointCoords[1])
+                    list = self.correctingSegments(point1, point2, self.model.points)
+                    self.newSegment(list[0], list[1])
                     
                     self.update()
                     self.messageSend("Segment succesfully placed")
@@ -115,11 +99,12 @@ class MainWidget(QMainWindow):
                 
                 self.paint.setBrush(QColor("black"))
 
-                self.newCircle(str(pointCoords[0]-distance) + "-" + str(pointCoords[1]-distance) + "-" + str(distance))
+                self.newCircle(Point(pointCoords[0]-distance, pointCoords[1]-distance), distance)
 
                 self.update()
                 self.messageSend("Circle succesfully placed")
                 self.pointCoords = []
+        self.update()
 
     def createText(self, event, text):
         self.paint.setPen(QColor(53, 8, 65))
@@ -153,6 +138,7 @@ class MainWidget(QMainWindow):
             self.flag = True
             self.paint = QPainter(self.image)
             self.drawingObjects(event)
+            self.update()
         elif event.button() == 2 or event.button() == 3:
             print("Button-2 was pressed")
 
@@ -322,6 +308,20 @@ class MainWidget(QMainWindow):
         self.toolbar.addSeparator()
 
         self.statusBar().showMessage("Paint")
+
+    @staticmethod
+    def correctingSegments(segmentstart, segmentend, pointlist):
+        error = 10
+        if pointlist:
+            for _, i in pointlist.items():
+                if ((segmentstart.x >= i.x + error) or (segmentstart.x >= i.x - error)) and ((segmentstart.y <= i.y + error) or (segmentstart.y <= i.y - error)):
+                    segmentstart.x = i.x
+                    segmentstart.y = i.y
+                if ((segmentend.x <= i.x + error) or (segmentend.x <= i.x - error)) and ((segmentend.y <= i.y + error) or (segmentend.y <= i.y - error)):
+                    segmentend.x = i.x
+                    segmentend.y = i.y
+                list = [segmentstart, segmentend]
+            return list
 
 app = QApplication(sys.argv)
 interface = MainWidget()
