@@ -31,14 +31,14 @@ class PrologConnector:
         if delete:
             os.remove(file_name)
 
-    def get_n_ans(self, instructions: str, maxresult=1, **kwargs) -> [dict]:  # warning! can be broken if maxresult != 1
+    def get_n_ans(self, instructions: str, maxresult=1, **kwargs) -> [dict]:  # warning! can be broken if maxresult = -1
 
-        return self.prolog.query(instructions, maxresult=maxresult, **kwargs)  # old simple way
+        return self.prolog.query(instructions, maxresult=maxresult, **kwargs)  # query for prolog
 
     # rewrite old way
-    def get_n_ans_new(self, instructions: str, maxresults=-1, solves=True) -> list:  # warning! can be broken(x9000)
+    def get_n_ans_new(self, instructions: str, maxresults=-1, solves=True) -> list:  # warning! may be unfinished
         terms, vars, statements = self.parse_ins(instructions)  # functors and items of predicates, variables
-        vars_ans = [] if solves else {i[0]: [] for i in vars}  # list of variable values
+        vars_ans = [] if solves else {i[0]: [] for i in vars}  # list/dict of variable values
         statements_ans = {}  # list of statements
         if terms:
             q = Query(*terms)  # make query
@@ -90,8 +90,8 @@ class PrologConnector:
                 statements.append((Functor(pred, len(names))(*items), pred + atoms))
         return terms, vars, statements
 
-    def make_req(self, command, solve=False):
-        a = self.get_n_ans_new(command, maxresults=-1, solve=solve)
+    def make_req(self, command, maxresults=-1, solves=False):
+        a = self.get_n_ans_new(command, maxresults=maxresults, solves=solves)
         if a[0]:
             return a[0]
         else:

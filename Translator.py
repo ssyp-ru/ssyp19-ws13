@@ -27,7 +27,7 @@ class Translator:
     #     # pc.consult_file('Prolog/Something.pl')
     #     return pc.get_n_ans_new(instructions, maxresults=results)  # FIXME: may be unfinished(and broken)
 
-    def make_request(self, req):
-        return self.connector.get_n_ans_new(req)
+    def make_request(self, req, **kwargs):
+        return self.connector.get_n_ans_new(req, **kwargs)
 
     # TODO: doit write this class!

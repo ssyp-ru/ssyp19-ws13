@@ -1,82 +1,39 @@
-class Point:
-    def __init__(self, name, x, y, parent):
-        self.name = name
-        self.x, self.y = x, y
-        self.parent = parent
+from Translator import Translator
+from geom import *
 
 
-class Intersection(Point):
-    def __init__(self, name, x, y, parent1, parent2):
-        self.name = name
-        self.x, self.y = x, y
-        self.parent1 = parent1
-        self.parent2 = parent2
-
-
-class Segment:
-    def __init__(self, a, b):
-        self.point1 = a
-        self.point2 = b
-
-
-class Circle:
-    def __init__(self, a, radius):
-        self.point = a
-        self.radius = radius
-
-
-class Rectangle:
-    def __init__(self, a, b, c, d):
-        self.point = a
-        self.point2 = b
-        self.point3 = c
-        self.point4 = d
-
-
-class Square(Rectangle):
-    def __init__(self, a, b, c, d):
-        self.point = a
-        self.point2 = b
-        self.point3 = c
-        self.point4 = d
-
-
-class Scheme:
+class Model:
 
     def __init__(self):
-        self.points = []
-        self.intersections = []
-        self.segments = []
-        self. circles = []
+        self.points = {}
+        self.segments = {}
+        self.circles = {}
+        self.operations = []
 
-    def add_point(self, name, x, y, parent):
-        self.points.append(Point(name, x, y, parent))
+    def add_point(self, x, y):
+        self.points[self.generate_name(Point)] = Point(x, y)
 
-    def add_intersection(self, name, x, y, parent1, parent2):
-        self.intersection.append(Intersection(name, x, y, parent1, parent2))
-
-    def add_segments(self, a, b):
-        self.segments.append((self.points[a][0], self.points[a][1]), (self.points[b][0], self.points[b][1]))
+    def add_segment(self, a, b):  # FIXME: watch this if strange results!
+        self.segments[self.generate_name(Segment)] = Segment(a, b)
 
     def add_circle(self, a, radius):
-        self.circle.append(Circle(a, radius))
+        self.circles[self.generate_name(Circle)] = Circle(a, radius)
 
-    def get_points(self, name):
-        for point in self.points:
-            if name == point.name:
-                return point
+    def generate_name(self, type):
+        if type is Circle:
+            return self.generate_name_by_number(len(self.circles))
+        elif type is Segment:
+            return self.generate_name_by_number(len(self.segments))
+        elif type is Point:
+            return self.generate_name_by_number(len(self.points))
 
-    def get_intersection(self, name):
-        for intersection in self.intersections:
-            if intersection.name == name:
-                return intersection
-
-    def get_segment(self, a, b):
-        for segment in self.segments:
-            if segment.point1 == a and segment.point2 == b:
-                return segment
-
-    def get_circle(self, a):
-        for circle in self.circles:
-            if circle.point == a:
-                return circle
+    @staticmethod
+    def generate_name_by_number(num):
+        dictionary = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
+                      "T", "U", "V", "W", "X", "Y", "Z"]
+        if num <= 25:
+            return dictionary[num]
+        else:
+            firstletter = dictionary[(num // 26)]
+            secondletter = dictionary[(num % 26)]
+            return firstletter + secondletter
