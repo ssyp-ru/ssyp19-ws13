@@ -16,10 +16,9 @@ class Model:
         self.segments[self.generate_name(Segment)] = Segment(a, b)
 
     def add_circle(self, a, radius):
-        self.circle[self.generate_name(Circle)] = Circle(a, radius)
+        self.circles[self.generate_name(Circle)] = Circle(a, radius)
 
     def generate_name(self, type):
-        print(type is Point)
         if type is Circle:
             return self.generate_name_by_number(len(self.circles))
         elif type is Segment:
@@ -32,8 +31,8 @@ class Model:
         dictionary = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
                       "T", "U", "V", "W", "X", "Y", "Z"]
         if num <= 26:
-            return dictionary[num - 1]
+            return dictionary[num]
         else:
-            firstletter = dictionary[(num // 26) - 1]
-            secondletter = dictionary[(num % 26) - 1]
+            firstletter = dictionary[(num // 26)]
+            secondletter = dictionary[(num % 26)]
             return firstletter + secondletter
