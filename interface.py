@@ -1,11 +1,34 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen, QBrush
+from PyQt5.QtCore import Qt, QPoint, QRect
 from random import *
 import sys
 import geom as geometry
 import math
 from model import Model
+
+class WidgetWithText(QWidget):
+    def __init__(self, text):
+        super().__init__()
+        self.text = text
+        self.initUI()
+
+    def centering(self):
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
+    def initUI(self):
+        self.lbl = QLabel(self)
+        self.lbl.setText(self.text)
+        self.lbl.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.lbl.move(30, 30)
+
+        self.setWindowTitle("Authors")
+        self.setFixedSize(400, 400)
+        self.show()
+        self.centering()
 
 
 class MainWidget(QMainWindow):
@@ -21,28 +44,32 @@ class MainWidget(QMainWindow):
         self.backgorundColor = Qt.white
         self.lastname = -1
         self.pointCoords = []
-        self.fieldWidth = 400
-        self.fieldHeight = 400
+        self.fieldWidth = 700
+        self.fieldHeight = 600
         self.zoomValue = 100
         self.operations = []
 
         self.table = False
 
         self.initUI()
-        # Review: This line prevents me from closing the program.
-        self.grabKeyboard()
 
-    def newPoint(self, x, y):
+    def newPoint(self, x, y, alloperationsInserting=True):
         self.model.add_point(x, y)
         self.model.operations.append(geometry.Point(x, y))
+        if alloperationsInserting:
+            self.model.alloperations.append(geometry.Point(x, y))
 
-    def newSegment(self, pointstart, pointend):
+    def newSegment(self, pointstart, pointend, alloperationsInserting=True):
         self.model.add_segment(pointstart, pointend)
         self.model.operations.append(geometry.Segment(pointstart, pointend))
+        if alloperationsInserting:
+            self.model.alloperations.append(geometry.Segment(pointstart, pointend))
 
-    def newCircle(self, a, radius):
+    def newCircle(self, a, radius, alloperationsInserting=True):
         self.model.add_circle(a, radius)
-
+        self.model.operations.append(geometry.Circle(a, radius))
+        if alloperationsInserting:
+            self.model.alloperations.append(geometry.Circle(a, radius))
 
     def newBrush(self, brush):
         self.brushes.append(brush)
@@ -65,9 +92,9 @@ class MainWidget(QMainWindow):
 
     def paintEvent(self, event):
         paint = QPainter(self)
+        paint.drawImage(0,0, self.image)
         paint.setBrush(QColor("black"))
-        paint.setPen(QPen(Qt.black, 3))
-        paint.setFont(QFont("Decorative", 10))
+        paint.setPen(QPen(Qt.black, 2))
         # Review: Doesn't this method duplicate drawingObjects()?
         for point in self.model.points.values():
             paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
@@ -77,25 +104,68 @@ class MainWidget(QMainWindow):
             circleX = circle.center.x
             circleY = circle.center.y
             distance = circle.radius
-            # Review: You should cache color objects
             alphaColor = QColor.fromRgbF(0, 0, 0, 0)
             paint.setBrush(alphaColor)
             paint.drawEllipse(float(circleX) - distance, float(circleY) - distance, float(distance) * 2, float(distance) * 2)
             paint.setBrush(QColor("black"))
         self.update()
 
-    def pointDrawing(self, event):
+    def pointDrawing(self, x, y):
+        self.newPoint(x, y)
+        self.messageSend("Point succesfully placed" + " " * 10 + str(x) + ", " + str(y))
+
+    def pointInObjectDrawing(self, x, y):
         pass
+
+    def segmentDrawing(self, point1, point2):
+        list = self.model.correcting_points(point1, point2)
+        if list:
+            newSegment = geometry.Segment(list[0], list[1])
+        else:
+            newSegment = geometry.Segment(point1, point2)
+        self.newSegment(newSegment.point1, newSegment.point2)
+        self.messageSend("Segment succesfully placed" + " " * 10 + "[" + str(newSegment.point1.x) + ", " + str(newSegment.point1.y) + "] , [" + str(newSegment.point2.x) + ", " + str(newSegment.point2.y) + "]")
+    def segmentWithPointsDrawing(self, point1, point2):
+        list = self.model.correcting_points(point1, point2)
+        if list:
+            newSegment = geometry.Segment(list[0], list[1])
+        else:
+            newSegment = geometry.Segment(point1, point2)
+        self.newPoint(point1.x, point1.y)
+        self.newPoint(point2.x, point2.y)
+        self.newSegment(newSegment.point1, newSegment.point2)
+        self.messageSend("Segment With Points succesfully placed" + " " * 10 + "[" + str(newSegment.point1.x) + ", " + str(newSegment.point1.y) + "] , [" + str(newSegment.point2.x) + ", " + str(newSegment.point2.y) + "]")
+
+    def circleWithRadiusDrawing(self, center, point2):
+        list = self.model.correcting_points(center, point2)
+        if list:
+            center = list[0]
+            radius = center.distToPoint(list[1])
+        else:
+            radius = center.distToPoint(geometry.Point(self.pointCoords[0], self.pointCoords[1]))
+
+        alphaColor = QColor.fromRgbF(0, 0, 0, 0)
+        self.paint.setBrush(alphaColor)
+
+        if self.brushundertype == "radius":
+            self.newCircle(center, radius)
+            self.messageSend("Circle succesfully placed" + " " * 10 + str(center.x) + ", " + str(center.y) + " ; " + str(round(radius, 2)))
+
+        self.paint.setBrush(QColor("black"))
 
     def drawingObjects(self, event):
         # Review: 78 lines for one method is not as bad as 2500, but that code
         # was not an example. I believe it should be four different methods.
+        self.paint.setBrush(QColor("black"))
+        self.paint.setPen(QPen(Qt.black, 2))
+        self.paint.setFont(QFont("Decorative", 10))
         self.update()
         if self.brushtype == "point":
-            self.pointCoords = [event.x(), event.y()]
-            self.newPoint(event.x(), event.y())
+            if self.brushundertype == "point":
+                self.pointDrawing(event.x(), event.y())
+            elif self.brushundertype == "pointinobject":
+                self.pointInObjectDrawing(event.x(), event.y())
             self.update()
-            self.messageSend("Point succesfully placed")
 
         if self.brushtype == "segment":
             if not self.pointCoords:
@@ -106,22 +176,12 @@ class MainWidget(QMainWindow):
                 else:
                     pointCoords = self.pointCoords
                     self.pointCoords = [event.x(), event.y()]
-                    
                     point1 = geometry.Point(pointCoords[0], pointCoords[1])
                     point2 = geometry.Point(self.pointCoords[0], self.pointCoords[1])
-                    list = self.model.correcting_points(point1, point2)
-                    if list:
-                        newSegment = geometry.Segment(list[0], list[1])
-                    else:
-                        newSegment = geometry.Segment(point1, point2)
                     if self.brushundertype == "segment":
-                        self.newSegment(newSegment.point1, newSegment.point2)
-                        self.messageSend("Segment succesfully placed")
+                        self.segmentDrawing(point1, point2)
                     elif self.brushundertype == "segmentwithpoints":
-                        self.newPoint(point1.x, point1.y)
-                        self.newPoint(point2.x, point2.y)
-                        self.newSegment(newSegment.point1, newSegment.point2)
-                        self.messageSend("Segment With Points succesfully placed")
+                        self.segmentWithPointsDrawing(point1, point2)
                     self.update()
                     self.pointCoords = []
 
@@ -133,25 +193,18 @@ class MainWidget(QMainWindow):
                 self.pointCoords = [event.x(), event.y()]
 
                 center = geometry.Point(pointCoords[0], pointCoords[1])
-                list = self.model.correcting_points(center, geometry.Point(self.pointCoords[0], self.pointCoords[1]))
-                if list:
-                    center = list[0]
-                    radius = center.distToPoint(list[1])
-                else:
-                    radius = center.distToPoint(geometry.Point(self.pointCoords[0], self.pointCoords[1]))
+                point = geometry.Point(self.pointCoords[0], self.pointCoords[1])
 
-                alphaColor = QColor.fromRgbF(0, 0, 0, 0)
-
-                if self.brushundertype == "radius":
-                    self.newCircle(center, radius)
-                    self.messageSend("Circle succesfully placed")
+                self.circleWithRadiusDrawing(center, point)
 
                 self.update()
                 self.pointCoords = []
         self.update()
 
     def createText(self, event, text):
-        pass
+        self.paint.setPen(QColor(53, 8, 65))
+        self.paint.setFont(QFont("Decorative", 10))
+        self.paint.drawText(event.rect(), Qt.AlignCenter, text)
 
     def setBrushType(self, typeOfBrush, brushObject):
         self.pointCoords = []
@@ -192,26 +245,51 @@ class MainWidget(QMainWindow):
             self.zoomValue += value
 
 
+
     def back(self):
-        pass
+        if len(self.model.operations):
+            operation = self.model.operations[len(self.model.operations)-1]
+            operationType = str(type(operation))
+            if operationType == "<class \'geom.Point\'>":
+                objectList = list(self.model.points.keys())
+                name = objectList[len(objectList)-1][0]
+                del(self.model.points[name])
+                self.messageSend("Point succesfully deleted")
+
+            elif operationType == "<class \'geom.Segment\'>":
+                objectList = list(self.model.segments.keys())
+                name = objectList[len(objectList)-1][0]
+                del(self.model.segments[name])
+                self.messageSend("Segment succesfully deleted")
+
+            elif operationType == "<class \'geom.Circle\'>":
+                objectList = list(self.model.circles.keys())
+                name = objectList[len(objectList)-1][0]
+                del(self.model.circles[name])
+                self.messageSend("Circle succesfully deleted")
+
+            self.model.operations.pop(len(self.model.operations)-1)
 
     def forwards(self):
-        pass
+        if len(self.model.operations) < len(self.model.alloperations):
+            operation = self.model.alloperations[len(self.model.operations)]
+            operationType = str(type(operation))
+            if operationType == "<class \'geom.Point\'>":
+                self.newPoint(operation.x, operation.y, alloperationsInserting=False)
+            elif operationType == "<class \'geom.Segment\'>":
+                self.newSegment(operation.point1, operation.point2, alloperationsInserting=False)
+            elif operationType == "<class \'geom.Circle\'>":
+                self.newCircle(operation.center, operation.radius, alloperationsInserting=False)
 
     def reset(self):
         self.pointCoords = []
 
-
-    def mouseMoveEvent(self, event):
-        self.update()
-
     def mousePressEvent(self, event):
-        # Review: Please be a good boy and remove these magic constants.
-        if event.button() == 1:
+        if event.button() == Qt.LeftButton:
             self.flag = True
-            # Review: WTF?! Why do you think we have paintEvent?
+            self.paint = QPainter(self.image)
             self.drawingObjects(event)
-        elif event.button() == 2 or event.button() == 3:
+        elif event.button() == Qt.RightButton:
             self.update()
 
     def mouseReleaseEvent(self, event):
@@ -225,13 +303,20 @@ class MainWidget(QMainWindow):
         self.move(qr.topLeft())
 
     def clear(self):
-        pass
+        self.paint.setBrush(QBrush(Qt.white))
+        for point in list(self.model.points.keys()):
+            del(self.model.points[point])
+        for segment in list(self.model.segments.keys()):
+            del(self.model.segments[segment])
+        for circle in list(self.model.circles.keys()):
+            del(self.model.circles[circle])
+        self.paint.drawRect(-20, 20, self.fieldWidth+30, self.fieldHeight+30)
 
     def reference(self):
-        pass
+        self.referenceWidget = WidgetWithText(text="")
 
     def authors(self):
-        pass
+        self.authorsWidget = WidgetWithText(text="")
 
 
     def backgroundColorSelect(self):
@@ -240,24 +325,12 @@ class MainWidget(QMainWindow):
     def foregroundColorSelect(self):
         pass
 
-    def initUI(self):
-        # Review: Two. Hundred. Freaking. Lines.
-        # It definitely should be multiple methods.
-        self.setGeometry(400, 400, 700, 600)
-        self.setWindowTitle("Prototype")
-        self.show()
-        self.centering()
-        self.resize(700, 600)
-
-        self.image = QImage(self.width(), self.height(), QImage.Format_ARGB32)
-        self.image.fill(QColor(255, 255, 255))
-
-        self.setToolTip("<b>Drawing Place</b>")
-        
+    def fileActionsCreating(self):
         self.newFileAct = QAction("&New", self)
         self.newFileAct.setShortcut("Ctrl+N")
         self.newFileAct.setStatusTip("Creating New File")
         self.newFileAct.setToolTip("Creating <b>New</b> File")
+        self.newFileAct.triggered.connect(self.clear)
 
         self.quitAct = QAction("&Quit", self)
         self.quitAct.setShortcut("Ctrl+Q")
@@ -265,9 +338,7 @@ class MainWidget(QMainWindow):
         self.quitAct.setToolTip("<b>Quit</b> program")
         self.quitAct.triggered.connect(qApp.quit)
 
-        self.typeBrushes = QMenu("&Brush Types", self)
-        self.undertypeBrushes = QMenu("&Brush Under Types", self)
-
+    def pointBrushActionsCreating(self):
         self.pointBrush = QAction("&Point", self, checkable=True)
         self.pointBrush.setShortcut("Ctrl+1")
         self.pointBrush.setStatusTip("Take Point Brush")
@@ -290,7 +361,7 @@ class MainWidget(QMainWindow):
         self.pointInObjectBrush.setChecked(False)
         self.newUnderType(self.pointBrush, self.pointInObjectBrush)
 
-
+    def segmentBrushActionsCreating(self):
         self.segmentBrush = QAction("&Segment", self, checkable=True)
         self.segmentBrush.setShortcut("Ctrl+2")
         self.segmentBrush.setStatusTip("Take Segment Brush")
@@ -313,7 +384,7 @@ class MainWidget(QMainWindow):
         self.segmentWithPointsBrush.setChecked(False)
         self.newUnderType(self.segmentBrush, self.segmentWithPointsBrush)
 
-
+    def circlesBrushActionsCreating(self):
         self.circleBrush = QAction("&Circle", self, checkable=True)
         self.circleBrush.setShortcut("Ctrl+3")
         self.circleBrush.setStatusTip("Take Circle Brush")
@@ -329,7 +400,7 @@ class MainWidget(QMainWindow):
         self.circleRadiusBrush.setChecked(True)
         self.newUnderType(self.circleBrush, self.circleRadiusBrush)
 
-
+    def editActionsCreating(self):
         self.backCommand = QAction("&Back", self)
         self.backCommand.setShortcut("Ctrl+Left")
         self.backCommand.setStatusTip("Return back")
@@ -348,7 +419,7 @@ class MainWidget(QMainWindow):
         self.resetCommand.setToolTip("<b>Reset</b> point")
         self.resetCommand.triggered.connect(self.reset)
 
-
+    def viewActionsCreating(self):
         self.backgroundColorCommand = QAction("&Background", self)
         self.backgroundColorCommand.setShortcut("Alt+B")
         self.backgroundColorCommand.setStatusTip("Change your background color")
@@ -361,7 +432,7 @@ class MainWidget(QMainWindow):
         self.foregroundColorCommand.setToolTip("Change your <b>foreground color</b>")
         self.foregroundColorCommand.triggered.connect(self.foregroundColorSelect)
 
-
+    def zoomActionsCreating(self):
         self.zoomMinusCommand = QAction("&Zoom - 10%", self)
         self.zoomMinusCommand.setShortcut("Alt+Left")
         self.zoomMinusCommand.triggered.connect(lambda event: self.zoom(-10))
@@ -374,7 +445,7 @@ class MainWidget(QMainWindow):
         self.zoomReturnCommand.setShortcut("Alt+Up")
         self.zoomReturnCommand.triggered.connect(lambda event: self.zoom(0))
 
-
+    def helpActionsCreating(self):
         self.referenceCommand = QAction("&Reference", self)
         self.referenceCommand.setShortcut("F1")
         self.referenceCommand.setStatusTip("Reference show")
@@ -386,12 +457,14 @@ class MainWidget(QMainWindow):
         self.authorsCommand.setToolTip("<b>Authors</b> show")
         self.authorsCommand.triggered.connect(self.authors)
 
-
+    def menuCreating(self):
         self.menubar = self.menuBar()
         self.fileMenu = self.menubar.addMenu("&File")
         self.fileMenu.addAction(self.newFileAct)
 
         self.brushesMenu = self.menubar.addMenu("&Brushes")
+        self.typeBrushes = QMenu("&Brush Types", self)
+        self.undertypeBrushes = QMenu("&Brush Under Types", self)
         self.brushesMenu.addMenu(self.typeBrushes)
         self.brushesMenu.addMenu(self.undertypeBrushes)
 
@@ -420,6 +493,7 @@ class MainWidget(QMainWindow):
         self.helpMenu.addAction(self.referenceCommand)
         self.helpMenu.addAction(self.authorsCommand)
 
+    def toolbarFilling(self):
         self.toolbar = self.addToolBar("Toolbar")
         self.toolbar.setMovable(False)
         self.toolbar.setToolTip("<b>Toolbar</b>")
@@ -438,9 +512,31 @@ class MainWidget(QMainWindow):
         self.toolbar.addAction(self.quitAct)
         self.toolbar.addSeparator()
 
+    def initUI(self):
+        self.setFixedSize(self.fieldWidth, self.fieldHeight)
+        self.saveState()
+        self.setWindowTitle("Prototype")
+        self.show()
+        self.centering()
+
+        self.image = QImage(self.width(), self.height(), QImage.Format_ARGB32)
+        self.image.fill(QColor(255, 255, 255))
+
+        self.setToolTip("<b>Drawing Place</b>")
+
+        self.fileActionsCreating()
+        self.pointBrushActionsCreating()
+        self.segmentBrushActionsCreating()
+        self.circlesBrushActionsCreating()
+        self.editActionsCreating()
+        self.viewActionsCreating()
+        self.zoomActionsCreating()
+        self.helpActionsCreating()
+        self.menuCreating()
+        self.toolbarFilling()
+
         self.setBrushType("point", self.pointBrush)
         self.messageSend("Paint")
-
 
 app = QApplication(sys.argv)
 interface = MainWidget()

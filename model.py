@@ -11,7 +11,8 @@ class Model:
         self.segments = {}
         self.circles = {}
         self.operations = []
-        self.error = 4
+        self.alloperations = []
+        self.error = 10
 
     def add_point(self, x: float, y: float):
         self.points[self.generate_name(Point)] = Point(x, y)
