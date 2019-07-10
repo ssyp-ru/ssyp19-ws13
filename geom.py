@@ -31,6 +31,7 @@ class Circle:
 
 class Segment():
     def pointBelongs(self, point):
+
         return point.distToPoint(self.point1) + point.distToPoint(self.point2) <= self.point1.distToPoint(self.point2) + 1
 
     def intersection(self, segment):
@@ -108,12 +109,15 @@ class Vector:
         return (self.x * vector.y) - (vector.x * self.y)
     def length(self, point):
         return point.distToPoint(Point(0, 0))
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.length = math.hypot(x, y)
+
     def __sub__(self, other):
         return Vector(self.x - other.x, self.y - other.y)
+
     def __str__(self):
         return f"({self.x}, {self.y})"
 
@@ -131,7 +135,7 @@ class Point(Vector):
     def distToLine(self, line):
         inclined = Vector(line.point1.x - self.x, line.point1.y - self.y)
         cross = inclined.crossProduct(Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y))
-        return abs(cross  / Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y)).length
+        return abs(cross / Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y)).length
 
     def distToSegment(self, segment):
         inclined = Vector(self.x - segment.point1.x, self.y - segment.point1.y)
@@ -139,10 +143,6 @@ class Point(Vector):
             return (min(self.distToPoint(segment.point1), self.distToPoint(segment.point2)))
         else:
             return self.distToline(segment)
-
-    def __init__ (self, x, y):
-        self.x = x
-        self.y = y
 
     def __add__(self, other):
         if isinstance(other, Point) or isinstance(other, Vector):
