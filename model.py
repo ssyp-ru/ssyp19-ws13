@@ -9,6 +9,7 @@ class Model:
         self.segments = {}
         self.circles = {}
         self.operations = []
+        self.alloperations = []
 
     def add_point(self, x, y):
         self.points[self.generate_name(Point)] = Point(x, y)

@@ -52,17 +52,23 @@ class MainWidget(QMainWindow):
 
         self.initUI()
 
-    def newPoint(self, x, y):
+    def newPoint(self, x, y, alloperationsInserting=True):
         self.model.add_point(x, y)
         self.model.operations.append(geometry.Point(x, y))
+        if alloperationsInserting:
+            self.model.alloperations.append(geometry.Point(x, y))
 
-    def newSegment(self, pointstart, pointend):
+    def newSegment(self, pointstart, pointend, alloperationsInserting=True):
         self.model.add_segment(pointstart, pointend)
         self.model.operations.append(geometry.Segment(pointstart, pointend))
+        if alloperationsInserting:
+            self.model.alloperations.append(geometry.Segment(pointstart, pointend))
 
-    def newCircle(self, a, radius):
+    def newCircle(self, a, radius, alloperationsInserting=True):
         self.model.add_circle(a, radius)
         self.model.operations.append(geometry.Circle(a, radius))
+        if alloperationsInserting:
+            self.model.alloperations.append(geometry.Circle(a, radius))
 
     def newBrush(self, brush):
         self.brushes.append(brush)
@@ -257,14 +263,21 @@ class MainWidget(QMainWindow):
             elif operationType == "<class \'geom.Circle\'>":
                 objectList = list(self.model.circles.keys())
                 name = objectList[len(objectList)-1][0]
-                print(objectList)
                 del(self.model.circles[name])
                 self.messageSend("Circle succesfully deleted")
 
             self.model.operations.pop(len(self.model.operations)-1)
 
     def forwards(self):
-        pass
+        if len(self.model.operations) < len(self.model.alloperations):
+            operation = self.model.alloperations[len(self.model.operations)]
+            operationType = str(type(operation))
+            if operationType == "<class \'geom.Point\'>":
+                self.newPoint(operation.x, operation.y, alloperationsInserting=False)
+            elif operationType == "<class \'geom.Segment\'>":
+                self.newSegment(operation.point1, operation.point2, alloperationsInserting=False)
+            elif operationType == "<class \'geom.Circle\'>":
+                self.newCircle(operation.center, operation.radius, alloperationsInserting=False)
 
     def reset(self):
         self.pointCoords = []
