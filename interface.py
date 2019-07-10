@@ -5,6 +5,7 @@ from random import *
 import sys
 import geom as geometry
 import math
+from correctingPoints import correctingPoints
 from model import Model
 
 class WidgetWithText(QWidget):
@@ -65,11 +66,11 @@ class MainWidget(QMainWindow):
         if alloperationsInserting:
             self.model.alloperations.append(geometry.Segment(pointstart, pointend))
 
-    def newCircle(self, a, radius, alloperationsInserting=True):
-        self.model.add_circle(a, radius)
-        self.model.operations.append(geometry.Circle(a, radius))
+    def newCircle(self, center, radius, alloperationsInserting=True):
+        self.model.add_circle(center, radius)
+        self.model.operations.append(geometry.Circle(center, radius))
         if alloperationsInserting:
-            self.model.alloperations.append(geometry.Circle(a, radius))
+            self.model.alloperations.append(geometry.Circle(center, radius))
 
     def newBrush(self, brush):
         self.brushes.append(brush)
@@ -95,7 +96,6 @@ class MainWidget(QMainWindow):
         paint.drawImage(0,0, self.image)
         paint.setBrush(QColor("black"))
         paint.setPen(QPen(Qt.black, 2))
-        # Review: Doesn't this method duplicate drawingObjects()?
         for point in self.model.points.values():
             paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
         for segment in self.model.segments.values():
@@ -115,7 +115,8 @@ class MainWidget(QMainWindow):
         self.messageSend("Point succesfully placed" + " " * 10 + str(x) + ", " + str(y))
 
     def pointInObjectDrawing(self, x, y):
-        pass
+        self.newPoint(x, y)
+        self.messageSend("Point succesfully placed" + " " * 10 + str(x) + ", " + str(y))
 
     def segmentDrawing(self, point1, point2):
         list = self.model.correcting_points(point1, point2)
@@ -144,8 +145,6 @@ class MainWidget(QMainWindow):
         else:
             radius = center.distToPoint(geometry.Point(self.pointCoords[0], self.pointCoords[1]))
 
-        alphaColor = QColor.fromRgbF(0, 0, 0, 0)
-
         if self.brushundertype == "radius":
             self.newCircle(center, radius)
             self.messageSend("Circle succesfully placed" + " " * 10 + str(center.x) + ", " + str(center.y) + " ; " + str(round(radius, 2)))
@@ -158,7 +157,8 @@ class MainWidget(QMainWindow):
             if self.brushundertype == "point":
                 self.pointDrawing(event.x(), event.y())
             elif self.brushundertype == "pointinobject":
-                self.pointInObjectDrawing(event.x(), event.y())
+                point = correctingPoints(geometry.Point(event.x(), event.y()), self.model.segments, self.model.circles)
+                self.pointInObjectDrawing(point.x, point.y)
             self.update()
 
         if self.brushtype == "segment":
@@ -187,10 +187,10 @@ class MainWidget(QMainWindow):
                 self.pointCoords = [event.x(), event.y()]
 
                 center = geometry.Point(pointCoords[0], pointCoords[1])
-                point = geometry.Point(self.pointCoords[0], self.pointCoords[1])
-
-                self.circleWithRadiusDrawing(center, point)
-
+                pointOnCircle = geometry.Point(self.pointCoords[0], self.pointCoords[1])
+                
+                self.circleWithRadiusDrawing(center, pointOnCircle)
+                
                 self.update()
                 self.pointCoords = []
         self.update()
