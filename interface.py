@@ -69,11 +69,11 @@ class MainWidget(QMainWindow):
         paint.setPen(QPen(Qt.black, 3))
         paint.setFont(QFont("Decorative", 10))
         # Review: Doesn't this method duplicate drawingObjects()?
-        for _, point in self.model.points.items():
+        for point in self.model.points.values():
             paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
-        for _, segment in self.model.segments.items():
+        for segment in self.model.segments.values():
             paint.drawLine(QPoint(segment.point1.x, segment.point1.y), QPoint(segment.point2.x, segment.point2.y))
-        for _, circle in self.model.circles.items():
+        for circle in self.model.circles.values():
             circleX = circle.center.x
             circleY = circle.center.y
             distance = circle.radius
@@ -109,7 +109,7 @@ class MainWidget(QMainWindow):
                     
                     point1 = geometry.Point(pointCoords[0], pointCoords[1])
                     point2 = geometry.Point(self.pointCoords[0], self.pointCoords[1])
-                    list = self.correctingPoints(point1, point2, self.model.points)
+                    list = self.model.correcting_points(point1, point2)
                     if list:
                         newSegment = geometry.Segment(list[0], list[1])
                     else:
@@ -133,7 +133,7 @@ class MainWidget(QMainWindow):
                 self.pointCoords = [event.x(), event.y()]
 
                 center = geometry.Point(pointCoords[0], pointCoords[1])
-                list = self.correctingPoints(center, geometry.Point(self.pointCoords[0], self.pointCoords[1]), self.model.points)
+                list = self.model.correcting_points(center, geometry.Point(self.pointCoords[0], self.pointCoords[1]))
                 if list:
                     center = list[0]
                     radius = center.distToPoint(list[1])
@@ -440,20 +440,7 @@ class MainWidget(QMainWindow):
 
         self.setBrushType("point", self.pointBrush)
         self.messageSend("Paint")
-    @staticmethod
-    # Review: This belongs to the Model class.
-    def correctingPoints(start, end, points):
-        error = 4
-        if points:
-            for _, i in points.items():
-                # Review: Long lines still suck.
-                if start.x <= i.x + error and start.x >= i.x - error and start.y <= i.y + error and start.y >= i.y - error:
-                    start.x = i.x
-                    start.y = i.y
-                if end.x <= i.x + error and end.x >= i.x - error and end.y <= i.y + error and end.y >= i.y - error:
-                    end.x = i.x
-                    end.y = i.y
-            return start, end
+
 
 app = QApplication(sys.argv)
 interface = MainWidget()

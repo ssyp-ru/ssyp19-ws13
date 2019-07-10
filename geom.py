@@ -23,6 +23,7 @@ class Circle:
 							Point((straight.A * straight.C) - (straight.A * math.sqrt(Discriminant)) / ((straight.A ** 2) + (straight.B ** 2)),
 							((straight.B * straight.A - (straight.A * math.sqrt(Discriminant))) / ((straight.A ** 2) + (straight.B ** 2))))]
 			return points
+
 	def __init__(self, point, radius):
 		self.center = point
 		self.radius = radius
@@ -41,28 +42,56 @@ class Point:
 		return math.sqrt((X ** 2) + (Y ** 2))
 
 	def	distToStraight(self, straight):
-		inclined = Vector(Point(straight.point1.x - self.x, straight.point1.y - self.y))
-		cross = inclined.crossProduct(Vector(Point(straight.point2.x - straight.point1.x, straight.point2.y - straight.point1.y)))
-		return abs(cross  / Vector(Point(straight.point2.x - straight.point1.x, straight.point2.y - straight.point1.y)).length)
+		inclined = Vector(straight.point1 - self)
+		cross = inclined.crossProduct(Vector(straight.point2 - straight.point1))
+		return abs(cross / Vector(straight.point2 - straight.point1).length)
 
 	def distToSegment(self, segment):
-		inclined = Vector(Point(self.x - segment.point1.x, self.y - segment.point1.y))
-		if (inclined.dotproduct(Vector(Point(segment.point2.x - segment.point1.x, segment.point2.y - segment.point1.y))) < 0):
-			return (min(self.distToPoint(segment.point1), self.distToPoint(segment.point2)))
+		inclined = Vector(self - segment.point1)
+		if inclined.dotproduct(Vector(segment.point2 - segment.point1)) < 0:
+			return min(self.distToPoint(segment.point1), self.distToPoint(segment.point2))
 		else:
 			return self.distToStraight(segment)
 
-	def __init__ (self, x, y):
+	def asd(self, straight):
+		inclined = Vector(straight.point1 - self)
+		return inclined.crossProduct(Vector(straight.point2 - straight.point1))
+
+	def __init__(self, x, y):
 		self.x = x
 		self.y = y
 
-class Segment():
-
-	def isPointBelongs(self, point):
-		if (point.distToPoint(self.point1) + point.distToPoint(self.point2) <= self.point1.distToPoint(self.point2) + 1):
-			return True
+	def __add__(self, other):
+		if isinstance(other, Point) or isinstance(other, Vector):
+			return Point(self.x + other.x, self.y + other.y)
 		else:
-			return False
+			return Point(self.x + other, self.y + other)
+
+	def __sub__(self, other):
+		if isinstance(other, Point) or isinstance(other, Vector):
+			return Point(self.x - other.x, self.y - other.y)
+		else:
+			return Point(self.x - other, self.y - other)
+
+	def __str__(self):
+		return f'Point({self.x},{self.y})'
+
+	def __le__(self, other):
+		if isinstance(other, Point):
+			return self.x <= other.x and self.y <= other.y
+		else:
+			return self.x <= other and self.y <= other
+
+	def __ge__(self, other):
+		if isinstance(other, Point):
+			return self.x >= other.x and self.y >= other.y
+		else:
+			return self.x >= other and self.y >= other
+
+class Segment:
+
+	def isPointBelongs(self, point, error):
+		return point.distToPoint(self.point1) + point.distToPoint(self.point2) <= self.length + error
 
 	def intersection(self, segment):
 		Mstraight = Straight(self.point1, self.point2)
@@ -107,7 +136,7 @@ class Straight():
 			Nvector = Vector(Point(self.A, self.B))
 			self.C = Nvector.dotproduct(Vector(Point(point2.x, point2.y)))
 
-class Vector :
+class Vector:
 	def dotproduct(self, vector):
 		return (self.x * vector.x) + (self.y * vector.y)
 
@@ -128,7 +157,7 @@ class Vector :
 	def crossProduct(self, vector):
 		return (self.x * vector.y) - (vector.x * self.y)
 
-	def __init__ (self, point):
+	def __init__(self, point):
 		self.x = point.x
 		self.y = point.y
 		point00 = Point(0, 0)
