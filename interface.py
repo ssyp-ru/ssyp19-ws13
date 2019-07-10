@@ -1,14 +1,34 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen, QBrush
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt, QPoint, QRect
 from random import *
 import sys
 import geom as geometry
 import math
 from model import Model
 
+class WidgetWithText(QWidget):
+    def __init__(self, text):
+        super().__init__()
+        self.text = text
+        self.initUI()
 
-#ANDREY : correctingPoints method must be in Model Class
+    def centering(self):
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
+    def initUI(self):
+        self.lbl = QLabel(self)
+        self.lbl.setText(self.text)
+        self.lbl.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        self.lbl.move(30, 30)
+
+        self.setWindowTitle("Authors")
+        self.setFixedSize(400, 400)
+        self.show()
+        self.centering()
 
 class MainWidget(QMainWindow):
     def __init__(self):
@@ -42,6 +62,7 @@ class MainWidget(QMainWindow):
 
     def newCircle(self, a, radius):
         self.model.add_circle(a, radius)
+        self.model.operations.append(geometry.Circle(a, radius))
 
     def newBrush(self, brush):
         self.brushes.append(brush)
@@ -82,7 +103,6 @@ class MainWidget(QMainWindow):
 
     def pointDrawing(self, x, y):
         self.newPoint(x, y)
-        self.paint.drawEllipse(x, y, 2, 2)
         self.messageSend("Point succesfully placed" + " " * 10 + str(x) + ", " + str(y))
 
     def pointInObjectDrawing(self, x, y):
@@ -119,7 +139,6 @@ class MainWidget(QMainWindow):
         self.paint.setBrush(alphaColor)
 
         if self.brushundertype == "radius":
-            self.paint.drawEllipse(center.x - radius, center.y - radius, radius*2, radius*2)
             self.newCircle(center, radius)
             self.messageSend("Circle succesfully placed" + " " * 10 + str(center.x) + ", " + str(center.y) + " ; " + str(round(radius, 2)))
         
@@ -218,8 +237,31 @@ class MainWidget(QMainWindow):
             self.zoomValue = 100
 
 
+
     def back(self):
-        pass
+        if len(self.model.operations):
+            operation = self.model.operations[len(self.model.operations)-1]
+            operationType = str(type(operation))
+            if operationType == "<class \'geom.Point\'>":
+                objectList = list(self.model.points.keys())
+                name = objectList[len(objectList)-1][0]
+                del(self.model.points[name])
+                self.messageSend("Point succesfully deleted")
+
+            elif operationType == "<class \'geom.Segment\'>":
+                objectList = list(self.model.segments.keys())
+                name = objectList[len(objectList)-1][0]
+                del(self.model.segments[name])
+                self.messageSend("Segment succesfully deleted")
+
+            elif operationType == "<class \'geom.Circle\'>":
+                objectList = list(self.model.circles.keys())
+                name = objectList[len(objectList)-1][0]
+                print(objectList)
+                del(self.model.circles[name])
+                self.messageSend("Circle succesfully deleted")
+
+            self.model.operations.pop(len(self.model.operations)-1)
 
     def forwards(self):
         pass
@@ -256,10 +298,10 @@ class MainWidget(QMainWindow):
         self.paint.drawRect(-20, 20, self.fieldWidth+30, self.fieldHeight+30)
 
     def reference(self):
-        pass
+        self.referenceWidget = WidgetWithText(text="")
 
     def authors(self):
-        pass
+        self.authorsWidget = WidgetWithText(text="")
 
 
     def backgroundColorSelect(self):
@@ -456,7 +498,8 @@ class MainWidget(QMainWindow):
         self.toolbar.addSeparator()
 
     def initUI(self):
-        self.setGeometry(400, 400, self.fieldWidth, self.fieldHeight)
+        self.setFixedSize(self.fieldWidth, self.fieldHeight)
+        self.saveState()
         self.setWindowTitle("Prototype")
         self.show()
         self.centering()
