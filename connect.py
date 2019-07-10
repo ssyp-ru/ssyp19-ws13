@@ -27,31 +27,39 @@ class PrologConnector:
             return file.name[file.name.rfind('\\') + 1::]
 
     def consult_code(self, code: str, delete=True):  # consult Prolog code via temp file
-        self.consult_file('connect_files/' + self.create_temp_file(code), delete)
+        self.consult_file('connect_files/' +
+                          self.create_temp_file(code), delete)
 
     def consult_file(self, file_name: str, delete=False):
         self.prolog.consult(file_name)
         if delete:
             os.remove(file_name)
 
-    def get_n_ans(self, instructions: str, maxresult=1, **kwargs) -> [dict]:  # warning! can be broken if maxresult = -1
+    # warning! can be broken if maxresult = -1
+    def get_n_ans(self, instructions: str, maxresult=1, **kwargs) -> [dict]:
 
-        return self.prolog.query(instructions, maxresult=maxresult, **kwargs)  # query for prolog
+        # query for prolog
+        return self.prolog.query(instructions, maxresult=maxresult, **kwargs)
 
     # rewrite old way
-    def get_n_ans_new(self, instructions: str, maxresults=-1, solves=True) -> list:  # warning! may be unfinished
-        terms, vars, statements = self.parse_ins(instructions)  # functors and items of predicates, variables
-        vars_ans = [] if solves else {i[0]: [] for i in vars}  # list/dict of variable values
+    # warning! may be unfinished
+    def get_n_ans_new(self, instructions: str, maxresults=-1, solves=True) -> list:
+        # functors and items of predicates, variables
+        terms, vars, statements = self.parse_ins(instructions)
+        vars_ans = [] if solves else {i[0]: []
+                                      for i in vars}  # list/dict of variable values
         statements_ans = {}  # list of statements
         if terms:
             q = Query(*terms)  # make query
             while q.nextSolution() and maxresults:  # find solutions
                 maxresults -= 1
                 if solves:
-                    vars_ans.append({k: v.value for k, v in vars})  # append values
+                    # append values
+                    vars_ans.append({k: v.value for k, v in vars})
                 else:
                     for k, v in vars:
-                        vars_ans[k].append(v.value)
+                        if v.value not in vars_ans[k]:
+                            vars_ans[k].append(v.value)
             q.closeQuery()
         if statements:
             for statement in statements:
@@ -59,14 +67,17 @@ class PrologConnector:
         return vars_ans, statements_ans
 
     @staticmethod
-    def parse_ins(instruction) -> list and list and list:  # parsing instruction.
+    # parsing instruction.
+    def parse_ins(instruction) -> list and list and list:
         terms = []  # if need var(s)
         vars = []
         statements = []  # if need True or False
-        pnames = re.compile(r'\[[\d\w\,]+\]|[\w\d]+')
+        pnames = re.compile(r'\[.+\]|[\w\d]+')  # find names(vars|lists|strings|ints) in atoms
+        plist = re.compile(r'\[.+\]')  # find list
         # Reviewed (2019-07-09 23:19): I want you to explain this.
-        for pred, atoms in re.findall(r'([^\(\)\,\s]+|\S)(\([\w\d\,\ \[\]]+\))', instruction):  # find predirects
-            names = pnames.findall(atoms)  # find names(vars|lists|strings|ints) in atoms
+        # find predirects
+        for pred, atoms in re.findall(r'([^\(\)\,\s]+|\S)(\([^\)]+\))', instruction):
+            names = pnames.findall(atoms)
             items = []
             there_is_var = False
             for atom in names:
@@ -80,8 +91,8 @@ class PrologConnector:
 
                 elif atom.isdigit():  # check for int
                     items.append(int(atom))
-                # Review: Why isn't this a regex? I thought you like them.
-                elif atom[0] == '[' and atom[-1] == ']':  # check for list
+
+                elif plist.search(atom):  # check for list
                     items.append(literal_eval(atom))
 
                 else:
@@ -92,20 +103,23 @@ class PrologConnector:
             if there_is_var:
                 terms.append(Functor(pred, len(names))(*items))
             else:
-                statements.append((Functor(pred, len(names))(*items), pred + atoms))
+                statements.append(
+                    (Functor(pred, len(names))(*items), pred + atoms))
         return terms, vars, statements
 
-    def make_req(self, command, maxresults=-1, solves=False):
-        a = self.get_n_ans_new(command, maxresults=maxresults, solves=solves)
-        # Review: Don't you think this is ugly? 
-        # Use list unpacking instead.
+    # for all solves of only 1 request(may be unused)
+    def make_req(self, command: str, solves=False, **kwargs):  # with custom parameters
+        a = self.get_n_ans_new(command, solves=solves, **kwargs)
+        # getting only 1 result
         if a[0]:
             return a[0]
-        else:
+        elif a[1]:
             for i in a[1].values():
                 return i
-    # Review: This function is unused and I like that.
-    # What was it meant to do?
-    def assert_code(self, ins):
+        else:
+            return None
+
+    # for assertion facts(the same as consult_code)
+    def assert_code(self, ins: str):
         for i in ins.split(','):
             self.prolog.assertz(i)

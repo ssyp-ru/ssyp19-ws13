@@ -4,6 +4,7 @@ from string import ascii_uppercase as dictionary
 
 # Review: I thought you like type hints.
 
+
 class Model:
 
     def __init__(self):
@@ -15,7 +16,6 @@ class Model:
     def add_point(self, x: float, y: float):
         self.points[self.generate_name(Point)] = Point(x, y)
 
-    # Review: What the hell does that fixme mean?
     def add_segment(self, a: Point, b: Point):
         self.segments[self.generate_name(Segment)] = Segment(a, b)
 
@@ -33,7 +33,6 @@ class Model:
     @staticmethod
     # Review: Why should it be static? 
     def generate_name_by_number(num: int) -> str:
-        # Review: This list is called strings.ascii_uppercase
         if num <= 25:
             return dictionary[num]
         else:
