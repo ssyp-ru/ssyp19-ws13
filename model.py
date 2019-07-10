@@ -51,6 +51,22 @@ class Model:
                     end = i
             return start, end
 
+    @staticmethod
+    def correcting_points_warning(point, segments, circles):
+        error = 4
+        for _, i in circles.items():
+            list = i.intersectionLine(Line(i.center, point))
+            if not list:
+                return point
+            for j in list:
+                Fcondition = point.distToPoint(j) < error
+                Scondition = point.distToPoint(j) > -error
+                print(str(j))
+                if Fcondition and Scondition:
+                    point.x = j.x
+                    point.y = j.y
+        return point
+
     def correcting_online_points(self, point: Point) -> Point:
         for segment in self.segments.values():
             if segment.isPointBelongs(Point, self.error):
