@@ -24,7 +24,6 @@ class Circle:
     def __init__(self, point, radius):
         self.center = point
         self.radius = radius
-        print("DEBUG>>", self.center, self.radius, type(self.center))
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
@@ -77,12 +76,12 @@ class Line():
         if ((point1.x == point2.x) and (point1.y == point2.y)):
             raise(LineError("That points are the same"))
         else:
-            self.point1 = point1
-            self.point2 = point2
-            self.A = point2.y - point1.y
-            self.B = -(point2.x - point1.x)
-            Nvector = Vector(self.A, self.B)
-            self.C = Nvector.dotproduct(Vector(point1.x, point1.y))
+            self.point1 = point1;
+            self.point2 = point2;
+            self.A = point2.y - point1.y;
+            self.B = -(point2.x - point1.x);
+            Nvector = Vector(self.A, self.B);
+            self.C = Nvector.dotproduct(Vector(point1.x, point1.y));
             self.normalize()
     def __str__(self):
         return "%0.4f x + %0.4f y + %0.4f = 0" % (self.A, self.B, self.C)

@@ -143,15 +143,9 @@ class MainWidget(QMainWindow):
             radius = center.distToPoint(list[1])
         else:
             radius = center.distToPoint(geometry.Point(self.pointCoords[0], self.pointCoords[1]))
-
-        alphaColor = QColor.fromRgbF(0, 0, 0, 0)
-        self.paint.setBrush(alphaColor)
-
         if self.brushundertype == "radius":
             self.newCircle(center, radius)
             self.messageSend("Circle succesfully placed" + " " * 10 + str(center.x) + ", " + str(center.y) + " ; " + str(round(radius, 2)))
-
-        self.paint.setBrush(QColor("black"))
 
     def drawingObjects(self, event):
         # Review: 78 lines for one method is not as bad as 2500, but that code
