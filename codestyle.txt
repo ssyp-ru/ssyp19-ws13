@@ -1,0 +1,291 @@
+connect.py:22:80: E501 line too long (104 > 79 characters)
+connect.py:26:80: E501 line too long (88 > 79 characters)
+connect.py:27:80: E501 line too long (81 > 79 characters)
+connect.py:34:80: E501 line too long (120 > 79 characters)
+connect.py:36:80: E501 line too long (97 > 79 characters)
+connect.py:39:80: E501 line too long (113 > 79 characters)
+connect.py:40:80: E501 line too long (109 > 79 characters)
+connect.py:41:80: E501 line too long (93 > 79 characters)
+connect.py:48:80: E501 line too long (83 > 79 characters)
+connect.py:59:80: E501 line too long (81 > 79 characters)
+connect.py:63:43: W605 invalid escape sequence '\('
+connect.py:63:45: W605 invalid escape sequence '\)'
+connect.py:63:47: W605 invalid escape sequence '\,'
+connect.py:63:49: W605 invalid escape sequence '\s'
+connect.py:63:54: W605 invalid escape sequence '\S'
+connect.py:63:58: W605 invalid escape sequence '\('
+connect.py:63:61: W605 invalid escape sequence '\w'
+connect.py:63:63: W605 invalid escape sequence '\d'
+connect.py:63:65: W605 invalid escape sequence '\,'
+connect.py:63:67: W605 invalid escape sequence '\ '
+connect.py:63:69: W605 invalid escape sequence '\['
+connect.py:63:71: W605 invalid escape sequence '\]'
+connect.py:63:75: W605 invalid escape sequence '\)'
+connect.py:63:80: E501 line too long (112 > 79 characters)
+connect.py:64:33: W605 invalid escape sequence '\['
+connect.py:64:36: W605 invalid escape sequence '\d'
+connect.py:64:38: W605 invalid escape sequence '\w'
+connect.py:64:40: W605 invalid escape sequence '\,'
+connect.py:64:44: W605 invalid escape sequence '\]'
+connect.py:64:48: W605 invalid escape sequence '\w'
+connect.py:64:50: W605 invalid escape sequence '\d'
+connect.py:64:80: E501 line too long (110 > 79 characters)
+connect.py:90:80: E501 line too long (84 > 79 characters)
+connect.py:103:35: W292 no newline at end of file
+geom.py:2:1: E265 block comment should start with '# '
+geom.py:4:1: E265 block comment should start with '# '
+geom.py:8:1: W191 indentation contains tabs
+geom.py:8:2: E117 over-indented
+geom.py:10:1: W191 indentation contains tabs
+geom.py:10:1: W293 blank line contains whitespace
+geom.py:13:1: W191 indentation contains tabs
+geom.py:13:2: E117 over-indented
+geom.py:14:1: W191 indentation contains tabs
+geom.py:14:3: E117 over-indented
+geom.py:14:80: E501 line too long (112 > 79 characters)
+geom.py:15:1: W191 indentation contains tabs
+geom.py:16:1: W191 indentation contains tabs
+geom.py:16:4: E117 over-indented
+geom.py:17:1: W191 indentation contains tabs
+geom.py:18:1: W191 indentation contains tabs
+geom.py:18:4: E117 over-indented
+geom.py:18:80: E501 line too long (85 > 79 characters)
+geom.py:19:1: W191 indentation contains tabs
+geom.py:19:4: E101 indentation contains mixed spaces and tabs
+geom.py:19:5: E128 continuation line under-indented for visual indent
+geom.py:20:1: W191 indentation contains tabs
+geom.py:21:1: W191 indentation contains tabs
+geom.py:21:4: E117 over-indented
+geom.py:21:80: E501 line too long (128 > 79 characters)
+geom.py:22:1: W191 indentation contains tabs
+geom.py:22:8: E128 continuation line under-indented for visual indent
+geom.py:22:80: E501 line too long (119 > 79 characters)
+geom.py:23:1: W191 indentation contains tabs
+geom.py:23:80: E501 line too long (122 > 79 characters)
+geom.py:24:1: W191 indentation contains tabs
+geom.py:24:8: E128 continuation line under-indented for visual indent
+geom.py:24:80: E501 line too long (119 > 79 characters)
+geom.py:25:1: W191 indentation contains tabs
+geom.py:26:1: W191 indentation contains tabs
+geom.py:26:2: E301 expected 1 blank line, found 0
+geom.py:27:1: W191 indentation contains tabs
+geom.py:27:3: E117 over-indented
+geom.py:28:1: W191 indentation contains tabs
+geom.py:30:1: E302 expected 2 blank lines, found 1
+geom.py:31:1: W191 indentation contains tabs
+geom.py:31:2: E117 over-indented
+geom.py:32:1: W191 indentation contains tabs
+geom.py:32:3: E117 over-indented
+geom.py:33:1: W191 indentation contains tabs
+geom.py:33:4: E117 over-indented
+geom.py:34:1: W191 indentation contains tabs
+geom.py:34:5: E117 over-indented
+geom.py:35:1: W191 indentation contains tabs
+geom.py:35:5: E265 block comment should start with '# '
+geom.py:36:1: W191 indentation contains tabs
+geom.py:36:5: E265 block comment should start with '# '
+geom.py:38:1: W191 indentation contains tabs
+geom.py:39:1: W191 indentation contains tabs
+geom.py:39:3: E117 over-indented
+geom.py:40:1: W191 indentation contains tabs
+geom.py:41:1: W191 indentation contains tabs
+geom.py:43:1: W191 indentation contains tabs
+geom.py:43:5: E273 tab after keyword
+geom.py:44:1: W191 indentation contains tabs
+geom.py:44:3: E117 over-indented
+geom.py:44:80: E501 line too long (82 > 79 characters)
+geom.py:45:1: W191 indentation contains tabs
+geom.py:45:80: E501 line too long (124 > 79 characters)
+geom.py:46:1: W191 indentation contains tabs
+geom.py:46:19: E221 multiple spaces before operator
+geom.py:46:80: E501 line too long (121 > 79 characters)
+geom.py:48:1: W191 indentation contains tabs
+geom.py:49:1: W191 indentation contains tabs
+geom.py:49:3: E117 over-indented
+geom.py:49:80: E501 line too long (80 > 79 characters)
+geom.py:50:1: W191 indentation contains tabs
+geom.py:50:80: E501 line too long (120 > 79 characters)
+geom.py:51:1: W191 indentation contains tabs
+geom.py:51:4: E117 over-indented
+geom.py:51:80: E501 line too long (83 > 79 characters)
+geom.py:52:1: W191 indentation contains tabs
+geom.py:53:1: W191 indentation contains tabs
+geom.py:53:4: E117 over-indented
+geom.py:55:1: W191 indentation contains tabs
+geom.py:55:14: E211 whitespace before '('
+geom.py:56:1: W191 indentation contains tabs
+geom.py:56:3: E117 over-indented
+geom.py:57:1: W191 indentation contains tabs
+geom.py:59:1: E302 expected 2 blank lines, found 1
+geom.py:61:1: W191 indentation contains tabs
+geom.py:61:2: E117 over-indented
+geom.py:62:1: W191 indentation contains tabs
+geom.py:62:3: E117 over-indented
+geom.py:62:80: E501 line too long (115 > 79 characters)
+geom.py:63:1: W191 indentation contains tabs
+geom.py:63:4: E117 over-indented
+geom.py:64:1: W191 indentation contains tabs
+geom.py:65:1: W191 indentation contains tabs
+geom.py:65:4: E117 over-indented
+geom.py:67:1: W191 indentation contains tabs
+geom.py:68:1: W191 indentation contains tabs
+geom.py:68:3: E117 over-indented
+geom.py:69:1: W191 indentation contains tabs
+geom.py:70:1: W191 indentation contains tabs
+geom.py:70:19: E712 comparison to False should be 'if cond is not False:' or 'if cond:'
+geom.py:70:80: E501 line too long (104 > 79 characters)
+geom.py:71:1: W191 indentation contains tabs
+geom.py:71:4: E117 over-indented
+geom.py:72:1: W191 indentation contains tabs
+geom.py:73:1: W191 indentation contains tabs
+geom.py:73:4: E117 over-indented
+geom.py:73:16: W291 trailing whitespace
+geom.py:75:1: W191 indentation contains tabs
+geom.py:76:1: W191 indentation contains tabs
+geom.py:76:3: E117 over-indented
+geom.py:77:1: W191 indentation contains tabs
+geom.py:78:1: W191 indentation contains tabs
+geom.py:80:1: E302 expected 2 blank lines, found 1
+geom.py:82:1: W191 indentation contains tabs
+geom.py:82:2: E117 over-indented
+geom.py:83:1: W191 indentation contains tabs
+geom.py:83:3: E117 over-indented
+geom.py:83:61: E202 whitespace before ')'
+geom.py:83:80: E501 line too long (123 > 79 characters)
+geom.py:84:1: W191 indentation contains tabs
+geom.py:84:4: E117 over-indented
+geom.py:85:1: W191 indentation contains tabs
+geom.py:85:80: E501 line too long (88 > 79 characters)
+geom.py:86:1: W191 indentation contains tabs
+geom.py:87:1: W191 indentation contains tabs
+geom.py:88:1: W191 indentation contains tabs
+geom.py:88:4: E117 over-indented
+geom.py:89:1: W191 indentation contains tabs
+geom.py:90:1: W191 indentation contains tabs
+geom.py:90:4: E117 over-indented
+geom.py:92:1: W191 indentation contains tabs
+geom.py:93:1: W191 indentation contains tabs
+geom.py:93:3: E117 over-indented
+geom.py:94:1: W191 indentation contains tabs
+geom.py:94:4: E117 over-indented
+geom.py:95:1: W191 indentation contains tabs
+geom.py:96:1: W191 indentation contains tabs
+geom.py:96:4: E117 over-indented
+geom.py:96:80: E501 line too long (115 > 79 characters)
+geom.py:96:116: W291 trailing whitespace
+geom.py:97:1: W191 indentation contains tabs
+geom.py:97:7: E128 continuation line under-indented for visual indent
+geom.py:97:80: E501 line too long (105 > 79 characters)
+geom.py:99:1: W191 indentation contains tabs
+geom.py:100:1: W191 indentation contains tabs
+geom.py:100:3: E117 over-indented
+geom.py:100:58: W291 trailing whitespace
+geom.py:101:1: W191 indentation contains tabs
+geom.py:101:4: E117 over-indented
+geom.py:102:1: W191 indentation contains tabs
+geom.py:103:1: W191 indentation contains tabs
+geom.py:103:4: E117 over-indented
+geom.py:104:1: W191 indentation contains tabs
+geom.py:105:1: W191 indentation contains tabs
+geom.py:106:1: W191 indentation contains tabs
+geom.py:107:1: W191 indentation contains tabs
+geom.py:108:1: W191 indentation contains tabs
+geom.py:110:1: E302 expected 2 blank lines, found 1
+geom.py:110:13: E203 whitespace before ':'
+geom.py:111:1: W191 indentation contains tabs
+geom.py:111:2: E117 over-indented
+geom.py:112:1: W191 indentation contains tabs
+geom.py:112:3: E117 over-indented
+geom.py:114:1: W191 indentation contains tabs
+geom.py:115:1: W191 indentation contains tabs
+geom.py:115:3: E117 over-indented
+geom.py:116:1: W191 indentation contains tabs
+geom.py:118:1: W191 indentation contains tabs
+geom.py:118:16: E211 whitespace before '('
+geom.py:119:1: W191 indentation contains tabs
+geom.py:119:3: E117 over-indented
+geom.py:120:1: W191 indentation contains tabs
+geom.py:122:1: W191 indentation contains tabs
+geom.py:123:1: W191 indentation contains tabs
+geom.py:123:3: E117 over-indented
+geom.py:125:1: W191 indentation contains tabs
+geom.py:126:1: W191 indentation contains tabs
+geom.py:126:3: E117 over-indented
+geom.py:128:1: W191 indentation contains tabs
+geom.py:129:1: W191 indentation contains tabs
+geom.py:129:3: E117 over-indented
+geom.py:131:1: W191 indentation contains tabs
+geom.py:131:14: E211 whitespace before '('
+geom.py:132:1: W191 indentation contains tabs
+geom.py:132:3: E117 over-indented
+geom.py:133:1: W191 indentation contains tabs
+geom.py:134:1: W191 indentation contains tabs
+geom.py:135:1: W191 indentation contains tabs
+geom.py:137:1: W391 blank line at end of file
+interface.py:32:9: E265 block comment should start with '# '
+interface.py:55:5: E303 too many blank lines (2)
+interface.py:61:9: E722 do not use bare 'except'
+interface.py:71:80: E501 line too long (134 > 79 characters)
+interface.py:75:26: E231 missing whitespace after ','
+interface.py:79:80: E501 line too long (119 > 79 characters)
+interface.py:86:80: E501 line too long (130 > 79 characters)
+interface.py:102:80: E501 line too long (86 > 79 characters)
+interface.py:117:1: W293 blank line contains whitespace
+interface.py:119:80: E501 line too long (85 > 79 characters)
+interface.py:120:80: E501 line too long (83 > 79 characters)
+interface.py:132:80: E501 line too long (92 > 79 characters)
+interface.py:133:80: E501 line too long (102 > 79 characters)
+interface.py:134:80: E501 line too long (82 > 79 characters)
+interface.py:145:17: E265 block comment should start with '# '
+interface.py:146:17: E265 block comment should start with '# '
+interface.py:149:80: E501 line too long (129 > 79 characters)
+interface.py:154:80: E501 line too long (105 > 79 characters)
+interface.py:160:21: E265 block comment should start with '# '
+interface.py:160:80: E501 line too long (113 > 79 characters)
+interface.py:163:1: W293 blank line contains whitespace
+interface.py:217:5: E303 too many blank lines (2)
+interface.py:227:5: E303 too many blank lines (2)
+interface.py:242:5: E303 too many blank lines (2)
+interface.py:249:9: E265 block comment should start with '# '
+interface.py:250:9: E265 block comment should start with '# '
+interface.py:251:9: E265 block comment should start with '# '
+interface.py:261:5: E303 too many blank lines (2)
+interface.py:278:1: W293 blank line contains whitespace
+interface.py:283:9: E265 block comment should start with '# '
+interface.py:298:80: E501 line too long (100 > 79 characters)
+interface.py:305:80: E501 line too long (127 > 79 characters)
+interface.py:309:80: E501 line too long (83 > 79 characters)
+interface.py:312:80: E501 line too long (141 > 79 characters)
+interface.py:317:9: E303 too many blank lines (2)
+interface.py:321:80: E501 line too long (106 > 79 characters)
+interface.py:328:80: E501 line too long (139 > 79 characters)
+interface.py:332:80: E501 line too long (91 > 79 characters)
+interface.py:334:80: E501 line too long (83 > 79 characters)
+interface.py:335:80: E501 line too long (155 > 79 characters)
+interface.py:340:9: E303 too many blank lines (2)
+interface.py:344:80: E501 line too long (103 > 79 characters)
+interface.py:351:80: E501 line too long (133 > 79 characters)
+interface.py:356:9: E303 too many blank lines (2)
+interface.py:375:9: E303 too many blank lines (2)
+interface.py:377:80: E501 line too long (80 > 79 characters)
+interface.py:378:80: E501 line too long (85 > 79 characters)
+interface.py:379:80: E501 line too long (81 > 79 characters)
+interface.py:383:80: E501 line too long (80 > 79 characters)
+interface.py:384:80: E501 line too long (85 > 79 characters)
+interface.py:385:80: E501 line too long (81 > 79 characters)
+interface.py:388:9: E303 too many blank lines (2)
+interface.py:390:80: E501 line too long (88 > 79 characters)
+interface.py:394:80: E501 line too long (87 > 79 characters)
+interface.py:398:80: E501 line too long (89 > 79 characters)
+interface.py:401:9: E303 too many blank lines (2)
+interface.py:413:9: E303 too many blank lines (2)
+interface.py:466:5: E301 expected 1 blank line, found 0
+interface.py:471:17: E265 block comment should start with '# '
+interface.py:472:80: E501 line too long (135 > 79 characters)
+interface.py:475:80: E501 line too long (127 > 79 characters)
+interface.py:481:1: E305 expected 2 blank lines after class or function definition, found 1
+model.py:32:80: E501 line too long (116 > 79 characters)
+Translator.py:28:80: E501 line too long (107 > 79 characters)
+Translator.py:33:35: W292 no newline at end of file
+Translator.py:33:35: W292 no newline at end of file
+Translator.py:33:35: W292 no newline at end of file

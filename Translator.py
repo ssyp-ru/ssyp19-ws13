@@ -1,6 +1,8 @@
 from connect import PrologConnector
 
 
+# Review: I guess you know what to do here. Do it.
+
 class Translator:
 
     def __init__(self):
@@ -19,6 +21,7 @@ class Translator:
         pass
 
     # TODO: Write me
+    # Review: Is this a Human Centipede reference?
     def feedback(self, cls):
         pass
 

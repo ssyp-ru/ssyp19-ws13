@@ -5,6 +5,9 @@ import os
 from ast import literal_eval
 
 
+# Review: Most of your comments should be docstrings.
+# We want to be better than pyswip authors.
+
 class PrologConnector:
 
     def __init__(self):
@@ -60,6 +63,7 @@ class PrologConnector:
         terms = []  # if need var(s)
         vars = []
         statements = []  # if need True or False
+        # Reviewed (2019-07-09 23:19): I want you to explain this.
         for pred, atoms in re.findall('([^\(\)\,\s]+|\S)(\([\w\d\,\ \[\]]+\))', instruction):  # find predirects
             names = re.findall('\[[\d\w\,]+\]|[\w\d]+', atoms)  # find names(vars|lists|strings|ints) in atoms
             items = []
@@ -75,7 +79,7 @@ class PrologConnector:
 
                 elif atom.isdigit():  # check for int
                     items.append(int(atom))
-
+                # Review: Why isn't this a regex? I thought you like them.
                 elif atom[0] == '[' and atom[-1] == ']':  # check for list
                     items.append(literal_eval(atom))
 
@@ -92,12 +96,15 @@ class PrologConnector:
 
     def make_req(self, command, maxresults=-1, solves=False):
         a = self.get_n_ans_new(command, maxresults=maxresults, solves=solves)
+        # Review: Don't you think this is ugly? 
+        # Use list unpacking instead.
         if a[0]:
             return a[0]
         else:
             for i in a[1].values():
                 return i
-
+    # Review: This function is unused and I like that.
+    # What was it meant to do?
     def assert_code(self, ins):
         for i in ins.split(','):
             self.prolog.assertz(i)

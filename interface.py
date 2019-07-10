@@ -6,7 +6,10 @@ import sys
 import geom as geometry
 import math
 from model import Model
+from correctingPoints import correctingPoints
 
+
+# Review: This class needs docstrings. A whole lot of docstrings.
 
 class MainWidget(QMainWindow):
     def __init__(self):
@@ -18,6 +21,7 @@ class MainWidget(QMainWindow):
         self.brushundertype = "point"
         self.flag = False
         self.brushColor = Qt.black
+        # Review: Oh.
         self.backgorundColor = Qt.white
         self.lastname = -1
         self.pointCoords = []
@@ -29,6 +33,7 @@ class MainWidget(QMainWindow):
         self.table = False
 
         self.initUI()
+        # Review: This line prevents me from closing the program.
         self.grabKeyboard()
 
     def newPoint(self, x, y):
@@ -41,6 +46,7 @@ class MainWidget(QMainWindow):
 
     def newCircle(self, a, radius):
         self.model.add_circle(a, radius)
+    # Review: Git exists to shield you from commented code.
     # def newSegment(self, segment):
     #     self.segments.append(segment)
     #     self.operations.append(segment)
@@ -68,6 +74,7 @@ class MainWidget(QMainWindow):
         self.messageSend("Brush Type is \"" + self.brushtype + "\"")
 
     def undertypeMessage(self):
+        #Review: Long lines suck.
         self.messageSend("Brush Type is \"" + self.brushtype + "\"" + " " * 10 + "Brush UnderType is \"" + self.brushundertype + "\"")
 
     def paintEvent(self, event):
@@ -83,6 +90,7 @@ class MainWidget(QMainWindow):
             circleX = circle.center.x
             circleY = circle.center.y
             distance = circle.radius
+            # Review: You should cache color objects
             alphaColor = QColor.fromRgbF(0, 0, 0, 0)
             paint.setBrush(alphaColor)
             paint.drawEllipse(float(circleX) - distance, float(circleY) - distance, float(distance) * 2, float(distance) * 2)
@@ -93,9 +101,12 @@ class MainWidget(QMainWindow):
         pass
 
     def drawingObjects(self, event):
+        # Review: 78 lines for one method is not as bad as 2500, but that code
+        # was not an example. I believe it should be four different methods.
         self.update()
         if self.brushtype == "point":
-            self.pointCoords = [event.x(), event.y()]
+            #self.pointCoords = [event.x(), event.y()]
+            eventPoint = correctingPoints(geometry.Point(event.x(), event.y()), self.model.segments, self.model.circles)
             self.newPoint(event.x(), event.y())
             #if self.brushundertype == "point":
             #    self.paint.drawEllipse(self.pointCoords[0], self.pointCoords[1], 2, 2)
@@ -225,12 +236,14 @@ class MainWidget(QMainWindow):
 
 
     def mouseMoveEvent(self, event):
+        # Review: Are you okay.
         self.update()
 
     def mousePressEvent(self, event):
+        # Review: Please be a good boy and remove these magic constants.
         if event.button() == 1:
             self.flag = True
-            #self.paint = QPainter(self.image)
+            # Review: WTF?! Why do you think we have paintEvent?
             self.drawingObjects(event)
         elif event.button() == 2 or event.button() == 3:
             self.update()
@@ -265,6 +278,8 @@ class MainWidget(QMainWindow):
         pass
 
     def initUI(self):
+        # Review: Two. Hundred. Freaking. Lines.
+        # It definitely should be multiple methods.
         self.setGeometry(400, 400, 700, 600)
         self.setWindowTitle("Prototype")
         self.show()
@@ -464,19 +479,21 @@ class MainWidget(QMainWindow):
         self.setBrushType("point", self.pointBrush)
         self.messageSend("Paint")
     @staticmethod
+    # Review: This belongs to the Model class.
     def correctingPoints(start, end, points):
         error = 4
         if points:
             for _, i in points.items():
                 #print(start.x, start.y, end.x, end.y, i.x, i.y)
+                # Review: Long lines still suck.
                 if ((start.x <= i.x + error) and (start.x >= i.x - error)) and ((start.y <= i.y + error) and (start.y >= i.y - error)):
                     start.x = i.x
                     start.y = i.y
                 if ((end.x <= i.x + error) and (end.x >= i.x - error)) and ((end.y <= i.y + error) and (end.y >= i.y - error)):
                     end.x = i.x
                     end.y = i.y
-            list = [start, end]
-            return list
+            # Review: Why do you need this object?
+            return [start, end]
 
 app = QApplication(sys.argv)
 interface = MainWidget()
