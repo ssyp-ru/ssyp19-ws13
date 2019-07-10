@@ -29,6 +29,7 @@ class MainWidget(QMainWindow):
         self.table = False
 
         self.initUI()
+        # Review: This line prevents me from closing the program.
         self.grabKeyboard()
 
     def newPoint(self, x, y):
@@ -41,15 +42,6 @@ class MainWidget(QMainWindow):
 
     def newCircle(self, a, radius):
         self.model.add_circle(a, radius)
-    # def newSegment(self, segment):
-    #     self.segments.append(segment)
-    #     self.operations.append(segment)
-    #     self.segmentsValue += 1
-    #
-    # def newCircle(self, circle):
-    #     self.circles.append(circle)
-    #     self.circles.append(circle)
-    #     self.circlesValue += 1
 
 
     def newBrush(self, brush):
@@ -68,6 +60,7 @@ class MainWidget(QMainWindow):
         self.messageSend("Brush Type is \"" + self.brushtype + "\"")
 
     def undertypeMessage(self):
+        #Review: Long lines suck.
         self.messageSend("Brush Type is \"" + self.brushtype + "\"" + " " * 10 + "Brush UnderType is \"" + self.brushundertype + "\"")
 
     def paintEvent(self, event):
@@ -75,6 +68,7 @@ class MainWidget(QMainWindow):
         paint.setBrush(QColor("black"))
         paint.setPen(QPen(Qt.black, 3))
         paint.setFont(QFont("Decorative", 10))
+        # Review: Doesn't this method duplicate drawingObjects()?
         for _, point in self.model.points.items():
             paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
         for _, segment in self.model.segments.items():
@@ -83,6 +77,7 @@ class MainWidget(QMainWindow):
             circleX = circle.center.x
             circleY = circle.center.y
             distance = circle.radius
+            # Review: You should cache color objects
             alphaColor = QColor.fromRgbF(0, 0, 0, 0)
             paint.setBrush(alphaColor)
             paint.drawEllipse(float(circleX) - distance, float(circleY) - distance, float(distance) * 2, float(distance) * 2)
@@ -93,14 +88,12 @@ class MainWidget(QMainWindow):
         pass
 
     def drawingObjects(self, event):
+        # Review: 78 lines for one method is not as bad as 2500, but that code
+        # was not an example. I believe it should be four different methods.
         self.update()
         if self.brushtype == "point":
             self.pointCoords = [event.x(), event.y()]
             self.newPoint(event.x(), event.y())
-            #if self.brushundertype == "point":
-            #    self.paint.drawEllipse(self.pointCoords[0], self.pointCoords[1], 2, 2)
-            #elif self.brushundertype == "pointinobject":
-            #    self.pointDrawing()
             self.update()
             self.messageSend("Point succesfully placed")
 
@@ -128,8 +121,6 @@ class MainWidget(QMainWindow):
                         self.newPoint(point1.x, point1.y)
                         self.newPoint(point2.x, point2.y)
                         self.newSegment(newSegment.point1, newSegment.point2)
-                        #paint.drawEllipse(QPoint(pointCoords[0], pointCoords[1]), 2, 2)
-                        #paint.drawEllipse(QPoint(self.pointCoords[0], self.pointCoords[1]), 2, 2)
                         self.messageSend("Segment With Points succesfully placed")
                     self.update()
                     self.pointCoords = []
@@ -141,9 +132,6 @@ class MainWidget(QMainWindow):
                 pointCoords = self.pointCoords
                 self.pointCoords = [event.x(), event.y()]
 
-                #print(pointCoords)
-                #print(self.pointCoords)
-
                 center = geometry.Point(pointCoords[0], pointCoords[1])
                 list = self.correctingPoints(center, geometry.Point(self.pointCoords[0], self.pointCoords[1]), self.model.points)
                 if list:
@@ -153,23 +141,16 @@ class MainWidget(QMainWindow):
                     radius = center.distToPoint(geometry.Point(self.pointCoords[0], self.pointCoords[1]))
 
                 alphaColor = QColor.fromRgbF(0, 0, 0, 0)
-                #self.paint.setBrush(alphaColor)
 
                 if self.brushundertype == "radius":
-                    #self.paint.drawEllipse(pointCoords[0] - radius, pointCoords[1] - radius, radius*2, radius*2)
                     self.newCircle(center, radius)
                     self.messageSend("Circle succesfully placed")
-                
-                #self.paint.setBrush(QColor("black"))
 
                 self.update()
                 self.pointCoords = []
         self.update()
 
     def createText(self, event, text):
-        #self.paint.setPen(QColor(53, 8, 65))
-        #self.paint.setFont(QFont("Decorative", 10))
-        #self.paint.drawText(event.rect(), Qt.AlignCenter, text)
         pass
 
     def setBrushType(self, typeOfBrush, brushObject):
@@ -204,14 +185,11 @@ class MainWidget(QMainWindow):
             undertype.setChecked(False)
         underTypeObject.setChecked(True)
 
-    def zoom(self, zoomType):
-        if zoomType == "-10":
-            if zoomType > 10:
-                self.zoomValue -= 10
-        elif zoomType == "+10":
-            self.zoomValue += 10
-        elif zoomType == "100":
+    def zoom(self, value):
+        if value == 0:
             self.zoomValue = 100
+        elif self.zoomValue < abs(value) and value < 0 or value > 0:
+            self.zoomValue += value
 
 
     def back(self):
@@ -228,9 +206,10 @@ class MainWidget(QMainWindow):
         self.update()
 
     def mousePressEvent(self, event):
+        # Review: Please be a good boy and remove these magic constants.
         if event.button() == 1:
             self.flag = True
-            #self.paint = QPainter(self.image)
+            # Review: WTF?! Why do you think we have paintEvent?
             self.drawingObjects(event)
         elif event.button() == 2 or event.button() == 3:
             self.update()
@@ -246,9 +225,6 @@ class MainWidget(QMainWindow):
         self.move(qr.topLeft())
 
     def clear(self):
-        #self.painter.setBackground(self.backgorundColor)
-        #self.painter.fillRect(0, 24, 700, 600, self.backgorundColor)
-        #self.showMessage("Clear succesfully")
         pass
 
     def reference(self):
@@ -265,6 +241,8 @@ class MainWidget(QMainWindow):
         pass
 
     def initUI(self):
+        # Review: Two. Hundred. Freaking. Lines.
+        # It definitely should be multiple methods.
         self.setGeometry(400, 400, 700, 600)
         self.setWindowTitle("Prototype")
         self.show()
@@ -280,7 +258,6 @@ class MainWidget(QMainWindow):
         self.newFileAct.setShortcut("Ctrl+N")
         self.newFileAct.setStatusTip("Creating New File")
         self.newFileAct.setToolTip("Creating <b>New</b> File")
-        #self.newFileAct.triggered.connect(self.clear)
 
         self.quitAct = QAction("&Quit", self)
         self.quitAct.setShortcut("Ctrl+Q")
@@ -387,15 +364,15 @@ class MainWidget(QMainWindow):
 
         self.zoomMinusCommand = QAction("&Zoom - 10%", self)
         self.zoomMinusCommand.setShortcut("Alt+Left")
-        self.zoomMinusCommand.triggered.connect(lambda event: self.zoom(zoomType="-10"))
+        self.zoomMinusCommand.triggered.connect(lambda event: self.zoom(-10))
 
         self.zoomPlusCommand = QAction("&Zoom + 10%", self)
         self.zoomPlusCommand.setShortcut("Alt+Right")
-        self.zoomPlusCommand.triggered.connect(lambda event: self.zoom(zoomType="+10"))
+        self.zoomPlusCommand.triggered.connect(lambda event: self.zoom(10))
 
         self.zoomReturnCommand = QAction("&Zoom 100%", self)
         self.zoomReturnCommand.setShortcut("Alt+Up")
-        self.zoomReturnCommand.triggered.connect(lambda event: self.zoom(zoomType="100"))
+        self.zoomReturnCommand.triggered.connect(lambda event: self.zoom(0))
 
 
         self.referenceCommand = QAction("&Reference", self)
@@ -464,19 +441,19 @@ class MainWidget(QMainWindow):
         self.setBrushType("point", self.pointBrush)
         self.messageSend("Paint")
     @staticmethod
+    # Review: This belongs to the Model class.
     def correctingPoints(start, end, points):
         error = 4
         if points:
             for _, i in points.items():
-                #print(start.x, start.y, end.x, end.y, i.x, i.y)
-                if ((start.x <= i.x + error) and (start.x >= i.x - error)) and ((start.y <= i.y + error) and (start.y >= i.y - error)):
+                # Review: Long lines still suck.
+                if start.x <= i.x + error and start.x >= i.x - error and start.y <= i.y + error and start.y >= i.y - error:
                     start.x = i.x
                     start.y = i.y
-                if ((end.x <= i.x + error) and (end.x >= i.x - error)) and ((end.y <= i.y + error) and (end.y >= i.y - error)):
+                if end.x <= i.x + error and end.x >= i.x - error and end.y <= i.y + error and end.y >= i.y - error:
                     end.x = i.x
                     end.y = i.y
-            list = [start, end]
-            return list
+            return start, end
 
 app = QApplication(sys.argv)
 interface = MainWidget()
