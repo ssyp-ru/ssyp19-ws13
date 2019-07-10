@@ -1,6 +1,8 @@
 from Translator import Translator
 from geom import *
+from string import ascii_uppercase as dictionary
 
+# Review: I thought you like type hints.
 
 class Model:
 
@@ -10,16 +12,17 @@ class Model:
         self.circles = {}
         self.operations = []
 
-    def add_point(self, x, y):
+    def add_point(self, x: float, y: float):
         self.points[self.generate_name(Point)] = Point(x, y)
 
-    def add_segment(self, a, b):  # FIXME: watch this if strange results!
+    # Review: What the hell does that fixme mean?
+    def add_segment(self, a: Point, b: Point):
         self.segments[self.generate_name(Segment)] = Segment(a, b)
 
-    def add_circle(self, a, radius):
+    def add_circle(self, a: Point, radius: float):
         self.circles[self.generate_name(Circle)] = Circle(a, radius)
 
-    def generate_name(self, type):
+    def generate_name(self, type: type):
         if type is Circle:
             return self.generate_name_by_number(len(self.circles))
         elif type is Segment:
@@ -28,9 +31,9 @@ class Model:
             return self.generate_name_by_number(len(self.points))
 
     @staticmethod
-    def generate_name_by_number(num):
-        dictionary = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
-                      "T", "U", "V", "W", "X", "Y", "Z"]
+    # Review: Why should it be static? 
+    def generate_name_by_number(num: int) -> str:
+        # Review: This list is called strings.ascii_uppercase
         if num <= 25:
             return dictionary[num]
         else:
