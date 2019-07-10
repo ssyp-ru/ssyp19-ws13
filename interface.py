@@ -72,28 +72,27 @@ class MainWidget(QMainWindow):
 
     def paintEvent(self, event):
         paint = QPainter(self)
-        paint.drawImage(0,0, self.image)
+        paint.setBrush(QColor("black"))
+        paint.setPen(QPen(Qt.black, 3))
+        paint.setFont(QFont("Decorative", 10))
         for _, point in self.model.points.items():
-            self.paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
+            paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
         for _, segment in self.model.segments.items():
-            self.paint.drawLine(QPoint(segment.point1.x, segment.point1.y), QPoint(segment.point2.x, segment.point2.y))
+            paint.drawLine(QPoint(segment.point1.x, segment.point1.y), QPoint(segment.point2.x, segment.point2.y))
         for _, circle in self.model.circles.items():
             circleX = circle.center.x
             circleY = circle.center.y
             distance = circle.radius
             alphaColor = QColor.fromRgbF(0, 0, 0, 0)
-            self.paint.setBrush(alphaColor)
-            self.paint.drawEllipse(float(circleX) - distance, float(circleY) - distance, float(distance) * 2, float(distance) * 2)
-            self.paint.setBrush(QColor("black"))
+            paint.setBrush(alphaColor)
+            paint.drawEllipse(float(circleX) - distance, float(circleY) - distance, float(distance) * 2, float(distance) * 2)
+            paint.setBrush(QColor("black"))
         self.update()
 
     def pointDrawing(self, event):
         pass
 
     def drawingObjects(self, event):
-        self.paint.setBrush(QColor("black"))
-        self.paint.setPen(QPen(Qt.black, 3))
-        self.paint.setFont(QFont("Decorative", 10))
         self.update()
         if self.brushtype == "point":
             self.pointCoords = [event.x(), event.y()]
