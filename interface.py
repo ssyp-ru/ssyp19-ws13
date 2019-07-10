@@ -97,10 +97,10 @@ class MainWidget(QMainWindow):
         if self.brushtype == "point":
             self.pointCoords = [event.x(), event.y()]
             self.newPoint(event.x(), event.y())
-            if self.brushundertype == "point":
-                self.paint.drawEllipse(self.pointCoords[0], self.pointCoords[1], 2, 2)
-            elif self.brushundertype == "pointinobject":
-                self.pointDrawing()
+            #if self.brushundertype == "point":
+            #    self.paint.drawEllipse(self.pointCoords[0], self.pointCoords[1], 2, 2)
+            #elif self.brushundertype == "pointinobject":
+            #    self.pointDrawing()
             self.update()
             self.messageSend("Point succesfully placed")
 
@@ -128,8 +128,8 @@ class MainWidget(QMainWindow):
                         self.newPoint(point1.x, point1.y)
                         self.newPoint(point2.x, point2.y)
                         self.newSegment(newSegment.point1, newSegment.point2)
-                        self.paint.drawEllipse(QPoint(pointCoords[0], pointCoords[1]), 2, 2)
-                        self.paint.drawEllipse(QPoint(self.pointCoords[0], self.pointCoords[1]), 2, 2)
+                        #paint.drawEllipse(QPoint(pointCoords[0], pointCoords[1]), 2, 2)
+                        #paint.drawEllipse(QPoint(self.pointCoords[0], self.pointCoords[1]), 2, 2)
                         self.messageSend("Segment With Points succesfully placed")
                     self.update()
                     self.pointCoords = []
@@ -153,23 +153,24 @@ class MainWidget(QMainWindow):
                     radius = center.distToPoint(geometry.Point(self.pointCoords[0], self.pointCoords[1]))
 
                 alphaColor = QColor.fromRgbF(0, 0, 0, 0)
-                self.paint.setBrush(alphaColor)
+                #self.paint.setBrush(alphaColor)
 
                 if self.brushundertype == "radius":
                     #self.paint.drawEllipse(pointCoords[0] - radius, pointCoords[1] - radius, radius*2, radius*2)
                     self.newCircle(center, radius)
                     self.messageSend("Circle succesfully placed")
                 
-                self.paint.setBrush(QColor("black"))
+                #self.paint.setBrush(QColor("black"))
 
                 self.update()
                 self.pointCoords = []
         self.update()
 
     def createText(self, event, text):
-        self.paint.setPen(QColor(53, 8, 65))
-        self.paint.setFont(QFont("Decorative", 10))
-        self.paint.drawText(event.rect(), Qt.AlignCenter, text)
+        #self.paint.setPen(QColor(53, 8, 65))
+        #self.paint.setFont(QFont("Decorative", 10))
+        #self.paint.drawText(event.rect(), Qt.AlignCenter, text)
+        pass
 
     def setBrushType(self, typeOfBrush, brushObject):
         self.pointCoords = []
@@ -229,7 +230,7 @@ class MainWidget(QMainWindow):
     def mousePressEvent(self, event):
         if event.button() == 1:
             self.flag = True
-            self.paint = QPainter(self.image)
+            #self.paint = QPainter(self.image)
             self.drawingObjects(event)
         elif event.button() == 2 or event.button() == 3:
             self.update()
