@@ -24,7 +24,6 @@ class Circle:
     def __init__(self, point, radius):
         self.center = point
         self.radius = radius
-        print("DEBUG>>", self.center, self.radius, type(self.center))
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
