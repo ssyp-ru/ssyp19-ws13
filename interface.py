@@ -156,6 +156,9 @@ class MainWidget(QMainWindow):
     def drawingObjects(self, event):
         # Review: 78 lines for one method is not as bad as 2500, but that code
         # was not an example. I believe it should be four different methods.
+        self.paint.setBrush(QColor("black"))
+        self.paint.setPen(QPen(Qt.black, 2))
+        self.paint.setFont(QFont("Decorative", 10))
         self.update()
         if self.brushtype == "point":
             if self.brushundertype == "point":
@@ -284,6 +287,7 @@ class MainWidget(QMainWindow):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.flag = True
+            self.paint = QPainter(self.image)
             self.drawingObjects(event)
         elif event.button() == Qt.RightButton:
             self.update()

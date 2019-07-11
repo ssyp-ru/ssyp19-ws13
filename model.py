@@ -69,5 +69,5 @@ class Model:
 
     def correcting_online_points(self, point: Point) -> Point:
         for segment in self.segments.values():
-            if segment.isPointBelongs(Point, self.error):
+            if segment.pointBelongs(Point, self.error):
                 return point + point.asd(segment)
