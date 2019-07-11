@@ -25,7 +25,6 @@ class Circle:
     def __init__(self, point, radius):
         self.center = point
         self.radius = radius
-        print("DEBUG>>", self.center, self.radius, type(self.center))
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
@@ -37,10 +36,8 @@ class Segment():
     def intersection(self, segment):
         Mline = Line(self.point1, self.point2)
         interpoint = Mline.intersection(Line(segment.point1, segment.point2))
-        if ((interpoint != False) and self.pointBelongs(interpoint) and segment.pointBelongs(interpoint)):
+        if interpoint and self.pointBelongs(interpoint) and segment.pointBelongs(interpoint):
             return interpoint
-        else:
-            return
 
     def __init__(self, point1, point2):
         self.point1 = point1
@@ -67,9 +64,7 @@ class Line():
 
     def intersection(self, line):
         Avector = Vector(self.A, line.B)
-        if (Avector.crossProduct(Vector(self.B, line.A)) == 0):
-            return False
-        else:
+        if not (Avector.crossProduct(Vector(self.B, line.A)) == 0):
             denom = ((self.A * line.B) - (self.B * line.A))
             Fnumerator = ((self.C * line.B) - (self.B * line.C))
             Snumerator = (self.A * line.C) - (self.C * line.A)
@@ -86,6 +81,7 @@ class Line():
             Nvector = Vector(self.A, self.B)
             self.C = Nvector.dotproduct(Vector(point1.x, point1.y))
             self.normalize()
+
     def __str__(self):
         return "%0.4f x + %0.4f y + %0.4f = 0" % (self.A, self.B, self.C)
 
@@ -109,6 +105,7 @@ class Vector:
 
     def crossProduct(self, vector):
         return (self.x * vector.y) - (vector.x * self.y)
+
     def length(self, point):
         return point.distToPoint(Point(0, 0))
     def __init__(self, x, y):
@@ -162,7 +159,7 @@ class Point(Vector):
     def distToLine(self, line):
         inclined = Vector(line.point1.x - self.x, line.point1.y - self.y)
         cross = inclined.crossProduct(Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y))
-        return abs(cross  / Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y)).length
+        return abs(cross / Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y)).length
 
     def distToSegment(self, segment):
         inclined = Vector(self.x - segment.point1.x, self.y - segment.point1.y)

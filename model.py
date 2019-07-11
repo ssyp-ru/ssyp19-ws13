@@ -2,7 +2,6 @@ from Translator import Translator
 from geom import *
 from string import ascii_uppercase as dictionary
 
-# Review: I thought you like type hints.
 
 class Model:
 
