@@ -17,13 +17,15 @@ class Model:
     def add_point(self, x: float, y: float):
         name = self.generate_name(Point)
         self.translator.connector.assert_code(f'point({name})')
-        self.points[name] = Point(x, y, name)
+        p = Point(x, y, name)
+        self.points[name] = p
+        return p
 
     def add_segment(self, a: Point, b: Point):
         name = self.generate_name(Segment)
         new_segment = Segment(a, b)
-        for segment in self.segments:
-            if segment == new_segment:
+        for segment in self.segments.values():
+            if segment.length == new_segment.length:
                 self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
                                                       f' {segment.point2.name}),'
                                                       f' segment({new_segment.point1.name},'
@@ -57,7 +59,7 @@ class Model:
                     start = i
                 if -self.error <= end - i <= self.error:
                     end = i
-            return start, end
+        return start, end
 
     @staticmethod
     def correcting_points_warning(point, segments, circles):
