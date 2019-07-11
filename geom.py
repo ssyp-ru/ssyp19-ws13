@@ -153,9 +153,6 @@ class Vector:
     def crossProduct(self, vector):
         return (self.x * vector.y) - (vector.x * self.y)
 
-    def length(self, point):
-        return point.distToPoint(Point(0, 0))
-
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -177,6 +174,9 @@ class Vector:
 
     def __str__(self):
         return f"({self.x}, {self.y})"
+
+    def __abs__(self):
+        return math.hypot(self.x, self.y)
 
     def __le__(self, other):
         if isinstance(other, Point) or isinstance(other, Vector):
@@ -208,9 +208,7 @@ class Point(Vector):
         self.name = name
 
     def isInCircle(self, circleslist):
-        for i in circleslist.values():
-            if (self.distToPoint(i.center) < i.radius):
-                pass
+        pass
                 # translator.connector.call(...)
                 # Here i need Vsevolod's code for request in prolog
 
@@ -229,9 +227,8 @@ class Point(Vector):
         if segment.pointBelongs(projectPoint):
             return projectPoint
         return
-
-    def distToPoint(self, point):
-        return (self - point).length
+    def distToPoint(self, other):
+        return abs(self-other)
 
     def distToLine(self, line):
         inclined = Vector(line.point1.x - self.x, line.point1.y - self.y)
@@ -242,7 +239,7 @@ class Point(Vector):
         inclined = Vector(self.x - segment.point1.x, self.y - segment.point1.y)
         if (inclined.dotproduct(segment.point2 - segment.point1)) < 0:
             return (min(self.distToPoint(segment.point1),
-                    self.distToPoint(segment.point2)))
+                        self.distToPoint(segment.point2)))
         else:
             return self.distToLine(segment)
 
@@ -251,7 +248,6 @@ class Point(Vector):
             return Point(self.x + other.x, self.y + other.y)
         else:
             return Point(self.x + other, self.y + other)
-
     def __truediv__(self, other):
         return Point(self.x / other, self.y / other)
 

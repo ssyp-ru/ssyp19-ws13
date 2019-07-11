@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         self.flag = False
         self.pointBrushColor = QColor(255, 0, 0)
         self.segmentBrushColor = Qt.black
-        self.backgorundColor = Qt.white
+        self.backgroundColor = Qt.white
         self.lastname = -1
         self.pointCoords = []
         self.fieldWidth = 700
@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
     def paintEvent(self, event):
         paint = QPainter(self)
         paint.drawImage(0,0, self.image)
-        paint.setBrush(QBrush(self.backgorundColor))
+        paint.setBrush(QBrush(self.backgroundColor))
         paint.drawRect(-20, 20, self.fieldWidth+30, self.fieldHeight+30)
         paint.setBrush(self.pointBrushColor)
         paint.setPen(QPen(self.segmentBrushColor, 2))
@@ -155,7 +155,9 @@ class MainWindow(QMainWindow):
             if self.brushundertype == "point":
                 self.pointDrawing(event.x(), event.y())
             elif self.brushundertype == "pointinobject":
-                point = self.model.correctingPoints(geometry.Point(event.x(), event.y()), self.model.segments, self.model.circles)
+                point = self.model.correctingPoints(geometry.Point(event.x(), event.y()),\
+                                                    self.model.segments,
+                                                    self.model.circles)
                 self.pointInObjectDrawing(point.x, point.y)
             self.update()
 
@@ -274,6 +276,12 @@ class MainWindow(QMainWindow):
     def reset(self):
         self.pointCoords = []
 
+    def prove(self):
+        solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
+        for solution in solutions:
+            print(solution)
+            print(f"{solution['X']} == {solution['Y']}")
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.flag = True
@@ -282,7 +290,8 @@ class MainWindow(QMainWindow):
             self.update()
 
     def keyReleaseEvent(self, event):
-        if event.key() == Qt.Key_A or event.key() == Qt.Key_AsciiTilde or event.key() == Qt.Key_Dead_Tilde:
+        print(event.key())
+        if event.key() == Qt.Key_QuoteLeft:
             self.console.show()
 
 
@@ -299,7 +308,7 @@ class MainWindow(QMainWindow):
     def clear(self):
         self.model.reset_prolog()
         self.paint = QPainter(self.image)
-        self.paint.setBrush(QBrush(self.backgorundColor))
+        self.paint.setBrush(QBrush(self.backgroundColor))
         for point in list(self.model.points.keys()):
             del(self.model.points[point])
         for segment in list(self.model.segments.keys()):
@@ -317,7 +326,7 @@ class MainWindow(QMainWindow):
     def backgroundColorSelect(self):
         color = QColorDialog.getColor()
         if color.isValid():
-            self.backgorundColor = color
+            self.backgroundColor = color
 
     def foregroundPointColorSelect(self):
         color = QColorDialog.getColor()
@@ -416,6 +425,13 @@ class MainWindow(QMainWindow):
         self.resetCommand.setToolTip("<b>Reset</b> point")
         self.resetCommand.triggered.connect(self.reset)
 
+        self.proveCommand = QAction("&Prove", self)
+        self.proveCommand.setShortcut("Ctrl+P")
+        self.proveCommand.setStatusTip("Proved")
+        self.proveCommand.setToolTip("<b>Prove</b>")
+        self.proveCommand.triggered.connect(self.prove)
+
+
     def viewActionsCreating(self):
         self.backgroundColorCommand = QAction("&Background", self)
         self.backgroundColorCommand.setShortcut("Alt+B")
@@ -469,6 +485,7 @@ class MainWindow(QMainWindow):
         self.editMenu.addAction(self.backCommand)
         self.editMenu.addAction(self.forwardCommand)
         self.editMenu.addAction(self.resetCommand)
+        self.editMenu.addAction(self.proveCommand)
 
         self.viewMenu = self.menubar.addMenu("&View")
         self.foregroundMenu = QMenu("&Foreground", self)
@@ -499,6 +516,7 @@ class MainWindow(QMainWindow):
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.quitAct)
         self.toolbar.addSeparator()
+        self.toolbar.addAction(self.proveCommand)
 
     def initUI(self):
         self.setFixedSize(self.fieldWidth, self.fieldHeight)
@@ -533,16 +551,20 @@ class Console(QTextEdit):
         self.resize(600, 300)
         self.setAlignment(Qt.AlignTop)
         self.setWindowTitle('Console')
-        self.setFont(QFont('SansSerif', 10))
+        self.setFont(QFont('Hack', 14))
         self.model = model
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Return:
-            s = self.toPlainText() + '\n'
+            s = self.toPlainText()
             try:
-                s += str(self.model.translator.connector.get_n_ans_new(s)) + '\n'
+                query = s.rsplit('\n', maxsplit=1)[-1]
+                s += '\n'
+                answer = self.model.translator.connector.prolog.query(query)
+                for sol in answer:
+                    s += '; '.join(list(map(str, sol.values()))) + '\n'
             except Exception as f:
-                s += f + '\n'
+                s += str(f) + '\n'
             finally:
                 self.setText(s)
                 self.moveCursor(QTextCursor.End)

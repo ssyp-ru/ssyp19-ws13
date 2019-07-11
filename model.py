@@ -21,13 +21,20 @@ class Model:
         self.points[name] = p
         for segment in self.segments.values():
             if segment.pointBelongs(p):
-                self.translator.connector.prolog.assertz(f'laysBetween({segment.point1.name},{segment.point2.name},{name})')
-                print(self.translator.connector.get_n_ans_new(f'isCongruent({segment.point1.name},{segment.point2.name})'))
+                self.translator.connector.prolog.assertz(\
+                    f'laysBetween({segment.point1.name}, {segment.point2.name}, {name})')
+                print(self.translator.connector.get_n_ans_new(\
+                    f'isCongruent({segment.point1.name}, {segment.point2.name})'))
         return p
 
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
-        self.segments[a.name+b.name] = new_segment
+        for segment in self.segments.values():
+            if -100 < segment.length - new_segment.length < 100:
+                segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
+                segment2 = f'segment({new_segment.point1.name}, {new_segment.point2.name})'
+                self.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
+        self.segments[a.name + b.name] = new_segment
         return new_segment
 
     def add_circle(self, segment: Segment):
@@ -53,18 +60,16 @@ class Model:
                     end = i
         return start, end
 
-    @staticmethod
-    def correctingPoints(point, segments, circles):
+    def correctingPoints(self, point, segments, circles):
         error = 8
-        for i in circles.values():
-            list = i.intersectionLine(Line(i.center, point))
-            if not list:
-                return point
-            for j in list:
-                condition = -error <= point - j <= error
-                if condition:
-                    point.x = j.x
-                    point.y = j.y
+
+        for circle in circles.values():
+            radial = point-circle.center
+            if (abs(radial)-circle.radius) < error:
+                unit = radial/abs(radial)
+                point = circle.center + unit*circle.radius
+                point.parent1 = circle
+            return point
         for i in segments.values():
             if point.distToSegment(i) < error:
                 return point.projectionOnSegment(i)
