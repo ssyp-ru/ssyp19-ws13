@@ -12,7 +12,7 @@ class Model:
         self.circles = {}
         self.operations = []
         self.alloperations = []
-        self.error = 10
+        self.error = 8
 
     def add_point(self, x: float, y: float):
         name = self.generate_name()
@@ -42,12 +42,27 @@ class Model:
     def correcting_points(self, start: Point, end: Point) -> Point and Point:
         if self.points:
             for i in self.points.values():
-                # Review: Long lines still suck.
                 if -self.error <= start - i <= self.error:
                     start = i
                 if -self.error <= end - i <= self.error:
                     end = i
         return start, end
+
+    def correctingPoints(point, segments, circles):
+        error = 8
+        for _, i in circles.items():
+            list = i.intersectionLine(geometry.Line(i.center, point))
+            if not list:
+                return point
+            for j in list:
+                condition = -error <= point - j <= error
+                if condition:
+                    point.x = j.x
+                    point.y = j.y
+        for _, i in segments.items():
+            if point.distToSegment(i) < error:
+                return point.projectionOnSegment(i)
+        return point
 
     def check_segment(self, point1, point2):
         names = (point1.name + point2.name, point2.name + point1.name)

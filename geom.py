@@ -11,38 +11,67 @@ class Circle:
 
     def intersectionLine(self, line):
         # line.normalVector()
-        C = line.C + line.A * self.center.x + line.B * self.center.y
+        C = line.C + (line.A * self.center.x) + (line.B * self.center.y)
         Acoefficient = line.B * line.B + line.A * line.A
         Bcoefficient = 2 * line.A * C
         Ccoefficient = C * C - line.B * line.B * self.radius * self.radius
         Discriminant = Bcoefficient * Bcoefficient - (4 * Acoefficient * Ccoefficient)
         if Discriminant < 0:
             return
-        y1 = (-Bcoefficient - math.sqrt(Discriminant)) / (2 * Acoefficient)
-        y2 = (-Bcoefficient + math.sqrt(Discriminant)) / (2 * Acoefficient)
-        x1 = (-C - y1 * line.B) / line.A
-        x2 = (-C - y2 * line.B) / line.A
-        return [Point(x1 + self.center.x, y1 + self.center.y), Point(x2 + self.center.x, y2 + self.center.y)]
+        x1 = (-Bcoefficient + math.sqrt(Discriminant)) / (2 * Acoefficient)
+        x2 = (-Bcoefficient - math.sqrt(Discriminant)) / (2 * Acoefficient)
+        y1 = (-C - x1 * line.A) / line.B
+        y2 = (-C - x2 * line.A) / line.B
+        return [Point(x1 + self.center.x, y1 + self.center.y),
+                Point(x2 + self.center.x, y2 + self.center.y)]
 
-    def __init__(self, segment):
-        self.center = segment.point1
-        self.radius = segment.length
-        self.point = segment.point2
-        self.segment = segment
+    def __init__(self, *args):
+        if isinstance(args[0], Segment):
+            segment = args[0]
+            self.center = segment.point1
+            self.radius = segment.length
+            self.point = segment.point2
+        else:
+            if isinstance(args[0], Point):
+                a, b, c, *_ = args
+            Bshifted = b - a
+            Cshifted = c - a
+            BshiftedSqwX = Bshifted.x * Bshifted.x
+            BshiftedSqwY = Bshifted.y * Bshifted.y
+            CshiftedSqwX = Cshifted.x * Cshifted.x
+            CshiftedSqwY = Cshifted.y * Cshifted.y
+            Denom = 2 * Bshifted.crossProduct(Cshifted)
+            FHalfNumerator = (BshiftedSqwX + BshiftedSqwY) * Cshifted.y
+            SHalfNumerator = (CshiftedSqwX + CshiftedSqwY) * Bshifted.y
+            DesiredX = a.x + (FHalfNumerator - SHalfNumerator) / Denom
+            FHalfNumerator = Bshifted.x * (BshiftedSqwX + BshiftedSqwY)
+            SHalfNumerator = Cshifted.x * (CshiftedSqwX + CshiftedSqwY)
+            DesiredY = a.y + (FHalfNumerator - SHalfNumerator) / Denom
+            self.center = Point(DesiredX, DesiredY)
+            self.radius = self.center.distToPoint(a)
+            self.point = a
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
+        # I don't know how to do this less
+
 
 class Segment():
 
     def pointBelongs(self, point):
-        return point.distToPoint(self.point1) + point.distToPoint(self.point2) <= self.point1.distToPoint(self.point2) + 1
+        summ = point.distToPoint(self.point1) + point.distToPoint(self.point2)
+        return summ <= self.point1.distToPoint(self.point2) + 1
 
     def intersection(self, segment):
         Mline = Line(self.point1, self.point2)
         interpoint = Mline.intersection(Line(segment.point1, segment.point2))
-        if interpoint and self.pointBelongs(interpoint) and segment.pointBelongs(interpoint):
-            return interpoint
+        if interpoint:
+            Fcondition = self.pointBelongs(interpoint)
+            Scondition = segment.pointBelongs(interpoint)
+            if Fcondition and Scondition:
+                return interpoint
+        else:
+            return
 
     def __init__(self, point1, point2):
         self.point1 = point1
@@ -69,10 +98,17 @@ class Line():
 
     def pointBelongs(self, point):
         ABvector = Vector(self.point2.x - self.point1.x,
-                                self.point2.y - self.point1.y)
+                          self.point2.y - self.point1.y)
         ACvector = Vector(point.x - self.point1.y,
-                            point.y - self.point1.y)
+                          point.y - self.point1.y)
         return ABvector.crossProduct(ACvector) == 0
+
+    def intersectionSegment(self, segment):
+        interpoint = self.intersection(Line(segment.point1, segment.point2))
+        if interpoint:
+            if segment.pointBelongs(interpoint):
+                return interpoint
+        return
 
     def intersection(self, line):
         Avector = Vector(self.A, line.B)
@@ -80,7 +116,7 @@ class Line():
             denom = ((self.A * line.B) - (self.B * line.A))
             Fnumerator = ((self.C * line.B) - (self.B * line.C))
             Snumerator = (self.A * line.C) - (self.C * line.A)
-            return Point( Fnumerator / denom, Snumerator / denom)
+            return Point(Fnumerator / denom, Snumerator / denom)
 
     def __init__(self, point1, point2):
         if ((point1.x == point2.x) and (point1.y == point2.y)):
@@ -97,20 +133,19 @@ class Line():
     def __str__(self):
         return "%0.4f x + %0.4f y + %0.4f = 0" % (self.A, self.B, self.C)
 
+
 class Vector:
     def dotproduct(self, vector):
         return (self.x * vector.x) + (self.y * vector.y)
 
     def angle(self, vector):
         multiplied = self.dotproduct(vector)
-        return math.degrees(math.acos(multiplied / (self.length * vector.length)))
+        lengthsqw = self.length * vector.length
+        return math.degrees(math.acos(multiplied / lengthsqw))
 
     def projection(self, vector):
         Nvector = self.singleDirectedVector()
-        return Nvector.__productVecByNum__(Nvector.dotproduct(vector))
-
-    def __productVecByNum__(self, num):
-        return Vector(self.x * num, self.y * num)
+        return Nvector * (Nvector.dotproduct(vector))
 
     def unitDirectedVector(self):
         return Vector((self.x / self.length), (self.y / self.length))
@@ -125,6 +160,12 @@ class Vector:
         self.x = x
         self.y = y
         self.length = math.hypot(x, y)
+
+    def __mul__(self, other: float):
+        return Vector(self.x * other, self.y * other)
+
+    def __truediv__(self, other: float):
+        return Vector(self.x / float, self.y / float)
 
     def __sub__(self, other):
         if isinstance(other, Point):
@@ -162,31 +203,88 @@ class Vector:
 
 class Point(Vector):
 
+    def __init__(self, x, y, name=None):
+        super().__init__(x, y)
+        self.name = name
+
     def isInCircle(self, circleslist):
-        for i in circleslist:
-            if (self.distToPoint(circleslist[i].center) < circleslist[i].radius):
+        for i in circleslist.values():
+            if (self.distToPoint(i.center) < i.radius):
                 pass
-                #translator.connector.call(...)
-                #Here i need Vsevolod's code for request in prolog
+                # translator.connector.call(...)
+                # Here i need Vsevolod's code for request in prolog
+
+    def projectionOnLine(self, line):
+        PminusQ = line.point1 - line.point2  # Shifting coordinate system to
+        OminusQ = self - line.point2  # line.point2
+        dotProduct = PminusQ.dotproduct(OminusQ)
+        lengthSqw = PminusQ.length * PminusQ.length
+        desiredVector = ((PminusQ / lengthSqw) * dotProduct)
+        desiredPoint = Point(desiredVector.x, desiredVector.y)
+        return line.point2 + desiredPoint
+
+    def projectionOnSegment(self, segment):
+        segmentLine = Line(segment.point1, segment.point2)
+        projectPoint = self.projectionOnLine(segmentLine)
+        if segment.pointBelongs(projectPoint):
+            return projectPoint
+        return
 
     def distToPoint(self, point):
         return (self - point).length
 
     def distToLine(self, line):
         inclined = Vector(line.point1.x - self.x, line.point1.y - self.y)
-        cross = inclined.crossProduct(Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y))
-        return abs(cross / Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y)).length
+        cross = inclined.crossProduct(line.point2 - line.point1)
+        return abs(cross / (line.point2 - line.point1).length)
 
     def distToSegment(self, segment):
         inclined = Vector(self.x - segment.point1.x, self.y - segment.point1.y)
-        if (inclined.dotproduct(Vector(segment.point2.x - segment.point1.x, segment.point2.y - segment.point1.y))) < 0:
-            return (min(self.distToPoint(segment.point1), self.distToPoint(segment.point2)))
+        if (inclined.dotproduct(segment.point2 - segment.point1)) < 0:
+            return (min(self.distToPoint(segment.point1),
+                    self.distToPoint(segment.point2)))
         else:
-            return self.distToline(segment)
+            return self.distToLine(segment)
 
-    def __init__(self, x, y, name=None):
-        super().__init__(x, y)
-        self.name = name
+    def __add__(self, other):
+        if isinstance(other, Point) or isinstance(other, Vector):
+            return Point(self.x + other.x, self.y + other.y)
+        else:
+            return Point(self.x + other, self.y + other)
+
+    def __truediv__(self, other):
+        return Point(self.x / other, self.y / other)
+
+    # redefined sub func
+    def __sub__(self, other):
+        if isinstance(other, Point) or isinstance(other, Vector):
+            return Point(self.x - other.x, self.y - other.y)
+        else:
+            return Point(self.x - other, self.y - other)
+
+    def __le__(self, other):
+        if isinstance(other, Point):
+            return self.x <= other.x and self.y <= other.y
+        else:
+            return self.x <= other and self.y <= other
+
+    def __ge__(self, other):
+        if isinstance(other, Point):
+            return self.x >= other.x and self.y >= other.y
+        else:
+            return self.x >= other and self.y >= other
 
     def __str__(self):
-        return f'{self.name}({self.x}, {self.y})'
+        return "%s (%0.2f, %0.2f)" % (self.name, self.x, self.y)
+
+
+class BasicPoint(Point):
+    def __init__(self, parent1, parent2):
+        if type(parent1) == Segment and type(parent2) == Segment:
+            interpoint = parent1.intersection(parent2)
+            if interpoint:
+                super().__init__(interpoint.x, interpoint.y)
+
+
+class DependPoint(Point):
+    pass

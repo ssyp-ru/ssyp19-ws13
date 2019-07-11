@@ -1,11 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen, QBrush
 from PyQt5.QtCore import Qt, QPoint, QRect
-from random import *
 import sys
 import webbrowser
 import geom as geometry
-import math
 from model import Model
 
 class WidgetWithText(QWidget):
@@ -101,8 +99,6 @@ class MainWidget(QMainWindow):
         paint.drawRect(-20, 20, self.fieldWidth+30, self.fieldHeight+30)
         paint.setBrush(self.pointBrushColor)
         paint.setPen(QPen(self.segmentBrushColor, 2))
-
-        
         for segment in self.model.segments.values():
             paint.setBrush(self.segmentBrushColor)
             paint.setPen(QPen(self.segmentBrushColor, 2))
@@ -119,6 +115,9 @@ class MainWidget(QMainWindow):
             paint.setBrush(self.pointBrushColor)
             paint.setPen(QPen(self.pointBrushColor, 2))
             paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
+            paint.setBrush(self.segmentBrushColor)
+            paint.setPen(QPen(self.segmentBrushColor, 2))
+            paint.drawText(point.x + 3, point.y - 3, str(point))
         self.update()
 
     def pointDrawing(self, x, y):
@@ -126,7 +125,8 @@ class MainWidget(QMainWindow):
         self.messageSend("Point succesfully placed" + " " * 10 + str(p))
 
     def pointInObjectDrawing(self, x, y):
-        pass
+        self.newPoint(x, y)
+        self.messageSend("Point succesfully placed" + " " * 10 + str(x) + ", " + str(y))
 
     def segmentDrawing(self, point1, point2):
         n_point1, n_point2 = self.model.correcting_points(point1, point2)
@@ -153,7 +153,8 @@ class MainWidget(QMainWindow):
             if self.brushundertype == "point":
                 self.pointDrawing(event.x(), event.y())
             elif self.brushundertype == "pointinobject":
-                self.pointInObjectDrawing(event.x(), event.y())
+                point = self.model.correctingPoints(geometry.Point(event.x(), event.y()), self.model.segments, self.model.circles)
+                self.pointInObjectDrawing(point.x, point.y)
             self.update()
 
         if self.brushtype == "segment":
@@ -178,13 +179,13 @@ class MainWidget(QMainWindow):
             if self.pointCoords == []:
                 self.pointCoords = [event.x(), event.y()]
             else:
-                pointCoords = self.pointCoords
+                firstPointCoords = self.pointCoords
                 self.pointCoords = [event.x(), event.y()]
 
-                center = geometry.Point(pointCoords[0], pointCoords[1])
-                point = geometry.Point(self.pointCoords[0], self.pointCoords[1])
+                center = geometry.Point(firstPointCoords[0], firstPointCoords[1])
+                pointOnCircle = geometry.Point(self.pointCoords[0], self.pointCoords[1])
 
-                self.circleWithRadiusDrawing(center, point)
+                self.circleWithRadiusDrawing(center, pointOnCircle)
 
                 self.update()
                 self.pointCoords = []
