@@ -62,10 +62,9 @@ class MainWidget(QMainWindow):
             self.model.alloperations.append(geometry.Point(x, y))
         return point
 
-    def newSegment(self, pointstart: geometry.Point, pointend: geometry.Point, print=True, alloperationsInserting=True):
+    def newSegment(self, pointstart: geometry.Point, pointend: geometry.Point, alloperationsInserting=True):
         segment = self.model.check_segment(pointstart, pointend)
-        if print:
-            self.model.operations.append(geometry.Segment(pointstart, pointend))
+        self.model.operations.append(geometry.Segment(pointstart, pointend))
         if alloperationsInserting:
             self.model.alloperations.append(geometry.Segment(pointstart, pointend))
         return segment
@@ -144,8 +143,8 @@ class MainWidget(QMainWindow):
             n_point1 = self.newPoint(point1.x, point1.y)
         if n_point2 is point2:
             n_point2 = self.newPoint(point2.x, point2.y)
-        self.newSegment(n_point1, n_point2)
-        self.messageSend(f"Segment With Points succesfully placed {' ' * 10}{n_point1}-{n_point2}")
+        segment = self.newSegment(n_point1, n_point2)
+        self.messageSend(f"Segment With Points succesfully placed {' ' * 10}{segment.point1}-{segment.point2}")
 
     def circleWithRadiusDrawing(self, center, point2):
         n_center, n_point2 = self.model.correcting_points(center, point2)

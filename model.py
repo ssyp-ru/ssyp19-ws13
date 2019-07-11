@@ -35,7 +35,7 @@ class Model:
     def add_circle(self, segment: Segment):
         circle = Circle(segment)
         self.circles[segment.point1.name+segment.point2.name] = circle
-
+        self.translator.connector.prolog.assertz(f'circle({segment.point1.name}, {segment.point2.name})')
         return circle
 
     def generate_name(self) -> str:
