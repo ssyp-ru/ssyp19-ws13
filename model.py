@@ -22,7 +22,6 @@ class Model:
         return p
 
     def add_segment(self, a: Point, b: Point):
-        name = self.generate_name(Segment)
         new_segment = Segment(a, b)
         for segment in self.segments.values():
             if segment.length == new_segment.length:
@@ -30,10 +29,13 @@ class Model:
                                                       f' {segment.point2.name}),'
                                                       f' segment({new_segment.point1.name},'
                                                       f' {new_segment.point2.name}))')
-        self.segments[name] = new_segment
+        self.segments[self.generate_name(Segment)] = new_segment
+        return new_segment
 
-    def add_circle(self, a: Point, radius: float):
-        self.circles[self.generate_name(Circle)] = Circle(a, radius)
+    def add_circle(self, segment: Segment):
+        circle = Circle(segment)
+        self.circles[self.generate_name(Circle)] = circle
+        return circle
 
     def generate_name(self, type: int) -> str:
         if type is Circle:
@@ -47,7 +49,7 @@ class Model:
         if num <= 25:
             return dictionary[num]
         else:
-            firstletter = dictionary[(num // 26)]
+            firstletter = dictionary[(num // 25) - 1]
             secondletter = dictionary[(num % 26)]
             return firstletter + secondletter
 

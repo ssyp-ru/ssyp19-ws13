@@ -22,9 +22,10 @@ class Circle:
         x2 = (-C - y2 * line.B) / line.A
         return [Point(x1 + self.center.x, y1 + self.center.y), Point(x2 + self.center.x, y2 + self.center.y)]
 
-    def __init__(self, point, radius):
-        self.center = point
-        self.radius = radius
+    def __init__(self, segment):
+        self.center = segment.point1
+        self.radius = segment.length
+        self.point = segment.point2
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
@@ -149,6 +150,7 @@ class Vector:
 
 
 class Point(Vector):
+
     def isInCircle(self, circleslist):
         for i in circleslist:
             if (self.distToPoint(circleslist[i].center) < circleslist[i].radius):
@@ -174,3 +176,6 @@ class Point(Vector):
     def __init__(self, x, y, name=None):
         super().__init__(x, y)
         self.name = name
+
+    def __str__(self):
+        return f'{self.name}({self.x}, {self.y})'
