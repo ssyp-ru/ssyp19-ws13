@@ -3,14 +3,16 @@ from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen, QBrush
 from PyQt5.QtCore import Qt, QPoint, QRect
 from random import *
 import sys
+import webbrowser
 import geom as geometry
 import math
 from model import Model
 
 class WidgetWithText(QWidget):
-    def __init__(self, text):
+    def __init__(self, text, title):
         super().__init__()
         self.text = text
+        self.title = title
         self.initUI()
 
     def centering(self):
@@ -25,7 +27,7 @@ class WidgetWithText(QWidget):
         self.lbl.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.lbl.move(30, 30)
 
-        self.setWindowTitle("Authors")
+        self.setWindowTitle(self.title)
         self.setFixedSize(400, 400)
         self.show()
         self.centering()
@@ -313,10 +315,10 @@ class MainWidget(QMainWindow):
         self.paint.drawRect(-20, 20, self.fieldWidth+30, self.fieldHeight+30)
 
     def reference(self):
-        self.referenceWidget = WidgetWithText(text="")
+        webbrowser.open("reference.html")
 
     def authors(self):
-        self.authorsWidget = WidgetWithText(text="")
+        pass
 
     def backgroundColorSelect(self):
         pass
@@ -431,19 +433,6 @@ class MainWidget(QMainWindow):
         self.foregroundColorCommand.setToolTip("Change your <b>foreground color</b>")
         self.foregroundColorCommand.triggered.connect(self.foregroundColorSelect)
 
-    def zoomActionsCreating(self):
-        self.zoomMinusCommand = QAction("&Zoom - 10%", self)
-        self.zoomMinusCommand.setShortcut("Alt+Left")
-        self.zoomMinusCommand.triggered.connect(lambda event: self.zoom(-10))
-
-        self.zoomPlusCommand = QAction("&Zoom + 10%", self)
-        self.zoomPlusCommand.setShortcut("Alt+Right")
-        self.zoomPlusCommand.triggered.connect(lambda event: self.zoom(10))
-
-        self.zoomReturnCommand = QAction("&Zoom 100%", self)
-        self.zoomReturnCommand.setShortcut("Alt+Up")
-        self.zoomReturnCommand.triggered.connect(lambda event: self.zoom(0))
-
     def helpActionsCreating(self):
         self.referenceCommand = QAction("&Reference", self)
         self.referenceCommand.setShortcut("F1")
@@ -477,12 +466,7 @@ class MainWidget(QMainWindow):
         self.editMenu = self.menubar.addMenu("&Edit")
         self.editMenu.addAction(self.backCommand)
         self.editMenu.addAction(self.forwardCommand)
-
-        self.zoomMenu = self.menubar.addMenu("&Zoom")
-        self.zoomMenu.addAction(self.zoomMinusCommand)
-        self.zoomMenu.addAction(self.zoomPlusCommand)
-        self.zoomMenu.addSeparator()
-        self.zoomMenu.addAction(self.zoomReturnCommand)
+        self.editMenu.addAction(self.resetCommand)
 
         self.viewMenu = self.menubar.addMenu("&View")
         self.viewMenu.addAction(self.backgroundColorCommand)
@@ -529,7 +513,6 @@ class MainWidget(QMainWindow):
         self.circlesBrushActionsCreating()
         self.editActionsCreating()
         self.viewActionsCreating()
-        self.zoomActionsCreating()
         self.helpActionsCreating()
         self.menuCreating()
         self.toolbarFilling()
