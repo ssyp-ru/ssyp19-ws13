@@ -70,7 +70,7 @@ class MainWidget(QMainWindow):
         return segment
 
     def newCircle(self, segment: geometry.Segment, alloperationsInserting=True):
-        circle = self.model.add_circle(segment)
+        circle = self.model.check_circle(segment)
         self.model.operations.append(geometry.Circle(segment))
         if alloperationsInserting:
             self.model.alloperations.append(geometry.Circle(segment))
@@ -129,15 +129,6 @@ class MainWidget(QMainWindow):
         pass
 
     def segmentDrawing(self, point1, point2):
-        list = self.model.correcting_points(point1, point2)
-        if list:
-            newSegment = geometry.Segment(list[0], list[1])
-        else:
-            newSegment = geometry.Segment(point1, point2)
-        self.newSegment(newSegment.point1, newSegment.point2)
-        self.messageSend("Segment succesfully placed" + " " * 10 + "[" + str(newSegment.point1.x) + ", " + str(newSegment.point1.y) + "] , [" + str(newSegment.point2.x) + ", " + str(newSegment.point2.y) + "]")
-
-    def segmentWithPointsDrawing(self, point1, point2):
         n_point1, n_point2 = self.model.correcting_points(point1, point2)
         if n_point1 is point1:
             n_point1 = self.newPoint(point1.x, point1.y)
@@ -153,7 +144,7 @@ class MainWidget(QMainWindow):
                 n_center = self.newPoint(center.x, center.y)
             if n_point2 is point2:
                 n_point2 = self.newPoint(point2.x, point2.y)
-            circle = self.newCircle(self.newSegment(n_center, n_point2))
+            circle = self.newCircle(geometry.Segment(n_center, n_point2))
             self.messageSend(f"Circle succesfully placed with{' '*10}center: {circle.center}; radius: {circle.radius}; point: {circle.point}")
 
     def drawingObjects(self, event):
@@ -298,6 +289,7 @@ class MainWidget(QMainWindow):
         self.move(qr.topLeft())
 
     def clear(self):
+        self.model.reset_prolog()
         self.paint = QPainter(self.image)
         self.paint.setBrush(QBrush(self.backgorundColor))
         for point in list(self.model.points.keys()):
@@ -380,13 +372,6 @@ class MainWidget(QMainWindow):
         self.segmentSegmentBrush.triggered.connect(lambda event: self.setUnderType("segment", self.segmentSegmentBrush, self.segmentBrush))
         self.segmentSegmentBrush.setChecked(True)
         self.newUnderType(self.segmentBrush, self.segmentSegmentBrush)
-
-        self.segmentWithPointsBrush = QAction("&Segment With Points", self, checkable=True)
-        self.segmentWithPointsBrush.setStatusTip("Making Segment With Points")
-        self.segmentWithPointsBrush.setToolTip("Making <b>Segment With Points</b>")
-        self.segmentWithPointsBrush.triggered.connect(lambda event: self.setUnderType("segmentwithpoints", self.segmentWithPointsBrush, self.segmentBrush))
-        self.segmentWithPointsBrush.setChecked(False)
-        self.newUnderType(self.segmentBrush, self.segmentWithPointsBrush)
 
     def circlesBrushActionsCreating(self):
         self.circleBrush = QAction("&Circle", self, checkable=True)

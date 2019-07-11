@@ -2,8 +2,10 @@ import math
 # from Translator import Translator
 # translator = Translator()
 
+
 class LineError(ValueError):
     pass
+
 
 class Circle:
 

@@ -16,26 +16,18 @@ class Model:
 
     def add_point(self, x: float, y: float):
         name = self.generate_name()
-        self.translator.connector.assert_code(f'point({name})')
         p = Point(x, y, name)
         self.points[name] = p
         return p
 
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
-        for segment in self.segments.values():
-            if segment.length == new_segment.length:  # bug: need to fix
-                self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
-                                                      f' {segment.point2.name}),'
-                                                      f' segment({new_segment.point1.name},'
-                                                      f' {new_segment.point2.name}))')
         self.segments[a.name+b.name] = new_segment
         return new_segment
 
     def add_circle(self, segment: Segment):
         circle = Circle(segment)
         self.circles[segment.point1.name+segment.point2.name] = circle
-        self.translator.connector.prolog.assertz(f'circle({segment.point1.name}, {segment.point2.name})')
         return circle
 
     def generate_name(self) -> str:
@@ -57,30 +49,18 @@ class Model:
                     end = i
         return start, end
 
-    @staticmethod
-    def correcting_points_warning(point, segments, circles):
-        error = 4
-        for _, i in circles.items():
-            print(str(i))
-            list = i.intersectionLine(Line(i.center, point))
-            if not list:
-                return point
-            for j in list:
-                condition = -error <= point - j <= error
-                print(str(j), str(point))
-                if condition:
-                    point.x = j.x
-                    point.y = j.y
-        return point
-
-    def correcting_online_points(self, point: Point) -> Point:
-        for segment in self.segments.values():
-            if segment.pointBelongs(Point, self.error):
-                pass
-                # return point + point.asd(segment)
-
     def check_segment(self, point1, point2):
-        for name in (point1.name + point2.name, point2.name + point1.name):
+        names = (point1.name + point2.name, point2.name + point1.name)
+        for name in names:
             if name in self.segments.keys():
                 return self.segments[name]
         return self.add_segment(point1, point2)
+
+    def check_circle(self, segment, error=10):
+        for circle in self.circles.values():
+            if circle.center == segment.point1 and abs(circle.radius - segment.length) <= error:
+                return circle
+        return self.add_circle(segment)
+
+    def reset_prolog(self):
+        self.translator = Translator()
