@@ -48,10 +48,11 @@ class Model:
                     end = i
         return start, end
 
+    @staticmethod
     def correctingPoints(point, segments, circles):
         error = 8
-        for _, i in circles.items():
-            list = i.intersectionLine(geometry.Line(i.center, point))
+        for i in circles.values():
+            list = i.intersectionLine(Line(i.center, point))
             if not list:
                 return point
             for j in list:
@@ -59,7 +60,7 @@ class Model:
                 if condition:
                     point.x = j.x
                     point.y = j.y
-        for _, i in segments.items():
+        for i in segments.values():
             if point.distToSegment(i) < error:
                 return point.projectionOnSegment(i)
         return point
