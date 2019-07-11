@@ -74,7 +74,6 @@ class PrologConnector:
         statements = []  # if need True or False
         pnames = re.compile(r'\[.+\]|[\w\d]+')  # find names(vars|lists|strings|ints) in atoms
         plist = re.compile(r'\[.+\]')  # find list
-        # Reviewed (2019-07-09 23:19): I want you to explain this.
         # find predirects
         for pred, atoms in re.findall(r'([^\(\)\,\s]+|\S)(\([^\)]+\))', instruction):
             names = pnames.findall(atoms)

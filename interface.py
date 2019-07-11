@@ -144,7 +144,6 @@ class MainWidget(QMainWindow):
             radius = center.distToPoint(list[1])
         else:
             radius = center.distToPoint(geometry.Point(self.pointCoords[0], self.pointCoords[1]))
-
         if self.brushundertype == "radius":
             self.newCircle(center, radius)
             self.messageSend("Circle succesfully placed" + " " * 10 + str(center.x) + ", " + str(center.y) + " ; " + str(round(radius, 2)))

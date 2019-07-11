@@ -2,7 +2,6 @@ from Translator import Translator
 from geom import *
 from string import ascii_uppercase as dictionary
 
-# Review: I thought you like type hints.
 
 class Model:
 
@@ -44,7 +43,6 @@ class Model:
     def correcting_points(self, start: Point, end: Point) -> Point and Point:
         if self.points:
             for i in self.points.values():
-                # Review: Long lines still suck.
                 if -self.error <= start - i <= self.error:
                     start = i
                 if -self.error <= end - i <= self.error:

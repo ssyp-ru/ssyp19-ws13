@@ -2,8 +2,10 @@ import math
 # from Translator import Translator
 # translator = Translator()
 
+
 class LineError(ValueError):
     pass
+
 
 class Circle:
     def intersectionLine(self, line):
@@ -12,14 +14,16 @@ class Circle:
         Acoefficient = line.B * line.B + line.A * line.A
         Bcoefficient = 2 * line.A * C
         Ccoefficient = C * C - line.B * line.B * self.radius * self.radius
-        Discriminant = Bcoefficient * Bcoefficient - (4 * Acoefficient * Ccoefficient)
+        BcoeffSqw = Bcoefficient * Bcoefficient
+        Discriminant = BcoeffSqw - 4 * Acoefficient * Ccoefficient
         if Discriminant < 0:
             return
         y1 = (-Bcoefficient - math.sqrt(Discriminant)) / (2 * Acoefficient)
         y2 = (-Bcoefficient + math.sqrt(Discriminant)) / (2 * Acoefficient)
         x1 = (-C - y1 * line.B) / line.A
         x2 = (-C - y2 * line.B) / line.A
-        return [Point(x1 + self.center.x, y1 + self.center.y), Point(x2 + self.center.x, y2 + self.center.y)]
+        return [Point(x1 + self.center.x, y1 + self.center.y),
+                Point(x2 + self.center.x, y2 + self.center.y)]
 
     def __init__(self, point, radius):
         self.center = point
@@ -27,15 +31,20 @@ class Circle:
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
+        # I don't know how do this less
+
 
 class Segment():
     def pointBelongs(self, point):
-        return point.distToPoint(self.point1) + point.distToPoint(self.point2) <= self.point1.distToPoint(self.point2) + 1
+        summ = point.distToPoint(self.point1) + point.distToPoint(self.point2)
+        return summ <= self.point1.distToPoint(self.point2) + 1
 
     def intersection(self, segment):
         Mline = Line(self.point1, self.point2)
         interpoint = Mline.intersection(Line(segment.point1, segment.point2))
-        if interpoint and self.pointBelongs(interpoint) and segment.pointBelongs(interpoint):
+        Fcondition = self.pointBelongs(interpoint)
+        Scondition = segment.pointBelongs(interpoint)
+        if interpoint and Fcondition and Scondition:
             return interpoint
         else:
             return
@@ -44,8 +53,10 @@ class Segment():
         self.point1 = point1
         self.point2 = point2
         self.length = point1.distToPoint(point2)
+
     def __str__(self):
         return f"({str(self.point1)}; {str(self.point2)})"
+
 
 class Line():
     def normalize(self):
@@ -56,20 +67,20 @@ class Line():
 
     def pointBelongs(self, point):
         ABvector = Vector(self.point2.x - self.point1.x,
-                                self.point2.y - self.point1.y)
+                          self.point2.y - self.point1.y)
         ACvector = Vector(point.x - self.point1.y,
-                            point.y - self.point1.y)
+                          point.y - self.point1.y)
         return ABvector.crossProduct(ACvector) == 0
 
     def intersection(self, line):
         Avector = Vector(self.A, line.B)
         if (Avector.crossProduct(Vector(self.B, line.A)) == 0):
-            return 
+            return
         else:
             denom = ((self.A * line.B) - (self.B * line.A))
             Fnumerator = ((self.C * line.B) - (self.B * line.C))
             Snumerator = (self.A * line.C) - (self.C * line.A)
-            return Point( Fnumerator / denom, Snumerator / denom)
+            return Point(Fnumerator / denom, Snumerator / denom)
 
     def __init__(self, point1, point2):
         if ((point1.x == point2.x) and (point1.y == point2.y)):
@@ -82,9 +93,10 @@ class Line():
             Nvector = Vector(self.A, self.B)
             self.C = Nvector.dotproduct(Vector(point1.x, point1.y))
             self.normalize()
-            
+
     def __str__(self):
         return "%0.4f x + %0.4f y + %0.4f = 0" % (self.A, self.B, self.C)
+
 
 class Vector:
     def dotproduct(self, vector):
@@ -92,7 +104,8 @@ class Vector:
 
     def angle(self, vector):
         multiplied = self.dotproduct(vector)
-        return math.degrees(math.acos(multiplied / (self.length * vector.length)))
+        lengthsqw = self.length * vector.length
+        return math.degrees(math.acos(multiplied / lengthsqw))
 
     def projection(self, vector):
         Nvector = self.singleDirectedVector()
@@ -121,26 +134,28 @@ class Vector:
     def __str__(self):
         return f"({self.x}, {self.y})"
 
+
 class Point(Vector):
     def isInCircle(self, circleslist):
-        for i in circleslist:
-            if (self.distToPoint(circleslist[i].center) < circleslist[i].radius):
+        for _, i in circleslist.items():
+            if (self.distToPoint(i.center) < i.radius):
                 pass
-                #translator.connector.call(...)
-                #Here i need Vsevolod's code for request in prolog
+                # translator.connector.call(...)
+                # Here i need Vsevolod's code for request in prolog
 
     def distToPoint(self, point):
         return (self - point).length
 
     def distToLine(self, line):
         inclined = Vector(line.point1.x - self.x, line.point1.y - self.y)
-        cross = inclined.crossProduct(Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y))
-        return abs(cross / Vector(line.point2.x - line.point1.x, line.point2.y - line.point1.y)).length
+        cross = inclined.crossProduct(line.point2 - line.point1)
+        return abs(cross / (line.point2 - line.point1).length)
 
     def distToSegment(self, segment):
         inclined = Vector(self.x - segment.point1.x, self.y - segment.point1.y)
-        if (inclined.dotproduct(Vector(segment.point2.x - segment.point1.x, segment.point2.y - segment.point1.y))) < 0:
-            return (min(self.distToPoint(segment.point1), self.distToPoint(segment.point2)))
+        if (inclined.dotproduct(segment.point2 - segment.point1)) < 0:
+            return (min(self.distToPoint(segment.point1),
+                    self.distToPoint(segment.point2)))
         else:
             return self.distToline(segment)
 
