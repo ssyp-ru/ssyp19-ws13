@@ -23,8 +23,9 @@ class Model:
 
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
+        n = False
         for segment in self.segments.values():
-            if segment.length == new_segment.length:
+            if segment.length == new_segment.length:  # bug: need to fix
                 self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
                                                       f' {segment.point2.name}),'
                                                       f' segment({new_segment.point1.name},'
@@ -35,9 +36,10 @@ class Model:
     def add_circle(self, segment: Segment):
         circle = Circle(segment)
         self.circles[self.generate_name(Circle)] = circle
+
         return circle
 
-    def generate_name(self, type: int) -> str:
+    def generate_name(self) -> str:
         if type is Circle:
             num = len(self.circles)
         elif type is Segment:

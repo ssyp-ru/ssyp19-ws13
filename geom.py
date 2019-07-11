@@ -26,11 +26,13 @@ class Circle:
         self.center = segment.point1
         self.radius = segment.length
         self.point = segment.point2
+        self.segment = segment
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
 
 class Segment():
+
     def pointBelongs(self, point):
         return point.distToPoint(self.point1) + point.distToPoint(self.point2) <= self.point1.distToPoint(self.point2) + 1
 
@@ -48,11 +50,15 @@ class Segment():
     def __eq__(self, other, error=5):
         return abs(other.length - self.length) <= error
 
+    def __ne__(self, other):
+        return (self.point1 != other.point1 or self.point2 != other.point2) and (self.point2 != other.point1 or self.point1 != other.point2)
+
     def __str__(self):
         return f"({str(self.point1)}; {str(self.point2)})"
 
 
 class Line():
+
     def normalize(self):
         Nvector = Vector(self.A, self.B).unitDirectedVector()
         self.A = Nvector.x
@@ -112,6 +118,7 @@ class Vector:
 
     def length(self, point):
         return point.distToPoint(Point(0, 0))
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -148,6 +155,8 @@ class Vector:
         else:
             return Point(self.x + other, self.y + other)
 
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
 
 class Point(Vector):
 
