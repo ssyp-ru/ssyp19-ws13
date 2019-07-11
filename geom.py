@@ -135,10 +135,10 @@ class Vector:
         self.y = y
         self.length = math.hypot(x, y)
 
-    def __mul__(self, other:float):
+    def __mul__(self, other: float):
         return Vector(self.x * other, self.y * other)
 
-    def __truediv__(self, other:float):
+    def __truediv__(self, other: float):
         return Vector(self.x / float, self.y / float)
 
     def __sub__(self, other):
@@ -186,8 +186,8 @@ class Point(Vector):
                 # Here i need Vsevolod's code for request in prolog
 
     def projectionOnLine(self, line):
-        PminusQ = line.point1 - line.point2 # Shifting coordinate system to
-        OminusQ = self - line.point2 # line.point2
+        PminusQ = line.point1 - line.point2  # Shifting coordinate system to
+        OminusQ = self - line.point2  # line.point2
         dotProduct = PminusQ.dotproduct(OminusQ)
         lengthSqw = PminusQ.length * PminusQ.length
         desiredVector = ((PminusQ / lengthSqw) * dotProduct)
