@@ -58,9 +58,9 @@ class Circle:
 
 class Segment():
 
-    def pointBelongs(self, point):
+    def pointBelongs(self, point, error=1):
         summ = point.distToPoint(self.point1) + point.distToPoint(self.point2)
-        return summ <= self.point1.distToPoint(self.point2) + 1
+        return summ <= self.point1.distToPoint(self.point2) + error
 
     def intersection(self, segment):
         Mline = Line(self.point1, self.point2)

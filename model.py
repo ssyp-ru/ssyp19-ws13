@@ -17,7 +17,12 @@ class Model:
     def add_point(self, x: float, y: float):
         name = self.generate_name()
         p = Point(x, y, name)
+        self.translator.connector.prolog.assertz(f'point({name})')
         self.points[name] = p
+        for segment in self.segments.values():
+            if segment.pointBelongs(p):
+                self.translator.connector.prolog.assertz(f'laysBetween({segment.point1.name},{segment.point2.name},{name})')
+                print(self.translator.connector.get_n_ans_new(f'isCongruent({segment.point1.name},{segment.point2.name})'))
         return p
 
     def add_segment(self, a: Point, b: Point):

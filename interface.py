@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen, QBrush
+from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen, QBrush, QTextCursor
 from PyQt5.QtCore import Qt, QPoint, QRect
 import sys
 import webbrowser
@@ -30,10 +30,12 @@ class WidgetWithText(QWidget):
         self.show()
         self.centering()
 
-class MainWidget(QMainWindow):
+
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.model = Model()
+        self.console = Console(self.model)
         self.brushes = []
         self.brushundertypes = {}
         self.brushtype = "point"
@@ -279,6 +281,11 @@ class MainWidget(QMainWindow):
         elif event.button() == Qt.RightButton:
             self.update()
 
+    def keyReleaseEvent(self, event):
+        if event.key() == Qt.Key_A or event.key() == Qt.Key_AsciiTilde or event.key() == Qt.Key_Dead_Tilde:
+            self.console.show()
+
+
     def mouseReleaseEvent(self, event):
         self.update()
 
@@ -518,6 +525,34 @@ class MainWidget(QMainWindow):
         self.setBrushType("point", self.pointBrush)
         self.messageSend("Paint")
 
+
+class Console(QTextEdit):
+
+    def __init__(self, model):
+        super().__init__()
+        self.resize(600, 300)
+        self.setAlignment(Qt.AlignTop)
+        self.setWindowTitle('Console')
+        self.setFont(QFont('SansSerif', 10))
+        self.model = model
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Return:
+            s = self.toPlainText() + '\n'
+            try:
+                s += str(self.model.translator.connector.get_n_ans_new(s)) + '\n'
+            except Exception as f:
+                s += f + '\n'
+            finally:
+                self.setText(s)
+                self.moveCursor(QTextCursor.End)
+        else:
+            super().keyPressEvent(event)
+
+
+class MainWidget(QWidget):
+    pass
+
 app = QApplication(sys.argv)
-interface = MainWidget()
+interface = MainWindow()
 sys.exit(app.exec_())
