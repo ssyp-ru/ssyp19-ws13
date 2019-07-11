@@ -29,4 +29,4 @@ class Translator:
     def make_request(self, req, **kwargs):
         return self.connector.get_n_ans_new(req, **kwargs)
 
-    # TODO: doit write this class!
+    # TODO: doit write this class(may be)!

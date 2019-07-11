@@ -33,17 +33,15 @@ class Model:
     def add_circle(self, a: Point, radius: float):
         self.circles[self.generate_name(Circle)] = Circle(a, radius)
 
-    def generate_name(self, type: type) -> str:
+    def generate_name(self, type: int) -> str:
         if type is Circle:
-            return self.generate_name_by_number(len(self.circles))
+            num = len(self.circles)
         elif type is Segment:
-            return self.generate_name_by_number(len(self.segments))
+            num = len(self.segments)
         elif type is Point:
-            return self.generate_name_by_number(len(self.points))
-
-    @staticmethod
-    # Review: Why should it be static?
-    def generate_name_by_number(num: int) -> str:
+            num = len(self.points)
+        else:
+            num = type
         if num <= 25:
             return dictionary[num]
         else:
