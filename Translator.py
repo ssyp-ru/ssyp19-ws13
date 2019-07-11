@@ -8,6 +8,7 @@ class Translator:
     def __init__(self):
         self.connector = PrologConnector()
         self.connector.consult_file('Prolog/axiomsTarski.pl')
+        self.connector.consult_file('Prolog/definitions.pl')
 
     def eat(self, something):
         # TODO: Parse ↑↑↑(maybe)
@@ -28,4 +29,4 @@ class Translator:
     def make_request(self, req, **kwargs):
         return self.connector.get_n_ans_new(req, **kwargs)
 
-    # TODO: doit write this class!
+    # TODO: doit write this class(may be)!

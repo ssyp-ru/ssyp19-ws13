@@ -6,6 +6,7 @@ class LineError(ValueError):
     pass
 
 class Circle:
+
     def intersectionLine(self, line):
         # line.normalVector()
         C = line.C + line.A * self.center.x + line.B * self.center.y
@@ -30,23 +31,25 @@ class Circle:
 
 class Segment():
     def pointBelongs(self, point):
-
         return point.distToPoint(self.point1) + point.distToPoint(self.point2) <= self.point1.distToPoint(self.point2) + 1
 
     def intersection(self, segment):
         Mline = Line(self.point1, self.point2)
         interpoint = Mline.intersection(Line(segment.point1, segment.point2))
-        if ((interpoint != False) and self.pointBelongs(interpoint) and segment.pointBelongs(interpoint)):
+        if interpoint and self.pointBelongs(interpoint) and segment.pointBelongs(interpoint):
             return interpoint
-        else:
-            return
 
     def __init__(self, point1, point2):
         self.point1 = point1
         self.point2 = point2
         self.length = point1.distToPoint(point2)
+
+    def __eq__(self, other, error=5):
+        return abs(other.length - self.length) <= error
+
     def __str__(self):
         return f"({str(self.point1)}; {str(self.point2)})"
+
 
 class Line():
     def normalize(self):
@@ -64,9 +67,7 @@ class Line():
 
     def intersection(self, line):
         Avector = Vector(self.A, line.B)
-        if (Avector.crossProduct(Vector(self.B, line.A)) == 0):
-            return False
-        else:
+        if not (Avector.crossProduct(Vector(self.B, line.A)) == 0):
             denom = ((self.A * line.B) - (self.B * line.A))
             Fnumerator = ((self.C * line.B) - (self.B * line.C))
             Snumerator = (self.A * line.C) - (self.C * line.A)
@@ -83,6 +84,7 @@ class Line():
             Nvector = Vector(self.A, self.B)
             self.C = Nvector.dotproduct(Vector(point1.x, point1.y))
             self.normalize()
+
     def __str__(self):
         return "%0.4f x + %0.4f y + %0.4f = 0" % (self.A, self.B, self.C)
 
@@ -106,19 +108,45 @@ class Vector:
 
     def crossProduct(self, vector):
         return (self.x * vector.y) - (vector.x * self.y)
+
     def length(self, point):
         return point.distToPoint(Point(0, 0))
-
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.length = math.hypot(x, y)
 
     def __sub__(self, other):
-        return Vector(self.x - other.x, self.y - other.y)
+        if isinstance(other, Point):
+            return Point(self.x - other.x, self.y - other.y)
+        elif isinstance(other, Vector):
+            return Vector(self.x - other.x, self.y - other.y)
+        else:
+            return Point(self.x - other, self.y - other)
 
     def __str__(self):
         return f"({self.x}, {self.y})"
+
+    def __le__(self, other):
+        if isinstance(other, Point) or isinstance(other, Vector):
+            return self.x <= other.x and self.y <= other.y
+        else:
+            return self.x <= other and self.y <= other
+
+    def __ge__(self, other):
+        if isinstance(other, Point) or isinstance(other, Vector):
+            return self.x >= other.x and self.y >= other.y
+        else:
+            return self.x >= other and self.y >= other
+
+    def __add__(self, other):
+        if isinstance(other, Point):
+            return Point(self.x + other.x, self.y + other.y)
+        elif isinstance(other, Vector):
+            return Vector(self.x + other.x, self.y + other.y)
+        else:
+            return Point(self.x + other, self.y + other)
+
 
 class Point(Vector):
     def isInCircle(self, circleslist):
@@ -143,27 +171,6 @@ class Point(Vector):
         else:
             return self.distToline(segment)
 
-    def __add__(self, other):
-        if isinstance(other, Point) or isinstance(other, Vector):
-            return Point(self.x + other.x, self.y + other.y)
-        else:
-            return Point(self.x + other, self.y + other)
-
-    # redefined sub func
-    def __sub__(self, other):
-        if isinstance(other, Point) or isinstance(other, Vector):
-            return Point(self.x - other.x, self.y - other.y)
-        else:
-            return Point(self.x - other, self.y - other)
-
-    def __le__(self, other):
-        if isinstance(other, Point):
-            return self.x <= other.x and self.y <= other.y
-        else:
-            return self.x <= other and self.y <= other
-
-    def __ge__(self, other):
-        if isinstance(other, Point):
-            return self.x >= other.x and self.y >= other.y
-        else:
-            return self.x >= other and self.y >= other
+    def __init__(self, x, y, name=None):
+        super().__init__(x, y)
+        self.name = name
