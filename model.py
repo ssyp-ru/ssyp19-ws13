@@ -6,6 +6,7 @@ from string import ascii_uppercase as dictionary
 class Model:
 
     def __init__(self):
+        self.translator = Translator()
         self.points = {}
         self.segments = {}
         self.circles = {}
@@ -14,10 +15,20 @@ class Model:
         self.error = 10
 
     def add_point(self, x: float, y: float):
-        self.points[self.generate_name(Point)] = Point(x, y)
+        name = self.generate_name(Point)
+        self.translator.connector.assert_code(f'point({name})')
+        self.points[name] = Point(x, y, name)
 
     def add_segment(self, a: Point, b: Point):
-        self.segments[self.generate_name(Segment)] = Segment(a, b)
+        name = self.generate_name(Segment)
+        new_segment = Segment(a, b)
+        for segment in self.segments:
+            if segment == new_segment:
+                self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
+                                                      f' {segment.point2.name}),'
+                                                      f' segment({new_segment.point1.name},'
+                                                      f' {new_segment.point2.name}))')
+        self.segments[name] = new_segment
 
     def add_circle(self, a: Point, radius: float):
         self.circles[self.generate_name(Circle)] = Circle(a, radius)
@@ -69,4 +80,5 @@ class Model:
     def correcting_online_points(self, point: Point) -> Point:
         for segment in self.segments.values():
             if segment.pointBelongs(Point, self.error):
-                return point + point.asd(segment)
+                pass
+                # return point + point.asd(segment)

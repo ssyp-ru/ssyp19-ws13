@@ -8,6 +8,7 @@ class Translator:
     def __init__(self):
         self.connector = PrologConnector()
         self.connector.consult_file('Prolog/axiomsTarski.pl')
+        self.connector.consult_file('Prolog/definitions.pl')
 
     def eat(self, something):
         # TODO: Parse ↑↑↑(maybe)

@@ -44,6 +44,9 @@ class Segment():
         self.point2 = point2
         self.length = point1.distToPoint(point2)
 
+    def __eq__(self, other, error=5):
+        return abs(other.length - self.length) <= error
+
     def __str__(self):
         return f"({str(self.point1)}; {str(self.point2)})"
 
@@ -168,7 +171,6 @@ class Point(Vector):
         else:
             return self.distToline(segment)
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, name=None):
         super().__init__(x, y)
-        # self.x = x
-        # self.y = y
+        self.name = name
