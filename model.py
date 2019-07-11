@@ -1,6 +1,6 @@
 from Translator import Translator
 from geom import *
-from string import ascii_uppercase as dictionary
+from string import ascii_lowercase as dictionary
 
 
 class Model:
@@ -24,11 +24,12 @@ class Model:
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
         for segment in self.segments.values():
-            if segment.length == new_segment.length:  # bug: need to fix
-                self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
-                                                      f' {segment.point2.name}),'
-                                                      f' segment({new_segment.point1.name},'
-                                                      f' {new_segment.point2.name}))')
+            if ((segment.length - new_segment.length) > - 100) or ((segment.length - new_segment.length) < 100):
+                print(segment.length - new_segment.length)
+                segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
+                segment2 = f'segment({new_segment.point1.name}, {new_segment.point2.name})'
+                print(segment1, segment2)
+                self.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
         self.segments[a.name+b.name] = new_segment
         return new_segment
 

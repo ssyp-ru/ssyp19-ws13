@@ -58,6 +58,12 @@ laysBetweenLaw(A, B, C):-
 
 laysBetweenLaw(X, X, Y) :- Y is X.
 
+oneLine(A, B, C):-
+	laysBetweenLaw(A, B, C).
+oneLine(A, B, C):-
+	laysBetweenLaw(B, C, A).
+oneLine(A, B, C):-
+	laysBetweenLaw(A, C, B).
 
 identityCongruence(X, Y):-
 			isCongruent(segment(X, Y), segment(Z, Z)).
@@ -70,21 +76,17 @@ axiomPasch(U, Y, V, X):-
 					laysBetweenLaw(X, Z, U), laysBetweenLaw(Y, Z, V).
 
 upperDimension(X, Y, Z):-
-				laysBetweenLaw(X, Y, Z);
-				laysBetweenLaw(X, Z, Y);
-				laysBetweenLaw(Z, Y, X);
 					isCongruent(segment(X, U), segment(X, V)),
 					isCongruent(segment(Y, V), segment(Y, U)),
 					isCongruent(segment(Z, V), segment(Z, U)).
 
 axiomEuclid1(X, Y, Z):-
-				laysBetweenLaw(X, Y, Z);
-				laysBetweenLaw(Y, Z, X);
-				laysBetweenLaw(Z, X, Y);
+				not(oneLine(X, Y, Z)),
 					isCongruent(segment(X, A), segment(Y, A)),
 					isCongruent(segment(X, A), segment(Z, A)).
 
-axiomEuclid2(X, Y, W, U, V, Z):-
+axiomEuclid2(Y, U, V, Z):-
+				not(oneLine(X, V, W)),
 				laysBetweenLaw(X, W, Y),
 				laysBetweenLaw(X, V, U),
 				laysBetweenLaw(W, V, Z),

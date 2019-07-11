@@ -280,6 +280,9 @@ class MainWidget(QMainWindow):
     def reset(self):
         self.pointCoords = []
 
+    def prove(self):
+        print(self.model.translator.connector.get_n_ans_new("prove_p(isCongruent(X, Y))"))
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.flag = True
@@ -423,6 +426,13 @@ class MainWidget(QMainWindow):
         self.resetCommand.setToolTip("<b>Reset</b> point")
         self.resetCommand.triggered.connect(self.reset)
 
+        self.proveCommand = QAction("&Prove", self)
+        self.proveCommand.setShortcut("Ctrl+P")
+        self.proveCommand.setStatusTip("Proved")
+        self.proveCommand.setToolTip("<b>Prove</b>")
+        self.proveCommand.triggered.connect(self.prove)
+
+
     def viewActionsCreating(self):
         self.backgroundColorCommand = QAction("&Background", self)
         self.backgroundColorCommand.setShortcut("Alt+B")
@@ -476,6 +486,7 @@ class MainWidget(QMainWindow):
         self.editMenu.addAction(self.backCommand)
         self.editMenu.addAction(self.forwardCommand)
         self.editMenu.addAction(self.resetCommand)
+        self.editMenu.addAction(self.proveCommand)
 
         self.viewMenu = self.menubar.addMenu("&View")
         self.foregroundMenu = QMenu("&Foreground", self)
@@ -506,6 +517,7 @@ class MainWidget(QMainWindow):
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.quitAct)
         self.toolbar.addSeparator()
+        self.toolbar.addAction(self.proveCommand)
 
     def initUI(self):
         self.setFixedSize(self.fieldWidth, self.fieldHeight)
