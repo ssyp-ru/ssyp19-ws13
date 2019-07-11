@@ -1,4 +1,5 @@
-import math
+import math 
+from scipy.optimize import fsolve
 # from Translator import Translator
 # translator = Translator()
 
@@ -10,20 +11,8 @@ class LineError(ValueError):
 class Circle:
     def intersectionLine(self, line):
         # line.normalVector()
-        C = line.C + line.A * self.center.x + line.B * self.center.y
-        Acoefficient = line.B * line.B + line.A * line.A
-        Bcoefficient = 2 * line.A * C
-        Ccoefficient = C * C - line.B * line.B * self.radius * self.radius
-        BcoeffSqw = Bcoefficient * Bcoefficient
-        Discriminant = BcoeffSqw - 4 * Acoefficient * Ccoefficient
-        if Discriminant < 0:
-            return
-        y1 = (-Bcoefficient - math.sqrt(Discriminant)) / (2 * Acoefficient)
-        y2 = (-Bcoefficient + math.sqrt(Discriminant)) / (2 * Acoefficient)
-        x1 = (-C - y1 * line.B) / line.A
-        x2 = (-C - y2 * line.B) / line.A
-        return [Point(x1 + self.center.x, y1 + self.center.y),
-                Point(x2 + self.center.x, y2 + self.center.y)]
+
+        return 
 
     def __init__(self, point, radius):
         self.center = point
@@ -31,7 +20,7 @@ class Circle:
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
-        # I don't know how do this less
+        # I don't know how to do this less
 
 
 class Segment():
@@ -42,10 +31,11 @@ class Segment():
     def intersection(self, segment):
         Mline = Line(self.point1, self.point2)
         interpoint = Mline.intersection(Line(segment.point1, segment.point2))
-        Fcondition = self.pointBelongs(interpoint)
-        Scondition = segment.pointBelongs(interpoint)
-        if interpoint and Fcondition and Scondition:
-            return interpoint
+        if interpoint:
+            Fcondition = self.pointBelongs(interpoint)
+            Scondition = segment.pointBelongs(interpoint)
+            if Fcondition and Scondition:
+                return interpoint
         else:
             return
 
@@ -72,9 +62,16 @@ class Line():
                           point.y - self.point1.y)
         return ABvector.crossProduct(ACvector) == 0
 
+    def intersectionSegment(self, segment):
+        interpoint = self.intersection(Line(segment.point1, segment.point2))
+        if interpoint:
+            if segment.pointBelongs(interpoint):
+                return interpoint
+        return
+
     def intersection(self, line):
-        Avector = Vector(self.A, line.B)
-        if (Avector.crossProduct(Vector(self.B, line.A)) == 0):
+        Avector = Vector(self.A, self.B)
+        if (Avector.crossProduct(Vector(line.A, line.B)) == 0):
             return
         else:
             denom = ((self.A * line.B) - (self.B * line.A))
@@ -136,6 +133,10 @@ class Vector:
 
 
 class Point(Vector):
+    def __init__(self, x, y, name=None):
+        super().__init__(x, y)
+        self.name = name
+
     def isInCircle(self, circleslist):
         for _, i in circleslist.items():
             if (self.distToPoint(i.center) < i.radius):
@@ -183,3 +184,15 @@ class Point(Vector):
             return self.x >= other.x and self.y >= other.y
         else:
             return self.x >= other and self.y >= other
+
+
+class BasicPoint(Point):
+    pass
+
+
+class DependPoint(Point):
+    def __init__(self, parent1, parent2):
+        if type(parent1) == Segment and type(parent2) == Segment:
+            interpoint = parent1.intersection(parent2)
+            if interpoint:
+                super().__init__(interpoint.x, interpoint.y)
