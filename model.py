@@ -24,12 +24,21 @@ class Model:
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
         for segment in self.segments.values():
+            interpoint = new_segment.intersection(segment)
+            if interpoint:
+                self.add_point(interpoint.x, interpoint.y)
             if segment.length == new_segment.length:
                 self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
                                                       f' {segment.point2.name}),'
                                                       f' segment({new_segment.point1.name},'
                                                       f' {new_segment.point2.name}))')
         self.segments[self.generate_name(Segment)] = new_segment
+        for circle in self.circles.values():
+            interpoint = circle.intersectionLine(Line(new_segment.point1, new_segment.point2))
+            print(str(interpoint))
+            if interpoint:
+                for point in interpoint.values():
+                    self.add_point(point.x, point.y)
         return new_segment
 
     def add_circle(self, segment: Segment):
