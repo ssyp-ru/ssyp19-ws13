@@ -1,35 +1,77 @@
-permuteOrLays(Condition, A, B, C):-
-			ABC =.. [Condition, A, B, C],
-			BAC =.. [Condition, B, A, C],
-			(call(ABC), !;
-				call(BAC), !).
+% display a proof tree
+prove_p(A):-prove_p(A, P),write_proof(P).
+
+% prove_p(A,P) <- P is proof tree of A
+prove_p(true,[]):-!.
+
+prove_p((A, B),[p((A, B), (A:-C))|Proof]):-!,
+	clause(A, C),
+	conj_append(C, B, D),
+	prove_p(D, Proof).
+
+prove_p(A, [p(A, (A:-B))|Proof]):-
+	clause(A, B),
+	prove_p(B, Proof).
+
+write_proof([]):-
+	write('...............[]'),nl.
+
+write_proof([p(A, B)|Proof]):-
+	write((:-A)),nl,
+	write(B),nl,
+	write_proof(Proof).
+
+conj_append(true, Ys, Ys).
+conj_append(X, Ys, (X, Ys)):-X\=true, X\=(_One, _TheOther).
+conj_append((X, Xs), Ys, (X, Zs)):-conj_append(Xs, Ys, Zs).
+
+
+laysBetween(u, y, a).
+laysBetween(v, x, a).
+laysBetween(x, z, u).
+laysBetween(y, z, v).
+
 congruent(segment(a, b), segment(c, d)).
 
+congruent(segment(x, y), segment(z, u)).
+congruent(segment(x, y), segment(v, w)).
+
+isCongruent(segment(A, B), segment(C, D)) :-
+			congruent(segment(A, B), segment(C, D)), !.
+isCongruent(segment(A, B), segment(C, D)) :-
+			congruent(segment(A, B), segment(D, C)), !.
 isCongruent(segment(A, B), segment(C, D)):-
-			congruent(segment(A, B), segment(C, D)), !;
-			congruent(segment(A, B), segment(D, C)), !;
-			congruent(segment(B, A), segment(C, D)), !;
-			congruent(segment(B, A), segment(D, C)), !;
-			congruent(segment(C, D), segment(A, B)), !;
-			congruent(segment(C, D), segment(B, A)), !;
-			congruent(segment(D, C), segment(A, B)), !;
+			congruent(segment(B, A), segment(C, D)), !.
+isCongruent(segment(A, B), segment(C, D)):-
+			congruent(segment(B, A), segment(D, C)), !.
+isCongruent(segment(A, B), segment(C, D)) :-
+			congruent(segment(C, D), segment(A, B)), !.
+isCongruent(segment(A, B), segment(C, D)):-
+			congruent(segment(C, D), segment(B, A)), !.
+isCongruent(segment(A, B), segment(C, D)):-
+			congruent(segment(D, C), segment(A, B)), !.
+isCongruent(segment(A, B), segment(C, D)):-
 			congruent(segment(D, C), segment(B, A)), !.
 
+isCongruent(segment(A, B), segment(C, D)) :-
+			congruent(segment(A, B), X),
+			congruent(X, segment(C, D)), !.
+
 laysBetweenLaw(A, B, C):-
-			permuteOrLays(laysBetween, A, B, C).
+			laysBetween(A, B, C), !;
+			laysBetween(B, A, C), !.
 
 identityCongruence(X, Y):-
 			isCongruent(segment(X, Y), segment(Z, Z)), !.
-
-transitivityCongruence(X, Y, Z, U, V, W):-
+/*
+transitivityCongruence(Z, U, V, W):-
 					isCongruent(segment(X, Y), segment(Z, U)),
-					isCongruent(segment(X, Y), segment(V, W)),
-					isCongruent(segment(Z, U), segment(V, W)), !.
-
+					isCongruent(segment(X, Y), segment(V, W)), !.
+*/
 identityBetweenness(X, Y):-
 					laysBetweenLaw(X, X, Y), !.
 
-axiomPasch(U, Y, A, V, X):-
+axiomPasch(U, Y, V, X):-
 					laysBetweenLaw(U, Y, A), laysBetweenLaw(V, X, A),
 					laysBetweenLaw(X, Z, U), laysBetweenLaw(Y, Z, V), !.
 
