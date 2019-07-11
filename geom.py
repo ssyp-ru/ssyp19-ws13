@@ -30,13 +30,12 @@ class Circle:
 
 class Segment():
     def pointBelongs(self, point):
-
         return point.distToPoint(self.point1) + point.distToPoint(self.point2) <= self.point1.distToPoint(self.point2) + 1
 
     def intersection(self, segment):
         Mline = Line(self.point1, self.point2)
         interpoint = Mline.intersection(Line(segment.point1, segment.point2))
-        if ((interpoint != False) and self.pointBelongs(interpoint) and segment.pointBelongs(interpoint)):
+        if interpoint and self.pointBelongs(interpoint) and segment.pointBelongs(interpoint):
             return interpoint
         else:
             return
@@ -65,7 +64,7 @@ class Line():
     def intersection(self, line):
         Avector = Vector(self.A, line.B)
         if (Avector.crossProduct(Vector(self.B, line.A)) == 0):
-            return False
+            return 
         else:
             denom = ((self.A * line.B) - (self.B * line.A))
             Fnumerator = ((self.C * line.B) - (self.B * line.C))
@@ -83,6 +82,7 @@ class Line():
             Nvector = Vector(self.A, self.B)
             self.C = Nvector.dotproduct(Vector(point1.x, point1.y))
             self.normalize()
+            
     def __str__(self):
         return "%0.4f x + %0.4f y + %0.4f = 0" % (self.A, self.B, self.C)
 
@@ -106,6 +106,7 @@ class Vector:
 
     def crossProduct(self, vector):
         return (self.x * vector.y) - (vector.x * self.y)
+
     def length(self, point):
         return point.distToPoint(Point(0, 0))
 
