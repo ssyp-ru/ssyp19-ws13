@@ -14,19 +14,29 @@ class Model:
         self.alloperations = []
         self.error = 8
 
-    def add_point(self, x: float, y: float):
+    def add_point(self, x: float, y: float, Fixed = False, parent1 = None, parent2 = None):
         name = self.generate_name(Point)
         self.translator.connector.assert_code(f'point({name})')
-        p = Point(x, y, name)
-        self.points[name] = p
-        return p
+        if not Fixed:
+            p = Point(x, y, name)
+            self.points[name] = p
+            return p
+        elif isinstance(parent1, Circle) or isinstance(parent2, Circle):
+            point = DependPoint(name, parent1, parent2, 0)
+            self.points[name] = point
+            name = self.generate_name(Point)
+            point = DependPoint(name, parent1, parent2, 1)
+            self.points[name] = point
+        else:
+            point = DependPoint(name, parent1, parent2, 0)
+            self.points[name] = point
 
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
         for segment in self.segments.values():
             interpoint = new_segment.intersection(segment)
             if interpoint:
-                self.add_point(interpoint.x, interpoint.y)
+                self.add_point(interpoint.x, interpoint.y, True, new_segment, segment)
             if segment.length == new_segment.length:
                 self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
                                                       f' {segment.point2.name}),'
@@ -34,10 +44,9 @@ class Model:
                                                       f' {new_segment.point2.name}))')
         self.segments[self.generate_name(Segment)] = new_segment
         for circle in self.circles.values():
-            interpoint = circle.intersectionLine(Line(new_segment.point1, new_segment.point2))
+            interpoint = circle.intersectionSegment(Segment(new_segment.point1, new_segment.point2))
             if interpoint:
-                for point in interpoint:
-                    self.add_point(point.x, point.y)
+                self.add_point(1, 1, True, new_segment, circle)
         return new_segment
 
     def add_circle(self, segment: Segment):

@@ -489,7 +489,7 @@ class MainWidget(QMainWindow):
 
         self.helpMenu = self.menubar.addMenu("&Help")
         self.helpMenu.addAction(self.referenceCommand)
-        self.helpMenu.addAction(self.authorsCommand)
+        self.helpMenu.addAction(self.authorsCommand) 
 
     def toolbarFilling(self):
         self.toolbar = self.addToolBar("Toolbar")
