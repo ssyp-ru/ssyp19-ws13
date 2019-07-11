@@ -63,7 +63,7 @@ class MainWidget(QMainWindow):
         return point
 
     def newSegment(self, pointstart: geometry.Point, pointend: geometry.Point, print=True, alloperationsInserting=True):
-        segment = self.model.add_segment(pointstart, pointend)
+        segment = self.model.check_segment(pointstart, pointend)
         if print:
             self.model.operations.append(geometry.Segment(pointstart, pointend))
         if alloperationsInserting:

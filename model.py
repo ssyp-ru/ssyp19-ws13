@@ -15,7 +15,7 @@ class Model:
         self.error = 10
 
     def add_point(self, x: float, y: float):
-        name = self.generate_name(Point)
+        name = self.generate_name()
         self.translator.connector.assert_code(f'point({name})')
         p = Point(x, y, name)
         self.points[name] = p
@@ -23,31 +23,23 @@ class Model:
 
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
-        n = False
         for segment in self.segments.values():
             if segment.length == new_segment.length:  # bug: need to fix
                 self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
                                                       f' {segment.point2.name}),'
                                                       f' segment({new_segment.point1.name},'
                                                       f' {new_segment.point2.name}))')
-        self.segments[self.generate_name(Segment)] = new_segment
+        self.segments[a.name+b.name] = new_segment
         return new_segment
 
     def add_circle(self, segment: Segment):
         circle = Circle(segment)
-        self.circles[self.generate_name(Circle)] = circle
+        self.circles[segment.point1.name+segment.point2.name] = circle
 
         return circle
 
     def generate_name(self) -> str:
-        if type is Circle:
-            num = len(self.circles)
-        elif type is Segment:
-            num = len(self.segments)
-        elif type is Point:
-            num = len(self.points)
-        else:
-            num = type
+        num = len(self.points)
         if num <= 25:
             return dictionary[num]
         else:
@@ -86,3 +78,9 @@ class Model:
             if segment.pointBelongs(Point, self.error):
                 pass
                 # return point + point.asd(segment)
+
+    def check_segment(self, point1, point2):
+        for name in (point1.name + point2.name, point2.name + point1.name):
+            if name in self.segments.keys():
+                return self.segments[name]
+        return self.add_segment(point1, point2)
