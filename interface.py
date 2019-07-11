@@ -6,7 +6,6 @@ import sys
 import webbrowser
 import geom as geometry
 import math
-from correctingPoints import correctingPoints
 from model import Model
 
 class WidgetWithText(QWidget):
