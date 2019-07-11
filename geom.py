@@ -8,6 +8,7 @@ class LineError(ValueError):
 
 
 class Circle:
+
     def intersectionLine(self, line):
         # line.normalVector()
         C = line.C + line.A * self.center.x + line.B * self.center.y
@@ -54,6 +55,9 @@ class Segment():
         self.point2 = point2
         self.length = point1.distToPoint(point2)
 
+    def __eq__(self, other, error=5):
+        return abs(other.length - self.length) <= error
+
     def __str__(self):
         return f"({str(self.point1)}; {str(self.point2)})"
 
@@ -80,10 +84,8 @@ class Line():
         return
 
     def intersection(self, line):
-        Avector = Vector(self.A, self.B)
-        if (Avector.crossProduct(Vector(line.A, line.B)) == 0):
-            return
-        else:
+        Avector = Vector(self.A, line.B)
+        if not (Avector.crossProduct(Vector(self.B, line.A)) == 0):
             denom = ((self.A * line.B) - (self.B * line.A))
             Fnumerator = ((self.C * line.B) - (self.B * line.C))
             Snumerator = (self.A * line.C) - (self.C * line.A)
@@ -129,18 +131,41 @@ class Vector:
 
     def length(self, point):
         return point.distToPoint(Point(0, 0))
-
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.length = math.hypot(x, y)
 
     def __sub__(self, other):
-        return Vector(self.x - other.x, self.y - other.y)
+        if isinstance(other, Point):
+            return Point(self.x - other.x, self.y - other.y)
+        elif isinstance(other, Vector):
+            return Vector(self.x - other.x, self.y - other.y)
+        else:
+            return Point(self.x - other, self.y - other)
 
     def __str__(self):
         return f"({self.x}, {self.y})"
 
+    def __le__(self, other):
+        if isinstance(other, Point) or isinstance(other, Vector):
+            return self.x <= other.x and self.y <= other.y
+        else:
+            return self.x <= other and self.y <= other
+
+    def __ge__(self, other):
+        if isinstance(other, Point) or isinstance(other, Vector):
+            return self.x >= other.x and self.y >= other.y
+        else:
+            return self.x >= other and self.y >= other
+
+    def __add__(self, other):
+        if isinstance(other, Point):
+            return Point(self.x + other.x, self.y + other.y)
+        elif isinstance(other, Vector):
+            return Vector(self.x + other.x, self.y + other.y)
+        else:
+            return Point(self.x + other, self.y + other)
 
 class Point(Vector):
     def __init__(self, x, y, name=None):
@@ -198,10 +223,10 @@ class Point(Vector):
 
 class BasicPoint(Point):
     def __init__(self, parent1, parent2):
-    if type(parent1) == Segment and type(parent2) == Segment:
-        interpoint = parent1.intersection(parent2)
-        if interpoint:
-            super().__init__(interpoint.x, interpoint.y)
+        if type(parent1) == Segment and type(parent2) == Segment:
+            interpoint = parent1.intersection(parent2)
+            if interpoint:
+                super().__init__(interpoint.x, interpoint.y)
 
 
 class DependPoint(Point):
