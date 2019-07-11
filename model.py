@@ -49,7 +49,7 @@ class Model:
         if num <= 25:
             return dictionary[num]
         else:
-            firstletter = dictionary[(num // 25) - 1]
+            firstletter = dictionary[(num // 26) - 1]
             secondletter = dictionary[(num % 26)]
             return firstletter + secondletter
 
