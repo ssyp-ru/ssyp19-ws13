@@ -22,12 +22,13 @@ class Circle:
         x2 = (-Bcoefficient - math.sqrt(Discriminant)) / (2 * Acoefficient)
         y1 = (-C - x1 * line.A) / line.B
         y2 = (-C - x2 * line.A) / line.B
-        return [Point(x1 + self.center.x, y1 + self.center.y), 
+        return [Point(x1 + self.center.x, y1 + self.center.y),
                 Point(x2 + self.center.x, y2 + self.center.y)]
 
-    def __init__(self, point, radius):
-        self.center = point
-        self.radius = radius
+    def __init__(self, segment):
+        self.center = segment.point1
+        self.radius = segment.length
+        self.point = segment.point2
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
@@ -131,6 +132,7 @@ class Vector:
 
     def length(self, point):
         return point.distToPoint(Point(0, 0))
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -166,6 +168,7 @@ class Vector:
             return Vector(self.x + other.x, self.y + other.y)
         else:
             return Point(self.x + other, self.y + other)
+
 
 class Point(Vector):
     def __init__(self, x, y, name=None):
@@ -219,6 +222,7 @@ class Point(Vector):
             return self.x >= other.x and self.y >= other.y
         else:
             return self.x >= other and self.y >= other
+
     def __str__(self):
         return "%s (%0.2f, %0.2f)" % (self.name, self.x, self.y)
 

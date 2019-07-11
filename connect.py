@@ -122,3 +122,7 @@ class PrologConnector:
     def assert_code(self, ins: str):
         for i in ins.split(','):
             self.prolog.assertz(i)
+
+    def retract_code(self, ins: str):
+        for i in ins.split(','):
+            self.prolog.retract(i)
