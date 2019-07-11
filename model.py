@@ -12,7 +12,7 @@ class Model:
         self.circles = {}
         self.operations = []
         self.alloperations = []
-        self.error = 10
+        self.error = 8
 
     def add_point(self, x: float, y: float):
         name = self.generate_name(Point)
@@ -47,7 +47,7 @@ class Model:
         if num <= 25:
             return dictionary[num]
         else:
-            firstletter = dictionary[(num // 26)]
+            firstletter = dictionary[(num // 26) - 1]
             secondletter = dictionary[(num % 26)]
             return firstletter + secondletter
 

@@ -11,17 +11,17 @@ class Circle:
 
     def intersectionLine(self, line):
         # line.normalVector()
-        C = line.C + line.A * self.center.x + line.B * self.center.y
+        C = line.C + (line.A * self.center.x) + (line.B * self.center.y)
         Acoefficient = line.B * line.B + line.A * line.A
         Bcoefficient = 2 * line.A * C
         Ccoefficient = C * C - line.B * line.B * self.radius * self.radius
         Discriminant = Bcoefficient * Bcoefficient - (4 * Acoefficient * Ccoefficient)
         if Discriminant < 0:
             return
-        y1 = (-Bcoefficient - math.sqrt(Discriminant)) / (2 * Acoefficient)
-        y2 = (-Bcoefficient + math.sqrt(Discriminant)) / (2 * Acoefficient)
-        x1 = (-C - y1 * line.B) / line.A
-        x2 = (-C - y2 * line.B) / line.A
+        x1 = (-Bcoefficient + math.sqrt(Discriminant)) / (2 * Acoefficient)
+        x2 = (-Bcoefficient - math.sqrt(Discriminant)) / (2 * Acoefficient)
+        y1 = (-C - x1 * line.A) / line.B
+        y2 = (-C - x2 * line.A) / line.B
         return [Point(x1 + self.center.x, y1 + self.center.y), 
                 Point(x2 + self.center.x, y2 + self.center.y)]
 
@@ -219,6 +219,8 @@ class Point(Vector):
             return self.x >= other.x and self.y >= other.y
         else:
             return self.x >= other and self.y >= other
+    def __str__(self):
+        return "%s (%0.2f, %0.2f)" % (self.name, self.x, self.y)
 
 
 class BasicPoint(Point):

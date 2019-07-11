@@ -116,6 +116,9 @@ class MainWidget(QMainWindow):
             paint.setBrush(self.pointBrushColor)
             paint.setPen(QPen(self.pointBrushColor, 2))
             paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
+            paint.setBrush(self.segmentBrushColor)
+            paint.setPen(QPen(self.segmentBrushColor, 2))
+            paint.drawText(point.x + 3, point.y - 3, str(point))
         self.update()
 
     def pointDrawing(self, x, y):
@@ -187,10 +190,10 @@ class MainWidget(QMainWindow):
             if self.pointCoords == []:
                 self.pointCoords = [event.x(), event.y()]
             else:
-                pointCoords = self.pointCoords
+                firstPointCoords = self.pointCoords
                 self.pointCoords = [event.x(), event.y()]
 
-                center = geometry.Point(pointCoords[0], pointCoords[1])
+                center = geometry.Point(firstPointCoords[0], firstPointCoords[1])
                 pointOnCircle = geometry.Point(self.pointCoords[0], self.pointCoords[1])
                 
                 self.circleWithRadiusDrawing(center, pointOnCircle)
