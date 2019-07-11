@@ -31,13 +31,13 @@ conj_append((X, Xs), Ys, (X, Zs)) :-conj_append(Xs, Ys, Zs).
 isCongruent(segment(A, B), segment(A, B)).
 isCongruent(segment(A, B), segment(B, A)).
 isCongruent(segment(A, B), segment(C, D)) :-
-			congruent(segment(B, A), segment(C, D)), !.
+			congruent(segment(B, A), segment(C, D)).
 isCongruent(segment(A, B), segment(C, D)) :-
-			congruent(segment(A, B), segment(C, D)), !.
+			congruent(segment(A, B), segment(C, D)).
 isCongruent(segment(A, B), segment(C, D)) :-
-			congruent(segment(B, A), segment(D, C)), !.
+			congruent(segment(B, A), segment(D, C)).
 isCongruent(segment(A, B), segment(C, D)) :-
-			congruent(segment(A, B), segment(D, C)), !.
+			congruent(segment(A, B), segment(D, C)).
 isCongruent(segment(A, B), segment(C, D)) :-
 			congruent(segment(A, B), X),
 			isCongruent(X, segment(C, D)).
