@@ -119,10 +119,7 @@ class Vector:
 
     def projection(self, vector):
         Nvector = self.singleDirectedVector()
-        return Nvector.__productVecByNum__(Nvector.dotproduct(vector))
-
-    def __productVecByNum__(self, num):
-        return Vector(self.x * num, self.y * num)
+        return Nvector * (Nvector.dotproduct(vector))
 
     def unitDirectedVector(self):
         return Vector((self.x / self.length), (self.y / self.length))
@@ -137,6 +134,12 @@ class Vector:
         self.x = x
         self.y = y
         self.length = math.hypot(x, y)
+
+    def __mul__(self, other:float):
+        return Vector(self.x * other, self.y * other)
+
+    def __truediv__(self, other:float):
+        return Vector(self.x / float, self.y / float)
 
     def __sub__(self, other):
         if isinstance(other, Point):
@@ -182,6 +185,22 @@ class Point(Vector):
                 # translator.connector.call(...)
                 # Here i need Vsevolod's code for request in prolog
 
+    def projectionOnLine(self, line):
+        PminusQ = line.point1 - line.point2 # Shifting coordinate system to
+        OminusQ = self - line.point2 # line.point2
+        dotProduct = PminusQ.dotproduct(OminusQ)
+        lengthSqw = PminusQ.length * PminusQ.length
+        desiredVector = ((PminusQ / lengthSqw) * dotProduct)
+        desiredPoint = Point(desiredVector.x, desiredVector.y)
+        return line.point2 + desiredPoint
+
+    def projectionOnSegment(self, segment):
+        segmentLine = Line(segment.point1, segment.point2)
+        projectPoint = self.projectionOnLine(segmentLine)
+        if segment.pointBelongs(projectPoint):
+            return projectPoint
+        return
+
     def distToPoint(self, point):
         return (self - point).length
 
@@ -196,13 +215,16 @@ class Point(Vector):
             return (min(self.distToPoint(segment.point1),
                     self.distToPoint(segment.point2)))
         else:
-            return self.distToline(segment)
+            return self.distToLine(segment)
 
     def __add__(self, other):
         if isinstance(other, Point) or isinstance(other, Vector):
             return Point(self.x + other.x, self.y + other.y)
         else:
             return Point(self.x + other, self.y + other)
+
+    def __truediv__(self, other):
+        return Point(self.x / other, self.y / other)
 
     # redefined sub func
     def __sub__(self, other):
