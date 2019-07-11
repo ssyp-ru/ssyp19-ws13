@@ -25,10 +25,31 @@ class Circle:
         return [Point(x1 + self.center.x, y1 + self.center.y),
                 Point(x2 + self.center.x, y2 + self.center.y)]
 
-    def __init__(self, segment):
-        self.center = segment.point1
-        self.radius = segment.length
-        self.point = segment.point2
+    def __init__(self, *args):
+        if isinstance(args[0], Segment):
+            segment = args[0]
+            self.center = segment.point1
+            self.radius = segment.length
+            self.point = segment.point2
+        else:
+            if isinstance(args[0], Point):
+                a, b, c, *_ = args
+            Bshifted = b - a
+            Cshifted = c - a
+            BshiftedSqwX = Bshifted.x * Bshifted.x
+            BshiftedSqwY = Bshifted.y * Bshifted.y
+            CshiftedSqwX = Cshifted.x * Cshifted.x
+            CshiftedSqwY = Cshifted.y * Cshifted.y
+            Denom = 2 * Bshifted.crossProduct(Cshifted)
+            FHalfNumerator = (BshiftedSqwX + BshiftedSqwY) * Cshifted.y
+            SHalfNumerator = (CshiftedSqwX + CshiftedSqwY) * Bshifted.y
+            DesiredX = a.x + (FHalfNumerator - SHalfNumerator) / Denom
+            FHalfNumerator = Bshifted.x * (BshiftedSqwX + BshiftedSqwY)
+            SHalfNumerator = Cshifted.x * (CshiftedSqwX + CshiftedSqwY)
+            DesiredY = a.y + (FHalfNumerator - SHalfNumerator) / Denom
+            self.center = Point(DesiredX, DesiredY)
+            self.radius = self.center.distToPoint(a)
+            self.point = a
 
     def __str__(self):
         return f"A circle centered at ({str(self.center)}) with radius {self.radius}"
