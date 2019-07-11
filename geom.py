@@ -14,10 +14,7 @@ class Circle:
         Acoefficient = line.B * line.B + line.A * line.A
         Bcoefficient = 2 * line.A * C
         Ccoefficient = C * C - line.B * line.B * self.radius * self.radius
-        print('DEBUG>>', line.A, line.B, C, line.C)
-        print('DEBUG>>', Acoefficient, Bcoefficient, Ccoefficient)
         Discriminant = Bcoefficient * Bcoefficient - (4 * Acoefficient * Ccoefficient)
-        print('DEBUG>>', Discriminant)
         if Discriminant < 0:
             return
         x1 = (-Bcoefficient + math.sqrt(Discriminant)) / (2 * Acoefficient)
@@ -112,12 +109,10 @@ class Segment():
 class Line():
     error = 1.0
     def normalize(self):
-        norm = math.sqrt(self.A*self.A + self.B*self.B)
-        if self.A < 0:
-            norm = -norm
-        self.A /= norm
-        self.B /= norm
-        self.C /= norm
+        Nvector = Vector(self.A, self.B).unitDirectedVector()
+        self.A = Nvector.x
+        self.B = Nvector.y
+        self.C = -Nvector.dotproduct(self.point1)
     def pointBelongs(self, point):
         ABvector = Vector(self.point2.x - self.point1.x,
                           self.point2.y - self.point1.y)

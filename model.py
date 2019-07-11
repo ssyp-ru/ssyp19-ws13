@@ -35,9 +35,8 @@ class Model:
         self.segments[self.generate_name(Segment)] = new_segment
         for circle in self.circles.values():
             interpoint = circle.intersectionLine(Line(new_segment.point1, new_segment.point2))
-            print(str(interpoint))
             if interpoint:
-                for point in interpoint.values():
+                for point in interpoint:
                     self.add_point(point.x, point.y)
         return new_segment
 

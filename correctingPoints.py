@@ -8,10 +8,9 @@ def correctingPoints(point, segments, circles):
         if -error < dist - circle.radius <= error:
             radialLine = geometry.Line(circle.center, point)
             list = circle.intersectionLine(radialLine)
-            print(radialLine, '\n', list)
             closest = min(list, key = lambda x: math.hypot(x.x-point.x, x.y-point.y))
-            print (f"Point {point} attracts to point {closest}")
- 
+            point = closest
+            return point
     for _, i in segments.items():
         if point.distToSegment(i) < error:
             return point.projectionOnSegment(i)
