@@ -1,6 +1,6 @@
 from Translator import Translator
 from geom import *
-from string import ascii_uppercase as dictionary
+from string import ascii_lowercase as dictionary
 
 
 class Model:
