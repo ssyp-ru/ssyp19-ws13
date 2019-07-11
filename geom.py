@@ -1,5 +1,4 @@
-import math 
-from scipy.optimize import fsolve
+import math
 # from Translator import Translator
 # translator = Translator()
 
@@ -11,8 +10,19 @@ class LineError(ValueError):
 class Circle:
     def intersectionLine(self, line):
         # line.normalVector()
-
-        return 
+        C = line.C + line.A * self.center.x + line.B * self.center.y
+        Acoefficient = line.B * line.B + line.A * line.A
+        Bcoefficient = 2 * line.A * C
+        Ccoefficient = C * C - line.B * line.B * self.radius * self.radius
+        Discriminant = Bcoefficient * Bcoefficient - (4 * Acoefficient * Ccoefficient)
+        if Discriminant < 0:
+            return
+        y1 = (-Bcoefficient - math.sqrt(Discriminant)) / (2 * Acoefficient)
+        y2 = (-Bcoefficient + math.sqrt(Discriminant)) / (2 * Acoefficient)
+        x1 = (-C - y1 * line.B) / line.A
+        x2 = (-C - y2 * line.B) / line.A
+        return [Point(x1 + self.center.x, y1 + self.center.y), 
+                Point(x2 + self.center.x, y2 + self.center.y)]
 
     def __init__(self, point, radius):
         self.center = point
@@ -187,12 +197,12 @@ class Point(Vector):
 
 
 class BasicPoint(Point):
-    pass
+    def __init__(self, parent1, parent2):
+    if type(parent1) == Segment and type(parent2) == Segment:
+        interpoint = parent1.intersection(parent2)
+        if interpoint:
+            super().__init__(interpoint.x, interpoint.y)
 
 
 class DependPoint(Point):
-    def __init__(self, parent1, parent2):
-        if type(parent1) == Segment and type(parent2) == Segment:
-            interpoint = parent1.intersection(parent2)
-            if interpoint:
-                super().__init__(interpoint.x, interpoint.y)
+    pass
