@@ -27,7 +27,7 @@ conj_append((X,Xs),Ys,(X,Zs)):-conj_append(Xs,Ys,Zs).
 :-dynamic circle/2.
 :-dynamic point/1.
 :-dynamic laysBetween/3.
-:-dynamic congruent/2.
+:-dynamic ``/2.
 
 laysBetweenLaw(X, X, X).
 
