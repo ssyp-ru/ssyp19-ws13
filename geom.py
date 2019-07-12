@@ -107,7 +107,12 @@ class Segment():
         return (self.point1 != other.point1 or self.point2 != other.point2) and (self.point2 != other.point1 or self.point1 != other.point2)
 
     def __str__(self):
-        return f"({str(self.point1)}; {str(self.point2)})"
+        return f"({str(self.point1)}; {str(self.point2)})."
+    def __repr__(self):
+        return f"({str(self.point1)}; {str(self.point2)})."
+
+    def __hash__(self):
+        return hash(self.point1) ^ hash(self.point2)
 
 
 class Line():

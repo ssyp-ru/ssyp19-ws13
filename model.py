@@ -12,6 +12,7 @@ class Model:
         self.circles = {}
         self.operations = []
         self.alloperations = []
+        self.CongruentSegments = {}
         self.error = 6
 
     def add_point(self, x: float, y: float, Fixed = False, parent1 = None, parent2 = None):
@@ -66,7 +67,7 @@ class Model:
             if interpoint:
                 self.add_point(1, 1, True, new_segment, circle)
         for segment in self.segments.values():
-            if -100 < segment.length - new_segment.length < 100:
+            if -10 < segment.length - new_segment.length < 10:
                 segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
                 segment2 = f'segment({new_segment.point1.name}, {new_segment.point2.name})'
                 self.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
@@ -134,5 +135,35 @@ class Model:
         return point
 
     def correctingScheme(self):
-        solutions = self.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
+        def equation(inputvector):
+            tempmodel = self.copy()
+            i = 0
+            for point in tempmodel.points:
+                if not isinstance(point, DependPoint):
+                    point.x = inputvector[i]
+                    point.y = inputvector[i+1]
+                    i += 2
+            y = [0] * len(x)
+            
+            X  = tempmodel.get_congruency_class()
+            avglen = sum([x.length for x in X])/len(X)
+            y[j] = sum([abs(x.length -avglen) for x in X])
+
+            return y
+
         
+        for i, val in self.CongruentSegments.items():
+            fsolve(equation, val + i)
+
+    
+    def findPointFromName(self, name):
+        res = self.points.get(str(name))
+        return res
+
+    def getCongruencyClass(self, index):
+        i = 0
+        if not index > len(self.CongruentSegments):
+            for key, val in self.CongruentSegments.items():
+                if i == index:
+                    return val + key
+                i += 1
