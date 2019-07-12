@@ -53,6 +53,8 @@ class Model:
         return point 
 
     def add_segment(self, a: Point, b: Point):
+        if a.name > b.name:
+            a, b  = b, a
         new_segment = Segment(a, b)
         split = {}
         for k, segment in self.segments.items():

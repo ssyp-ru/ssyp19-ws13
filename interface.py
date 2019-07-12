@@ -35,8 +35,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.model = Model()
-        self.console = Console(model=self.model, parent=None)
-        self.console.resize(600, 300)
+        self.console = Console(model=self.model, parent=self)
+        self.console.move(0, 600)
+        self.console.resize(900, 100)
         self.canvas = Canvas(parent=self, model=self.model)
         self.canvas.resize(900, 600)
         self.brushes = []
@@ -123,9 +124,9 @@ class MainWindow(QMainWindow):
         elif self.brushtype == "circle":
             self.brushundertype = "radius"
             self.circleRadiusBrush.setChecked(True)
-        elif self.brushtype == "competitor":
-            self.brushundertype = "competitor"
-            self.competitorNormalBrush.setChecked(True)
+        elif self.brushtype == "congruency":
+            self.brushundertype = "congruency"
+            self.congruencyNormalBrush.setChecked(True)
 
     def setUnderType(self, typeOfUnderType, underTypeObject, brushObject):
         self.brushundertype = typeOfUnderType
@@ -144,7 +145,7 @@ class MainWindow(QMainWindow):
         self.pointCoords = []
         self.select = list()
 
-    def prove(self):
+    def addCongruency(self):
         s = self.select[0]
         for segment in self.select:
             if segment is not s:
@@ -152,9 +153,9 @@ class MainWindow(QMainWindow):
                 segment2 = f'segment({s.point1.name}, {s.point2.name})'
                 self.model.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
                 s = segment
-
-        solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
-        for el in solutions[2::]:
+    def fixScheme(self):
+        solutions = self.model.translator.connector.get_n_ans_new("congruented(X, Y)")[0]
+        for el in solutions:
             point1 = self.model.findPointFromName(el['X'].args[0])
             point2 = self.model.findPointFromName(el['X'].args[1])
             point3 = self.model.findPointFromName(el['Y'].args[0])
@@ -277,22 +278,22 @@ class MainWindow(QMainWindow):
         self.circleRadiusBrush.setChecked(True)
         self.newUnderType(self.circleBrush, self.circleRadiusBrush)
 
-    def competitorBrushActionCreating(self):
-        self.competitorBrush = QAction("&Competitor", self, checkable=True)
-        self.competitorBrush.setShortcut("Ctrl+4")
-        self.competitorBrush.setStatusTip("Set competitor")
-        self.competitorBrush.setToolTip("Set <b>competitor</b>")
-        self.competitorBrush.triggered.connect(lambda event: self.setBrushType("competitor", self.competitorBrush))
-        self.competitorBrush.setChecked(False)
-        self.newBrush(self.competitorBrush)
+    def congruencyBrushActionCreating(self):
+        self.congruencyBrush = QAction("&Congruency", self, checkable=True)
+        self.congruencyBrush.setShortcut("Ctrl+4")
+        self.congruencyBrush.setStatusTip("Set congruency")
+        self.congruencyBrush.setToolTip("Set <b>congruency</b>")
+        self.congruencyBrush.triggered.connect(lambda event: self.setBrushType("congruency", self.congruencyBrush))
+        self.congruencyBrush.setChecked(False)
+        self.newBrush(self.congruencyBrush)
 
-        self.competitorNormalBrush = QAction("&Competitor", self, checkable=True)
-        self.competitorNormalBrush.setStatusTip("Set competitor")
-        self.competitorNormalBrush.setToolTip("Set <b>competitor</b>")
-        self.competitorNormalBrush.triggered.connect(
-            lambda event: self.setUnderType("competitor", self.competitorNormalBrush, self.competitorBrush))
-        self.competitorNormalBrush.setChecked(True)
-        self.newUnderType(self.competitorBrush, self.competitorNormalBrush)
+        self.congruencyNormalBrush = QAction("&Congruency", self, checkable=True)
+        self.congruencyNormalBrush.setStatusTip("Set congruency")
+        self.congruencyNormalBrush.setToolTip("Set <b>congruency</b>")
+        self.congruencyNormalBrush.triggered.connect(
+            lambda event: self.setUnderType("congruency", self.congruencyNormalBrush, self.congruencyBrush))
+        self.congruencyNormalBrush.setChecked(True)
+        self.newUnderType(self.congruencyBrush, self.congruencyNormalBrush)
 
     def editActionsCreating(self):
 
@@ -302,11 +303,11 @@ class MainWindow(QMainWindow):
         self.resetCommand.setToolTip("<b>Reset</b> point")
         self.resetCommand.triggered.connect(self.reset)
 
-        self.proveCommand = QAction("&Prove", self)
-        self.proveCommand.setShortcut("Ctrl+P")
-        self.proveCommand.setStatusTip("Proved")
-        self.proveCommand.setToolTip("<b>Prove</b>")
-        self.proveCommand.triggered.connect(self.prove)
+        self.addCongruencyCommand = QAction("Add &Congruency", self)
+        self.addCongruencyCommand.setShortcut("Ctrl+G")
+        self.addCongruencyCommand.setStatusTip("Congruency added")
+        self.addCongruencyCommand.setToolTip("<b>Add Congruency</b>")
+        self.addCongruencyCommand.triggered.connect(self.addCongruency)
 
     def viewActionsCreating(self):
         self.backgroundColorCommand = QAction("&Background", self)
@@ -376,14 +377,14 @@ class MainWindow(QMainWindow):
         self.typeBrushes.addAction(self.pointBrush)
         self.typeBrushes.addAction(self.segmentBrush)
         self.typeBrushes.addAction(self.circleBrush)
-        self.typeBrushes.addAction(self.competitorBrush)
+        self.typeBrushes.addAction(self.congruencyBrush)
 
         self.undertypeBrushes.addAction(self.pointPointBrush)
         self.undertypeBrushes.addAction(self.pointInObjectBrush)
 
         self.editMenu = self.menubar.addMenu("&Edit")
         self.editMenu.addAction(self.resetCommand)
-        self.editMenu.addAction(self.proveCommand)
+        self.editMenu.addAction(self.addCongruencyCommand)
 
         self.viewMenu = self.menubar.addMenu("&View")
         self.foregroundMenu = QMenu("&Foreground", self)
@@ -409,7 +410,7 @@ class MainWindow(QMainWindow):
         self.toolbar.addAction(self.pointBrush)
         self.toolbar.addAction(self.segmentBrush)
         self.toolbar.addAction(self.circleBrush)
-        self.toolbar.addAction(self.competitorBrush)
+        self.toolbar.addAction(self.congruencyBrush)
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.resetCommand)
         self.toolbar.addSeparator()
@@ -417,7 +418,7 @@ class MainWindow(QMainWindow):
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.quitAct)
         self.toolbar.addSeparator()
-        self.toolbar.addAction(self.proveCommand)
+        self.toolbar.addAction(self.addCongruencyCommand)
         self.toolbar.addSeparator()
 
     def initUI(self):
@@ -428,7 +429,7 @@ class MainWindow(QMainWindow):
         self.centering()
 
         self.image = QImage(self.width(), self.height(), QImage.Format_ARGB32)
-        self.image.fill(QColor(255, 255, 255))
+        self.image.fill(QColor(64, 0, 128))
 
         self.setToolTip("<b>Drawing Place</b>")
 
@@ -436,15 +437,12 @@ class MainWindow(QMainWindow):
         self.pointBrushActionsCreating()
         self.segmentBrushActionsCreating()
         self.circlesBrushActionsCreating()
-        self.competitorBrushActionCreating()
+        self.congruencyBrushActionCreating()
         self.editActionsCreating()
         self.viewActionsCreating()
         self.helpActionsCreating()
         self.menuCreating()
         self.toolbarFilling()
-
-        # self.console.move(0, 600)
-        # self.canvas.move(0, 25)
 
         QApplication.setOverrideCursor(Qt.CrossCursor)
 
@@ -564,8 +562,8 @@ class Canvas(QWidget):
             self.segmentContol(event)
         if self.parent.brushtype == "circle":
             self.circleControl(event)
-        if self.parent.brushtype == "competitor":
-            self.competitorControl(event)
+        if self.parent.brushtype == "congruency":
+            self.congruencyControl(event)
         self.update()
 
     def pointControl(self, event):
@@ -609,7 +607,7 @@ class Canvas(QWidget):
             self.update()
             self.parent.pointCoords = []
 
-    def competitorControl(self, event):
+    def congruencyControl(self, event):
             newPoint = geometry.Point(event.x(), event.y())
             for segment in self.parent.model.segments.values():
                 if segment.pointBelongs(newPoint):
@@ -624,17 +622,17 @@ class Canvas(QWidget):
         #     newPoint = geometry.Point(event.x(), event.y())
         #     for segment in self.parent.model.segments.values():
         #         if segment.pointBelongs(newPoint):
-        #             if segment == self.parent.competitorFirstElement:
+        #             if segment == self.parent.congruencyFirstElement:
         #                 self.messageSend("Error")
         #             else:
-        #                 self.parent.newCompetitor(self.parent.competitorFirstElement, segment)
+        #                 self.parent.newCongruency(self.parent.congruencyFirstElement, segment)
         #                 self.parent.pointCoords = []
         #                 segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
-        #                 segment2 = f'segment({self.parent.competitorFirstElement.point1.name}, {self.parent.competitorFirstElement.point2.name})'
+        #                 segment2 = f'segment({self.parent.congruencyFirstElement.point1.name}, {self.parent.congruencyFirstElement.point2.name})'
         #                 self.model.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
-        #                 self.parent.prove()
+        #                 self.parent.addCongruency()
         #                 self.parent.messageSend("Second segment selected")
-        #                 self.parent.competitorFirstElement = None
+        #                 self.parent.congruencyFirstElement = None
 
     def pointCreating(self, x, y):
         p = self.parent.newPoint(x, y)
