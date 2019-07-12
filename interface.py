@@ -169,7 +169,7 @@ class MainWindow(QMainWindow):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.flag = True
-            self.drawingObjects(event)
+            #self.drawingObjects(event)
         elif event.button() == Qt.RightButton:
             self.update()
 
@@ -544,10 +544,13 @@ class Canvas(QWidget):
         for circle in self.parent.model.circles.values():
             self.circleDrawing(paint, circle.center.x, circle.center.y, circle.radius)
         for point in self.parent.model.points.values():
-            if str(type(point)) == "<class \'geom.Point\'>":
-                self.pointDrawing(paint, point.x, point.y, str(point))
-            else:
-                self.dependingPointDrawing(paint, point.x, point.y, str(point))
+            self.pointDrawing(paint, point.x, point.y, str(point))
+        for point in self.parent.model.dependpoints.values():
+            self.dependingPointDrawing(paint, point.x, point.y, str(point))
+            # if str(type(point)) == "<class \'geom.Point\'>":
+            #     self.pointDrawing(paint, point.x, point.y, str(point))
+            # else:
+            #     self.dependingPointDrawing(paint, point.x, point.y, str(point))
         self.update()
 
     def mousePressEvent(self, event):
