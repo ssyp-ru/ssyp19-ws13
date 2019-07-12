@@ -101,7 +101,7 @@ class Model:
 
         for circle in circles.values():
             radial = point-circle.center
-            if (abs(radial)-circle.radius) < error:
+            if abs(abs(radial)-circle.radius) < error:
                 unit = radial/abs(radial)
                 point = circle.center + unit*circle.radius
                 point.parent1 = circle
