@@ -1,7 +1,7 @@
 from Translator import Translator
 from geom import *
 from string import ascii_lowercase as dictionary
-
+from scipy.optimize import fsolve
 
 class Model:
 
@@ -12,23 +12,52 @@ class Model:
         self.circles = {}
         self.operations = []
         self.alloperations = []
-        self.error = 8
+        self.error = 6
 
-    def add_point(self, x: float, y: float):
+    def add_point(self, x: float, y: float, Fixed = False, parent1 = None, parent2 = None):
         name = self.generate_name()
-        p = Point(x, y, name)
         self.translator.connector.prolog.assertz(f'point({name})')
-        self.points[name] = p
+        if not Fixed:
+            point = Point(x, y, name)
+            self.points[name] = point
+        elif isinstance(parent2, Circle) and isinstance(parent1, Segment):
+            points = parent2.intersectionSegment(parent1)
+            if len(points) > 1:
+                for i, el in enumerate(points):
+                    point = DependPoint(name, parent1, parent2, i)
+                    self.points[name] = point
+                    name = self.generate_name()
+                return point
+            else:
+                point = DependPoint(name, parent1, parent2)
+                self.points[name] = point
+                name = self.generate_name()
+        else:
+            point = DependPoint(name, parent1, parent2)
+            self.points[name] = point
         for segment in self.segments.values():
-            if segment.pointBelongs(p):
+            if segment.pointBelongs(point):
                 self.translator.connector.prolog.assertz(\
-                    f'laysBetween({segment.point1.name}, {segment.point2.name}, {name})')
+                    f'laysBetween({segment.point1.name}, {segment.point2.name}, {point.name})')
                 print(self.translator.connector.get_n_ans_new(\
                     f'isCongruent({segment.point1.name}, {segment.point2.name})'))
-        return p
+        return point 
 
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
+        for segment in self.segments.values():
+            interpoint = new_segment.intersection(segment)
+            if interpoint:
+                self.add_point(1, 1, True, new_segment, segment)
+            if segment.length == new_segment.length:
+                self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
+                                                      f' {segment.point2.name}),'
+                                                      f' segment({new_segment.point1.name},'
+                                                      f' {new_segment.point2.name}))')
+        for circle in self.circles.values():
+            interpoint = circle.intersectionSegment(Segment(new_segment.point1, new_segment.point2))
+            if interpoint:
+                self.add_point(1, 1, True, new_segment, circle)
         for segment in self.segments.values():
             if -100 < segment.length - new_segment.length < 100:
                 segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
@@ -91,3 +120,7 @@ class Model:
     def reset_prolog(self):
         del self.translator
         self.translator = Translator()
+
+    def correctingScheme(self):
+        solutions = self.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
+        solutions = set(solutions[2::])

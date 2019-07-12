@@ -172,12 +172,12 @@ class MainWindow(QMainWindow):
                     self.pointCoords = [event.x(), event.y()]
                     point1 = geometry.Point(pointCoords[0], pointCoords[1])
                     point2 = geometry.Point(self.pointCoords[0], self.pointCoords[1])
+                    self.pointCoords = []
                     if self.brushundertype == "segment":
                         self.segmentDrawing(point1, point2)
                     elif self.brushundertype == "segmentwithpoints":
                         self.segmentWithPointsDrawing(point1, point2)
                     self.update()
-                    self.pointCoords = []
 
         if self.brushtype == "circle":
             if self.pointCoords == []:
@@ -278,8 +278,9 @@ class MainWindow(QMainWindow):
 
     def prove(self):
         solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
+        solutions = set(solutions)
         for solution in solutions:
-            print(solution)
+            # print(solution)
             print(f"{solution['X']} == {solution['Y']}")
 
     def mousePressEvent(self, event):
@@ -496,7 +497,7 @@ class MainWindow(QMainWindow):
 
         self.helpMenu = self.menubar.addMenu("&Help")
         self.helpMenu.addAction(self.referenceCommand)
-        self.helpMenu.addAction(self.authorsCommand)
+        self.helpMenu.addAction(self.authorsCommand) 
 
     def toolbarFilling(self):
         self.toolbar = self.addToolBar("Toolbar")

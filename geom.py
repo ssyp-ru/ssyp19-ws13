@@ -10,7 +10,6 @@ class LineError(ValueError):
 class Circle:
 
     def intersectionLine(self, line):
-        # line.normalVector()
         C = line.C + (line.A * self.center.x) + (line.B * self.center.y)
         Acoefficient = line.B * line.B + line.A * line.A
         Bcoefficient = 2 * line.A * C
@@ -22,8 +21,31 @@ class Circle:
         x2 = (-Bcoefficient - math.sqrt(Discriminant)) / (2 * Acoefficient)
         y1 = (-C - x1 * line.A) / line.B
         y2 = (-C - x2 * line.A) / line.B
+
         return [Point(x1 + self.center.x, y1 + self.center.y),
                 Point(x2 + self.center.x, y2 + self.center.y)]
+
+    def intersectionSegment(self, segment):
+        segmentLine = Line(segment.point1, segment.point2)
+        interpoints = self.intersectionLine(segmentLine)
+        if not interpoints:
+            return
+        return [i for i in interpoints if segment.pointBelongs(i)]
+
+    def intersectionCircle(self, circle):
+        RadiusSqw1 = self.radius * self.radius
+        RadiusSqw2 = circle.radius * circle.radius
+        Xshifted = circle.center.x - self.center.x
+        Yshifted = circle.center.y - self.center.y
+        XshiftedSqw = Xshifted * Xshifted
+        YshiftedSqw = Yshifted * Yshifted
+        AnewLine = 2 * Xshifted
+        BnewLine = 2 * Yshifted
+        CnewLine = RadiusSqw2 - RadiusSqw1 - (XshiftedSqw + YshiftedSqw)
+        line = Line(AnewLine, BnewLine, CnewLine)
+        line.normalize()
+        print(str(line))
+        return self.intersectionLine(Line(AnewLine, BnewLine, CnewLine))
 
     def __init__(self, *args):
         if isinstance(args[0], Segment):
@@ -89,6 +111,7 @@ class Segment():
 
 
 class Line():
+    error = 1.0
 
     def normalize(self):
         Nvector = Vector(self.A, self.B).unitDirectedVector()
@@ -101,7 +124,7 @@ class Line():
                           self.point2.y - self.point1.y)
         ACvector = Vector(point.x - self.point1.y,
                           point.y - self.point1.y)
-        return ABvector.crossProduct(ACvector) == 0
+        return ABvector.crossProduct(ACvector) < self.error
 
     def intersectionSegment(self, segment):
         interpoint = self.intersection(Line(segment.point1, segment.point2))
@@ -111,23 +134,27 @@ class Line():
         return
 
     def intersection(self, line):
-        Avector = Vector(self.A, line.B)
-        if not (Avector.crossProduct(Vector(self.B, line.A)) == 0):
-            denom = ((self.A * line.B) - (self.B * line.A))
-            Fnumerator = ((self.C * line.B) - (self.B * line.C))
-            Snumerator = (self.A * line.C) - (self.C * line.A)
+        Avector = Vector(self.A, self.B)
+        denom = Avector.crossProduct(Vector(line.A, line.B))
+        if not denom == 0:
+            Fnumerator = ((self.B * line.C) - (self.C * line.B))
+            Snumerator = (line.A * self.C) - (line.C * self.A)
             return Point(Fnumerator / denom, Snumerator / denom)
 
-    def __init__(self, point1, point2):
-        if ((point1.x == point2.x) and (point1.y == point2.y)):
-            raise(LineError("That points are the same"))
-        else:
+    def __init__(self, *args):
+        if isinstance(args[0], Point):
+            point1, point2 = args
+            if ((point1.x == point2.x) and (point1.y == point2.y)):
+                raise(LineError("That points are the same"))
             self.point1 = point1
             self.point2 = point2
             self.A = point2.y - point1.y
             self.B = -(point2.x - point1.x)
             Nvector = Vector(self.A, self.B)
-            self.C = Nvector.dotproduct(Vector(point1.x, point1.y))
+            self.C = Nvector.dotproduct(point1)
+            self.normalize()
+        else:
+            self.A, self.B, self.C, *_ = args
             self.normalize()
 
     def __str__(self):
@@ -273,14 +300,39 @@ class Point(Vector):
     def __str__(self):
         return "%s (%0.2f, %0.2f)" % (self.name, self.x, self.y)
 
+    def __hash__(self):
+        return hash(self.name)
+
 
 class BasicPoint(Point):
-    def __init__(self, parent1, parent2):
-        if type(parent1) == Segment and type(parent2) == Segment:
-            interpoint = parent1.intersection(parent2)
-            if interpoint:
-                super().__init__(interpoint.x, interpoint.y)
+    pass
 
 
 class DependPoint(Point):
-    pass
+    def __init__(self, name, parent1, parent2, index=0):
+        if isinstance(parent1, Segment):
+            if isinstance(parent2, Segment):
+                interpoint = parent1.intersection(parent2)
+                if interpoint:
+                    super().__init__(interpoint.x, interpoint.y)
+                self.parent1 = parent1
+                self.parent2 = parent2
+                self.name = name
+
+            else:
+                interpoint = parent2.intersectionSegment(parent1)
+                i = interpoint[index]
+                super().__init__(i.x, i.y)
+                self.parent1 = parent1
+                self.parent2 = parent2
+                self.name = name
+        else:
+            if isinstance(point2, Segment):
+                interpoint = parent1.intersectionSegment(parent2)
+                i = interpoint[index]
+                super().__init__(i.x, i.y)
+                self.parent1 = parent1
+                self.parent2 = parent2
+                self.name = name
+            else:
+                pass
