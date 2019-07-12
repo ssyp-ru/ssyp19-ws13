@@ -619,21 +619,6 @@ class Canvas(QWidget):
                         self.parent.messageSend("Segment selected")
                     else:
                         self.parent.messageSend("Error")
-        # else:
-        #     newPoint = geometry.Point(event.x(), event.y())
-        #     for segment in self.parent.model.segments.values():
-        #         if segment.pointBelongs(newPoint):
-        #             if segment == self.parent.competitorFirstElement:
-        #                 self.messageSend("Error")
-        #             else:
-        #                 self.parent.newCompetitor(self.parent.competitorFirstElement, segment)
-        #                 self.parent.pointCoords = []
-        #                 segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
-        #                 segment2 = f'segment({self.parent.competitorFirstElement.point1.name}, {self.parent.competitorFirstElement.point2.name})'
-        #                 self.model.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
-        #                 self.parent.prove()
-        #                 self.parent.messageSend("Second segment selected")
-        #                 self.parent.competitorFirstElement = None
 
     def pointCreating(self, x, y):
         p = self.parent.newPoint(x, y)

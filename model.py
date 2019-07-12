@@ -63,6 +63,7 @@ class Model:
             if interpoint:
                 if isinstance(self.pointExist(interpoint), Point):
                     self.add_point(1, 1, True, segment, new_segment)
+                   # TODO: comment from here if error
         #            break
         #if split:
         #    del self.segments[k]
@@ -76,12 +77,12 @@ class Model:
             interpoint = circle.intersectionSegment(Segment(new_segment.point1, new_segment.point2))
             if interpoint:
                 self.add_point(1, 1, True, new_segment, circle)
-
-        for segment in self.segments.values():
-            if -error - 10 < segment.length - new_segment.length < error + 10:
-                segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
-                segment2 = f'segment({new_segment.point1.name}, {new_segment.point2.name})'
-                self.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
+        # TODO may this not important
+        # for segment in self.segments.values():
+        #     if -error - 10 < segment.length - new_segment.length < error + 10:
+        #         segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
+        #         segment2 = f'segment({new_segment.point1.name}, {new_segment.point2.name})'
+        #         self.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
         self.segments[a.name + b.name] = new_segment
         return new_segment
 
