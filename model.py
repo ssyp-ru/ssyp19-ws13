@@ -26,19 +26,18 @@ class Model:
             points = parent2.intersectionSegment(parent1)
             if len(points) > 1:
                 for i, el in enumerate(points):
-                    if isinstance(self.pointExist(el), Point):  
+                    if isinstance(self.pointExist(el), Point):
                         point = DependPoint(name, parent1, parent2, i)
                         self.points[name] = point
                         name = self.generate_name()
                         self.translator.connector.prolog.assertz(f'point({name})')
                 return point
-            # else:
-            #     print(1)
-            #     point = DependPoint(name, parent1, parent2)
-            #     if isinstance(self.pointExist(point), Point):
-            #         self.points[name] = point
-            #         name = self.generate_name()
-            #         self.translator.connector.prolog.assertz(f'point({name})')
+            else:
+                point = DependPoint(name, parent1, parent2)
+                if isinstance(self.pointExist(point), Point):
+                    self.points[name] = point
+                    name = self.generate_name()
+                    self.translator.connector.prolog.assertz(f'point({name})')
         else:
             point = DependPoint(name, parent1, parent2)
             self.points[name] = point
