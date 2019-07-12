@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         self.fieldHeight = 600
         self.zoomValue = 100
         self.operations = []
-        self.selected = {}
+        self.selected = set()
         self.competitorFirstElement = None
         self.table = False
 
@@ -125,9 +125,6 @@ class MainWindow(QMainWindow):
     def pointInObjectCreating(self, x, y):
         self.newPoint(x, y)
         self.messageSend("Point succesfully placed" + " " * 10 + str(x) + ", " + str(y))
-
-    def pointIntersectionCreating(self, parent1, parent2):
-        pass
 
     def segmentCreating(self, point1, point2):
         n_point1, n_point2 = self.model.correcting_points(point1, point2)
@@ -322,12 +319,23 @@ class MainWindow(QMainWindow):
 
     def reset(self):
         self.pointCoords = []
+        self.selected = set()
 
     def prove(self):
         solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
-        for solution in solutions:
-            print(solution)
-            print(f"{solution['X']} == {solution['Y']}")
+        for el in solutions[2::]:
+            point1 = self.model.findPointFromName(el['X'].args[0])
+            point2 = self.model.findPointFromName(el['X'].args[1])
+            point3 = self.model.findPointFromName(el['Y'].args[0])
+            point4 = self.model.findPointFromName(el['Y'].args[1])
+            Xsegment = geometry.Segment(point1, point2)
+            Ysegment = geometry.Segment(point3, point4)
+            # print(XsYsegment)
+            if Xsegment not in self.model.CongruentSegments:
+                self.model.CongruentSegments[Xsegment] = set()
+            self.model.CongruentSegments[Xsegment].add(Ysegment)
+        # print(self.model.getCongruencyClass(0))
+        # self.model.correctingScheme()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -429,12 +437,6 @@ class MainWindow(QMainWindow):
         self.pointInObjectBrush.triggered.connect(lambda event: self.setUnderType("pointinobject", self.pointInObjectBrush, self.pointBrush))
         self.pointInObjectBrush.setChecked(False)
         self.newUnderType(self.pointBrush, self.pointInObjectBrush)
-
-        self.pointIntersectionBrush = QAction("&Intersection", self, checkable=True)
-        self.pointIntersectionBrush.setStatusTip("Making Intersection")
-        self.pointIntersectionBrush.setToolTip("Making <b>Intersection</b>")
-        self.pointIntersectionBrush.triggered.connect(lambda event: self.setUnderType("intersection", self.pointIntersectionBrush, self.pointBrush))
-        self.newUnderType(self.pointBrush, self.pointIntersectionBrush)
 
     def segmentBrushActionsCreating(self):
         self.segmentBrush = QAction("&Segment", self, checkable=True)
