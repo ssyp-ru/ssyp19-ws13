@@ -16,25 +16,31 @@ class Model:
 
     def add_point(self, x: float, y: float, Fixed = False, parent1 = None, parent2 = None):
         name = self.generate_name()
-        self.translator.connector.prolog.assertz(f'point({name})')
         if not Fixed:
             point = Point(x, y, name)
+            print(str(point))
             self.points[name] = point
+            self.translator.connector.prolog.assertz(f'point({name})')
         elif isinstance(parent2, Circle) and isinstance(parent1, Segment):
             points = parent2.intersectionSegment(parent1)
             if len(points) > 1:
                 for i, el in enumerate(points):
-                    point = DependPoint(name, parent1, parent2, i)
-                    self.points[name] = point
-                    name = self.generate_name()
+                    if isinstance(self.pointExist(el), Point):  
+                        point = DependPoint(name, parent1, parent2, i)
+                        self.points[name] = point
+                        name = self.generate_name()
+                        self.translator.connector.prolog.assertz(f'point({name})')
                 return point
             else:
                 point = DependPoint(name, parent1, parent2)
-                self.points[name] = point
-                name = self.generate_name()
+                if isinstance(self.pointExist(point), Point):
+                    self.points[name] = point
+                    name = self.generate_name()
+                    self.translator.connector.prolog.assertz(f'point({name})')
         else:
             point = DependPoint(name, parent1, parent2)
             self.points[name] = point
+            self.translator.connector.prolog.assertz(f'point({name})')
         for segment in self.segments.values():
             if segment.pointBelongs(point):
                 self.translator.connector.prolog.assertz(\
@@ -48,7 +54,8 @@ class Model:
         for segment in self.segments.values():
             interpoint = new_segment.intersection(segment)
             if interpoint:
-                self.add_point(1, 1, True, new_segment, segment)
+                if isinstance(self.pointExist(interpoint), Point):
+                    self.add_point(1, 1, True, new_segment, segment)
             if segment.length == new_segment.length:
                 self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
                                                       f' {segment.point2.name}),'
@@ -119,6 +126,12 @@ class Model:
 
     def reset_prolog(self):
         self.translator = Translator()
+
+    def pointExist(self, point):
+        for _, i in self.points.items():
+            if point == i:
+                return True
+        return point
 
     def correctingScheme(self):
         solutions = self.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]

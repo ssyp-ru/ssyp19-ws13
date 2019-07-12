@@ -1,7 +1,7 @@
 import math
 # from Translator import Translator
 # translator = Translator()
-
+error = 1.0
 
 class LineError(ValueError):
     pass
@@ -275,8 +275,12 @@ class Point(Vector):
             return Point(self.x + other.x, self.y + other.y)
         else:
             return Point(self.x + other, self.y + other)
+    
     def __truediv__(self, other):
         return Point(self.x / other, self.y / other)
+
+    def __eq__(self, other):
+        return self.distToPoint(other) < error
 
     # redefined sub func
     def __sub__(self, other):
