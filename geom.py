@@ -44,7 +44,6 @@ class Circle:
         CnewLine = RadiusSqw2 - RadiusSqw1 - (XshiftedSqw + YshiftedSqw)
         line = Line(AnewLine, BnewLine, CnewLine)
         line.normalize()
-        print(str(line))
         return self.intersectionLine(Line(AnewLine, BnewLine, CnewLine))
 
     def __init__(self, *args):

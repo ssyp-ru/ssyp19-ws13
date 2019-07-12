@@ -184,9 +184,24 @@ class MainWindow(QMainWindow):
 
     def prove(self):
         solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
-        for solution in solutions:
-            print(solution)
-            print(f"{solution['X']} == {solution['Y']}")
+        for el in solutions[2::]:
+            point1 = self.model.findPointFromName(el['X'].args[0])
+            point2 = self.model.findPointFromName(el['X'].args[1])
+            point3 = self.model.findPointFromName(el['Y'].args[0])
+            point4 = self.model.findPointFromName(el['Y'].args[1])
+            Xsegment = geometry.Segment(point1, point2)
+            Ysegment = geometry.Segment(point3, point4)
+            if Xsegment not in self.model.CongruentSegments:
+                self.model.CongruentSegments[Xsegment] = set()
+            self.model.CongruentSegments[Xsegment].add(Ysegment)
+        self.model.correctingScheme()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.flag = True
+            self.drawingObjects(event)
+        elif event.button() == Qt.RightButton:
+            self.update()
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_QuoteLeft:
