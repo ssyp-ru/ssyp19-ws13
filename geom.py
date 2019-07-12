@@ -300,6 +300,9 @@ class Point(Vector):
     def __str__(self):
         return "%s (%0.2f, %0.2f)" % (self.name, self.x, self.y)
 
+    def __hash__(self):
+        return hash(self.name)
+
 
 class BasicPoint(Point):
     pass

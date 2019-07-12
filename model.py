@@ -1,7 +1,7 @@
 from Translator import Translator
 from geom import *
 from string import ascii_lowercase as dictionary
-
+from scipy.optimize import fsolve
 
 class Model:
 
@@ -12,7 +12,7 @@ class Model:
         self.circles = {}
         self.operations = []
         self.alloperations = []
-        self.error = 8
+        self.error = 6
 
     def add_point(self, x: float, y: float, Fixed = False, parent1 = None, parent2 = None):
         name = self.generate_name()
@@ -23,7 +23,7 @@ class Model:
         elif isinstance(parent2, Circle) and isinstance(parent1, Segment):
             points = parent2.intersectionSegment(parent1)
             if len(points) > 1:
-                for i, _ in points:
+                for i, el in enumerate(points):
                     point = DependPoint(name, parent1, parent2, i)
                     self.points[name] = point
                     name = self.generate_name()
@@ -119,3 +119,7 @@ class Model:
 
     def reset_prolog(self):
         self.translator = Translator()
+
+    def correctingScheme(self):
+        solutions = self.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
+        solutions = set(solutions[2::])
