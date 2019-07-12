@@ -30,7 +30,6 @@ class WidgetWithText(QWidget):
         self.show()
         self.centering()
 
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -288,6 +287,7 @@ class MainWindow(QMainWindow):
 
     def competitorBrushActionCreating(self):
         self.competitorBrush = QAction("&Competitor", self, checkable=True)
+        self.competitorBrush.setShortcut("Ctrl+4")
         self.competitorBrush.setStatusTip("Set competitor")
         self.competitorBrush.setToolTip("Set <b>competitor</b>")
         self.competitorBrush.triggered.connect(lambda event: self.setBrushType("competitor", self.competitorBrush))
@@ -472,7 +472,6 @@ class MainWindow(QMainWindow):
 
         self.setBrushType("point", self.pointBrush)
         self.messageSend("Paint")
-
 
 class Console(QTextEdit):
     def __init__(self, model, parent):
