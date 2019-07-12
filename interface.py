@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         self.operations = []
         self.programTitle = "Prototype"
 
-        self.competitorFirstElement = None
+        self.select = list()
         self.table = False
 
         self.initUI()
@@ -78,8 +78,6 @@ class MainWindow(QMainWindow):
             self.model.alloperations.append(geometry.Circle(segment))
         return circle
 
-    def newCompetitor(self, segment1, segment2):
-        pass
 
     def newBrush(self, brush):
         self.brushes.append(brush)
@@ -107,7 +105,7 @@ class MainWindow(QMainWindow):
                 self.toolbar.removeAction(action)
         self.brushtype = typeOfBrush
         self.brushMessage()
-        self.competitorFirstElement = None
+        self.select = list()
         for brush in self.brushes:
             brush.setChecked(False)
         brushObject.setChecked(True)
@@ -144,9 +142,17 @@ class MainWindow(QMainWindow):
 
     def reset(self):
         self.pointCoords = []
-        self.competitorFirstElement = None
+        self.select = list()
 
     def prove(self):
+        s = self.select[0]
+        for segment in self.select:
+            if segment is not s:
+                segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
+                segment2 = f'segment({s.point1.name}, {s.point2.name})'
+                self.model.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
+                s = segment
+
         solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
         for el in solutions[2::]:
             point1 = self.model.findPointFromName(el['X'].args[0])
@@ -184,7 +190,7 @@ class MainWindow(QMainWindow):
         self.model.reset_prolog()
         self.paint = QPainter(self.image)
         self.paint.setBrush(QBrush(self.canvas.backgroundColor))
-        self.competitorFirstElement = None
+        self.select = list()
         for point in tuple(self.model.points.keys()):
             del (self.model.points[point])
         for segment in tuple(self.model.segments.keys()):
@@ -528,8 +534,8 @@ class Canvas(QWidget):
         paint.setBrush(self.pointBrushColor)
         paint.setPen(QPen(self.segmentBrushColor, 2))
         for segment in self.parent.model.segments.values():
-            if self.parent.competitorFirstElement is not None:
-                if segment == self.parent.competitorFirstElement:
+            if self.parent.select is not None:
+                if segment in self.parent.select:
                     self.selectionSegmentDrawing(paint, segment.point1, segment.point2)
                 else:
                     self.segmentDrawing(paint, segment.point1, segment.point2)
@@ -601,28 +607,31 @@ class Canvas(QWidget):
             self.parent.pointCoords = []
 
     def competitorControl(self, event):
-        if self.parent.pointCoords == []:
             newPoint = geometry.Point(event.x(), event.y())
             for segment in self.parent.model.segments.values():
                 if segment.pointBelongs(newPoint):
-                    self.parent.pointCoords = [event.x(), event.y()]
-                    self.parent.competitorFirstElement = segment
-                    self.parent.messageSend("First segment selected")
-        else:
-            newPoint = geometry.Point(event.x(), event.y())
-            for segment in self.parent.model.segments.values():
-                if segment.pointBelongs(newPoint):
-                    if segment == self.parent.competitorFirstElement:
-                        self.messageSend("Error")
+                    if segment not in self.parent.select:
+                        if not self.parent.pointCoords:
+                            self.parent.pointCoords = [event.x(), event.y()]
+                        self.parent.select.append(segment)
+                        self.parent.messageSend("Segment selected")
                     else:
-                        self.parent.newCompetitor(self.parent.competitorFirstElement, segment)
-                        self.parent.pointCoords = []
-                        segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
-                        segment2 = f'segment({self.parent.competitorFirstElement.point1.name}, {self.parent.competitorFirstElement.point2.name})'
-                        self.model.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
-                        self.parent.prove()
-                        self.parent.messageSend("Second segment selected")
-                        self.parent.competitorFirstElement = None
+                        self.parent.messageSend("Error")
+        # else:
+        #     newPoint = geometry.Point(event.x(), event.y())
+        #     for segment in self.parent.model.segments.values():
+        #         if segment.pointBelongs(newPoint):
+        #             if segment == self.parent.competitorFirstElement:
+        #                 self.messageSend("Error")
+        #             else:
+        #                 self.parent.newCompetitor(self.parent.competitorFirstElement, segment)
+        #                 self.parent.pointCoords = []
+        #                 segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
+        #                 segment2 = f'segment({self.parent.competitorFirstElement.point1.name}, {self.parent.competitorFirstElement.point2.name})'
+        #                 self.model.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
+        #                 self.parent.prove()
+        #                 self.parent.messageSend("Second segment selected")
+        #                 self.parent.competitorFirstElement = None
 
     def pointCreating(self, x, y):
         p = self.parent.newPoint(x, y)
