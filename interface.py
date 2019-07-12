@@ -340,31 +340,31 @@ class MainWindow(QMainWindow):
         self.backgroundColorCommand.setShortcut("Alt+B")
         self.backgroundColorCommand.setStatusTip("Change your background color")
         self.backgroundColorCommand.setToolTip("Change your <b>background color</b>")
-        #self.backgroundColorCommand.triggered.connect(self.canvas.backgroundColorSelect)
+        self.backgroundColorCommand.triggered.connect(self.canvas.backgroundColorSelect)
 
         self.foregroundPointColorCommand = QAction("&Foreground Point", self)
         self.foregroundPointColorCommand.setShortcut("Shift+P")
         self.foregroundPointColorCommand.setStatusTip("Change your point color")
         self.foregroundPointColorCommand.setToolTip("Change your <b>point color</b>")
-        #self.foregroundPointColorCommand.triggered.connect(self.canvas.foregroundPointColorSelect)
+        self.foregroundPointColorCommand.triggered.connect(self.canvas.foregroundPointColorSelect)
 
         self.foregroundDependingPointColorCommand = QAction("&Foreground Depending Point", self)
         self.foregroundDependingPointColorCommand.setShortcut("Shift+D")
         self.foregroundDependingPointColorCommand.setStatusTip("Change your depending point color")
         self.foregroundDependingPointColorCommand.setToolTip("Change your <b>depending point color</b>")
-        #self.foregroundDependingPointColorCommand.triggered.connect(self.canvas.foregroundDependingPointColorSelect)
+        self.foregroundDependingPointColorCommand.triggered.connect(self.canvas.foregroundDependingPointColorSelect)
 
         self.foregroundSegmentColorCommand = QAction("&Foreground Segment", self)
         self.foregroundSegmentColorCommand.setShortcut("Shift+S")
         self.foregroundSegmentColorCommand.setStatusTip("Change your segment color")
         self.foregroundSegmentColorCommand.setToolTip("Change your <b>segment color</b>")
-        #self.foregroundSegmentColorCommand.triggered.connect(self.canvas.foregroundSegmentColorSelect)
+        self.foregroundSegmentColorCommand.triggered.connect(self.canvas.foregroundSegmentColorSelect)
 
         self.foregroundTextColorCommand = QAction("&Foreground Text", self)
         self.foregroundTextColorCommand.setShortcut("Shift+T")
         self.foregroundTextColorCommand.setStatusTip("Change your text color")
         self.foregroundTextColorCommand.setToolTip("Change your <b>text color</b>")
-        #self.foregroundTextColorCommand.triggered.connect(self.canvas.foregroundTextColorSelect)
+        self.foregroundTextColorCommand.triggered.connect(self.canvas.foregroundTextColorSelect)
 
     def helpActionsCreating(self):
         self.referenceCommand = QAction("&Reference", self)
