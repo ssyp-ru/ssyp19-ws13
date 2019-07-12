@@ -13,6 +13,7 @@ class Model:
         self.operations = []
         self.alloperations = []
         self.CongruentSegments = {}
+        self.dependpoints = {}
         self.error = 6
 
     def add_point(self, x: float, y: float, Fixed = False, parent1 = None, parent2 = None):
@@ -26,21 +27,25 @@ class Model:
             points = parent2.intersectionSegment(parent1)
             if len(points) > 1:
                 for i, el in enumerate(points):
-                    if isinstance(self.pointExist(el), Point):
+                    for existing in self.points.values():
+                        if el.distToPoint(existing) < error:
+                            return existing
+                    else:
                         point = DependPoint(name, parent1, parent2, i)
-                        self.points[name] = point
+                        self.dependpoints[name] = point
                         name = self.generate_name()
                         self.translator.connector.prolog.assertz(f'point({name})')
                 return point
             else:
                 point = DependPoint(name, parent1, parent2)
                 if isinstance(self.pointExist(point), Point):
-                    self.points[name] = point
+                    self.dependpoints[name] = point
                     name = self.generate_name()
                     self.translator.connector.prolog.assertz(f'point({name})')
         else:
             point = DependPoint(name, parent1, parent2)
-            self.points[name] = point
+            print(str(point)) 
+            self.dependpoints[name] = point
             self.translator.connector.prolog.assertz(f'point({name})')
         for segment in self.segments.values():
             if segment.pointBelongs(point):
@@ -57,17 +62,15 @@ class Model:
             interpoint = new_segment.intersection(segment)
             if interpoint:
                 if isinstance(self.pointExist(interpoint), Point):
-                    n_point = self.add_point(1, 1, True, new_segment, segment)
-                    split[k] = (n_point, new_segment.point1, new_segment.point2, segment.point1, segment.point2)
-                    # TODO: if error - commend from here
-                    break
-        if split:
-            del self.segments[k]
-        for k, v in split.items():
-            for point in v[1::]:
-                self.add_segment(v[0], point)
-        if split:
-            return None
+                    self.add_point(1, 1, True, segment, new_segment)
+        #            break
+        #if split:
+        #    del self.segments[k]
+        #for k, v in split.items():
+        #    for point in v[1::]:
+        #        self.add_segment(v[0], point)
+        #if split:
+        #    return None
         # to here
         for circle in self.circles.values():
             interpoint = circle.intersectionSegment(Segment(new_segment.point1, new_segment.point2))
@@ -89,7 +92,7 @@ class Model:
 
     def generate_name(self, index=None) -> str:
         if not index:
-            num = len(self.points)
+            num = len(self.points) + len(self.dependpoints)
         else:
             num = index
         if num <= 25:
@@ -140,9 +143,8 @@ class Model:
         self.translator.connector.retract_code('point(X);segment(A, B);laysBetween(A, B, C);congruent(A,B)', all=True)
 
     def pointExist(self, point):
-        for _, i in self.points.items():
-            if point == i:
-                return True
+        if point in self.points.values():
+            return True
         return point
 
     def correctingScheme(self):
@@ -150,34 +152,36 @@ class Model:
             tempmodel = self.copy()
             i = 0
             for point in tempmodel.points.values():
-                if not isinstance(point, DependPoint):
-                    point.x = inputvector[i]
-                    point.y = inputvector[i + 1]
-                    i += 2
+                point.x = inputvector[i]
+                point.y = inputvector[i + 1]
+                i += 2
             y = [0] * len(inputvector)
             X = []
             j = 0
-            while X:
+            for j in range(len(inputvector)):
                 X = tempmodel.getCongruencyClass(j)
-                avglen = sum([el.length for el in X]) / len(X)
+                print(X)
+                if not X:
+                    break
+                avglen = sum([float(el.length) for el in X]) / len(X)
                 print(sum([abs(el.length - avglen) for el in X]))
                 y[j] = sum([abs(el.length - avglen) for el in X])
-                j += 1
+            print('Residual', y)
             return y
+        print(self.CongruentSegments)
         inputvector = []
         pointlist = list(self.points.values())
         for i in pointlist:
             inputvector.append(i.x)
             inputvector.append(i.y)
-        print(inputvector)
         awnser, data, ok, msg = fsolve(equation, inputvector, full_output=True)
-        if ok == 1:
-            j = 0
+        if ok == 1:      
             self.points = {}
-            print(awnser)
+            j = 0
             for i in range(int(len(awnser) / 2)):
                 self.add_point(awnser[2 * j], awnser[(2 * j) + 1])
                 j += 1
+
     
     def findPointFromName(self, name):
         res = self.points.get(str(name))
@@ -191,7 +195,7 @@ class Model:
                     val.add(key)
                     return val
                 i += 1
-        return
+        return []
     def copy(self):
         model = Model()
         model.points = self.points.copy()
