@@ -30,7 +30,7 @@ class Model:
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
         for segment in self.segments.values():
-            if -100 < segment.length - new_segment.length < 100:
+            if -1 < segment.length - new_segment.length < 1:
                 segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
                 segment2 = f'segment({new_segment.point1.name}, {new_segment.point2.name})'
                 self.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
