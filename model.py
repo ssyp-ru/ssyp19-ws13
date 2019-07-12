@@ -89,4 +89,5 @@ class Model:
         return self.add_circle(segment)
 
     def reset_prolog(self):
+        del self.translator
         self.translator = Translator()

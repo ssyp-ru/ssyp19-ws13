@@ -290,7 +290,7 @@ class MainWindow(QMainWindow):
             self.update()
 
     def keyReleaseEvent(self, event):
-        print(event.key())
+        # print(event.key())
         if event.key() == Qt.Key_QuoteLeft:
             self.console.show()
 
@@ -306,7 +306,6 @@ class MainWindow(QMainWindow):
         self.move(qr.topLeft())
 
     def clear(self):
-        self.model.reset_prolog()
         self.paint = QPainter(self.image)
         self.paint.setBrush(QBrush(self.backgroundColor))
         for point in list(self.model.points.keys()):
@@ -316,6 +315,7 @@ class MainWindow(QMainWindow):
         for circle in list(self.model.circles.keys()):
             del(self.model.circles[circle])
         self.paint.drawRect(-20, 20, self.fieldWidth+30, self.fieldHeight+30)
+        self.model.reset_prolog()
 
     def reference(self):
         webbrowser.open("reference.html")
