@@ -69,13 +69,15 @@ class PrologConnector:
     @staticmethod
     # parsing instruction.
     def parse_ins(instruction) -> list and list and list:
+        if instruction[-1] != ';':
+            instruction += ';'
         terms = []  # if need var(s)
         vars = []
         statements = []  # if need True or False
         pnames = re.compile(r'\[.+\]|[\w\d]+')  # find names(vars|lists|strings|ints) in atoms
         plist = re.compile(r'\[.+\]')  # find list
         # find predirects
-        for pred, atoms in re.findall(r'([^\(\)\,\s]+|\S)(\([^\)]+\))', instruction):
+        for pred, atoms in re.findall(r'([^\(\)\,\s]+|\S)(\([^\)]+\))\;', instruction):
             names = pnames.findall(atoms)
             items = []
             there_is_var = False
