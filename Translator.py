@@ -3,6 +3,16 @@ from connect import PrologConnector
 
 # Review: I guess you know what to do here. Do it.
 
+class HashableSegment:
+    
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+
+    def __hash__(self):
+        return hash(start) ^ hash(end)
+
+
 class Translator:
 
     def __init__(self):
