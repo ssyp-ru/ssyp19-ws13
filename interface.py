@@ -285,12 +285,10 @@ class MainWindow(QMainWindow):
             point4 = self.model.findPointFromName(el['Y'].args[1])
             Xsegment = geometry.Segment(point1, point2)
             Ysegment = geometry.Segment(point3, point4)
-            # print(XsYsegment)
             if Xsegment not in self.model.CongruentSegments:
                 self.model.CongruentSegments[Xsegment] = set()
             self.model.CongruentSegments[Xsegment].add(Ysegment)
-        # print(self.model.getCongruencyClass(0))
-        # self.model.correctingScheme()
+        self.model.correctingScheme()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -300,7 +298,6 @@ class MainWindow(QMainWindow):
             self.update()
 
     def keyReleaseEvent(self, event):
-        print(event.key())
         if event.key() == Qt.Key_QuoteLeft:
             self.console.show()
 

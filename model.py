@@ -19,7 +19,6 @@ class Model:
         name = self.generate_name()
         if not Fixed:
             point = Point(x, y, name)
-            print(str(point))
             self.points[name] = point
             self.translator.connector.prolog.assertz(f'point({name})')
         elif isinstance(parent2, Circle) and isinstance(parent1, Segment):
@@ -46,8 +45,8 @@ class Model:
             if segment.pointBelongs(point):
                 self.translator.connector.prolog.assertz(\
                     f'laysBetween({segment.point1.name}, {segment.point2.name}, {point.name})')
-                print(self.translator.connector.get_n_ans_new(\
-                    f'isCongruent({segment.point1.name}, {segment.point2.name})'))
+                #print(self.translator.connector.get_n_ans_new(\
+                #    f'isCongruent({segment.point1.name}, {segment.point2.name})'))
         return point 
 
     def add_segment(self, a: Point, b: Point):
@@ -67,7 +66,7 @@ class Model:
             if interpoint:
                 self.add_point(1, 1, True, new_segment, circle)
         for segment in self.segments.values():
-            if -10 < segment.length - new_segment.length < 10:
+            if -error - 10 < segment.length - new_segment.length < error + 10:
                 segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
                 segment2 = f'segment({new_segment.point1.name}, {new_segment.point2.name})'
                 self.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
@@ -79,8 +78,11 @@ class Model:
         self.circles[segment.point1.name+segment.point2.name] = circle
         return circle
 
-    def generate_name(self) -> str:
-        num = len(self.points)
+    def generate_name(self, index=None) -> str:
+        if not index:
+            num = len(self.points)
+        else:
+            num = index
         if num <= 25:
             return dictionary[num]
         else:
@@ -138,23 +140,35 @@ class Model:
         def equation(inputvector):
             tempmodel = self.copy()
             i = 0
-            for point in tempmodel.points:
+            for _, point in tempmodel.points.items():
                 if not isinstance(point, DependPoint):
                     point.x = inputvector[i]
-                    point.y = inputvector[i+1]
+                    point.y = inputvector[i + 1]
                     i += 2
-            y = [0] * len(x)
-            
-            X  = tempmodel.get_congruency_class()
-            avglen = sum([x.length for x in X])/len(X)
-            y[j] = sum([abs(x.length -avglen) for x in X])
-
+            y = [0] * len(inputvector)
+            X = []
+            j = 0 
+            while X:
+                X  = tempmodel.getCongruencyClass(j)
+                avglen = sum([el.length for el in X]) / len(X)
+                print(sum([abs(el.length - avglen) for el in X]))
+                y[j] = sum([abs(el.length - avglen) for el in X])
+                j += 1
             return y
-
-        
-        for i, val in self.CongruentSegments.items():
-            fsolve(equation, val + i)
-
+        inputvector = []
+        pointlist = [v for v in self.points.values()]
+        for i in pointlist:
+            inputvector.append(i.x)
+            inputvector.append(i.y)
+        print(inputvector)
+        awnser, data, ok, msg = fsolve(equation, inputvector, full_output=True)
+        if ok == 1:
+            j = 0
+            self.points = {}
+            print(awnser)
+            for i in range(int(len(awnser) / 2)):
+                self.add_point(awnser[2 * j], awnser[(2 * j) + 1])
+                j += 1
     
     def findPointFromName(self, name):
         res = self.points.get(str(name))
@@ -165,5 +179,12 @@ class Model:
         if not index > len(self.CongruentSegments):
             for key, val in self.CongruentSegments.items():
                 if i == index:
-                    return val + key
+                    val.add(key)
+                    return val
                 i += 1
+        return
+    def copy(self):
+        model = Model()
+        model.points = self.points.copy()
+        model.CongruentSegments = self.CongruentSegments.copy()
+        return model
