@@ -168,16 +168,14 @@ class Model:
         for i in pointlist:
             inputvector.append(i.x)
             inputvector.append(i.y)
-        print(inputvector)
+        # print(inputvector)
         awnser, data, ok, msg = fsolve(equation, inputvector, full_output=True)
         if ok == 1:      
             self.points = {}
-            print(dependlist)
             j = 0
             for i in range(int(len(awnser) / 2)):
-                if dependlist.count(j) == 0: 
-                    self.add_point(awnser[2 * j], awnser[(2 * j) + 1])
-                j += 1
+                self.add_point(awnser[2 * j], awnser[(2 * j) + 1])
+
     
     def findPointFromName(self, name):
         res = self.points.get(str(name))
