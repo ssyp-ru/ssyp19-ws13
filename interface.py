@@ -363,6 +363,11 @@ class MainWindow(QMainWindow):
         self.foregroundSelectionSegmentsCommand.setToolTip("Change your <b>selecting segments color</b>")
         self.foregroundSelectionSegmentsCommand.triggered.connect(self.canvas.foregroundSelectionSegmentsSelect)
 
+        self.textFontCommand = QAction("&Font Text", self)
+        self.textFontCommand.setStatusTip("Change your font")
+        self.textFontCommand.setToolTip("Change your <b>font</b>")
+        self.textFontCommand.triggered.connect(self.canvas.fontSelect)
+
     def helpActionsCreating(self):
         self.referenceCommand = QAction("&Reference", self)
         self.referenceCommand.setShortcut("F1")
@@ -409,6 +414,7 @@ class MainWindow(QMainWindow):
         self.foregroundMenu.addAction(self.foregroundSegmentColorCommand)
         self.foregroundMenu.addAction(self.foregroundTextColorCommand)
         self.foregroundMenu.addAction(self.foregroundSelectionSegmentsCommand)
+        self.viewMenu.addAction(self.textFontCommand)
 
         self.helpMenu = self.menubar.addMenu("&Help")
         self.helpMenu.addAction(self.referenceCommand)
@@ -500,6 +506,7 @@ class Canvas(QWidget):
         self.textColor = Qt.black
         self.backgroundColor = Qt.white
         self.selectionSegmentBrushColor = QColor(0, 255, 255)
+        self.textFont = QFont("Helvetica", 12)
         self.parent = parent
 
     def backgroundColorSelect(self):
@@ -531,6 +538,11 @@ class Canvas(QWidget):
         color = QColorDialog.getColor()
         if color.isValid():
             self.selectionSegmentBrushColor = color
+
+    def fontSelect(self):
+        (font, ok) = QFontDialog.getFont()
+        if ok:
+            self.textFont = QFont(font)
 
     def paintEvent(self, event):
         paint = QPainter(self)
@@ -665,6 +677,7 @@ class Canvas(QWidget):
         qp.drawEllipse(QPoint(x, y), 2, 2)
         qp.setBrush(self.textColor)
         qp.setPen(QPen(self.textColor, 2))
+        qp.setFont(self.textFont)
         qp.drawText(x + 3, y - 3, name)
 
     def dependingPointDrawing(self, qp, x, y, name):
