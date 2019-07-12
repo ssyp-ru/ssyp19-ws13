@@ -99,13 +99,6 @@ class MainWindow(QMainWindow):
     def undertypeMessage(self):
         self.messageSend("Brush Type is \"" + self.brushtype + "\"" + " " * 10 + "Brush UnderType is \"" + self.brushundertype + "\"")
 
-
-
-    
-
-    def createText(self, event, text):
-        pass
-
     def setBrushType(self, typeOfBrush, brushObject):
         self.pointCoords = []
         for brush in self.brushes:
@@ -190,8 +183,6 @@ class MainWindow(QMainWindow):
         for solution in solutions:
             print(solution)
             print(f"{solution['X']} == {solution['Y']}")
-
-    
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_QuoteLeft:
@@ -334,7 +325,6 @@ class MainWindow(QMainWindow):
         self.proveCommand.setToolTip("<b>Prove</b>")
         self.proveCommand.triggered.connect(self.prove)
 
-
     def viewActionsCreating(self):
         self.backgroundColorCommand = QAction("&Background", self)
         self.backgroundColorCommand.setShortcut("Alt+B")
@@ -365,6 +355,12 @@ class MainWindow(QMainWindow):
         self.foregroundTextColorCommand.setStatusTip("Change your text color")
         self.foregroundTextColorCommand.setToolTip("Change your <b>text color</b>")
         self.foregroundTextColorCommand.triggered.connect(self.canvas.foregroundTextColorSelect)
+
+        self.foregroundSelectionSegmentsCommand = QAction("&Foreground Selecting Segments", self)
+        self.foregroundSelectionSegmentsCommand.setShortcut("Shift+C")
+        self.foregroundSelectionSegmentsCommand.setStatusTip("Change your selecting segments color")
+        self.foregroundSelectionSegmentsCommand.setToolTip("Change your <b>selecting segments color</b>")
+        self.foregroundSelectionSegmentsCommand.triggered.connect(self.canvas.foregroundSelectionSegmentsSelect)
 
     def helpActionsCreating(self):
         self.referenceCommand = QAction("&Reference", self)
@@ -411,6 +407,7 @@ class MainWindow(QMainWindow):
         self.foregroundMenu.addAction(self.foregroundDependingPointColorCommand)
         self.foregroundMenu.addAction(self.foregroundSegmentColorCommand)
         self.foregroundMenu.addAction(self.foregroundTextColorCommand)
+        self.foregroundMenu.addAction(self.foregroundSelectionSegmentsCommand)
 
         self.helpMenu = self.menubar.addMenu("&Help")
         self.helpMenu.addAction(self.referenceCommand)
@@ -499,6 +496,7 @@ class Canvas(QWidget):
         self.segmentBrushColor = Qt.black
         self.textColor = Qt.black
         self.backgroundColor = Qt.white
+        self.selectionSegmentBrushColor = QColor(0, 255, 255)
         self.parent = parent
 
     def backgroundColorSelect(self):
@@ -526,6 +524,11 @@ class Canvas(QWidget):
         if color.isValid():
             self.dependingPointBrushColor = color
 
+    def foregroundSelectionSegmentsSelect(self):
+        color = QColorDialog.getColor()
+        if color.isValid():
+            self.selectionSegmentBrushColor = color
+
     def paintEvent(self, event):
         paint = QPainter(self)
         paint.drawImage(0,0, self.parent.image)
@@ -534,7 +537,13 @@ class Canvas(QWidget):
         paint.setBrush(self.pointBrushColor)
         paint.setPen(QPen(self.segmentBrushColor, 2))
         for segment in self.parent.model.segments.values():
-            self.segmentDrawing(paint, segment.point1, segment.point2)
+            if self.parent.competitorFirstElement is not None: 
+                if segment == self.parent.competitorFirstElement:
+                    self.selectionSegmentDrawing(paint, segment.point1, segment.point2)
+                else:
+                    self.segmentDrawing(paint, segment.point1, segment.point2)
+            else:
+                self.segmentDrawing(paint, segment.point1, segment.point2)
         for circle in self.parent.model.circles.values():
             self.circleDrawing(paint, circle.center.x, circle.center.y, circle.radius)
         for point in self.parent.model.points.values():
@@ -582,8 +591,6 @@ class Canvas(QWidget):
                 point2 = geometry.Point(self.parent.pointCoords[0], self.parent.pointCoords[1])
                 if self.parent.brushundertype == "segment":
                     self.segmentCreating(point1, point2)
-                elif self.parent.brushundertype == "segmentwithpoints":
-                    self.segmentWithPointsCreating(point1, point2)
                 self.update()
                 self.parent.pointCoords = []
 
@@ -605,9 +612,7 @@ class Canvas(QWidget):
     def competitorControl(self, event):
         if self.parent.pointCoords == []:
             newPoint = geometry.Point(event.x(), event.y())
-            print(newPoint)
             for segment in self.parent.model.segments.values():
-                print(segment)
                 if segment.pointBelongs(newPoint):
                     self.parent.pointCoords = [event.x(), event.y()]
                     self.parent.competitorFirstElement = segment
@@ -670,6 +675,11 @@ class Canvas(QWidget):
     def segmentDrawing(self, qp, point1, point2):
         qp.setBrush(self.segmentBrushColor)
         qp.setPen(QPen(self.segmentBrushColor, 2))
+        qp.drawLine(QPoint(point1.x, point1.y), QPoint(point2.x, point2.y))
+
+    def selectionSegmentDrawing(self, qp, point1, point2):
+        qp.setBrush(self.selectionSegmentBrushColor)
+        qp.setPen(QPen(self.selectionSegmentBrushColor, 2))
         qp.drawLine(QPoint(point1.x, point1.y), QPoint(point2.x, point2.y))
 
     def circleDrawing(self, qp, centerX, centerY, distance):
