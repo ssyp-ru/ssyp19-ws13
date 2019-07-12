@@ -149,7 +149,7 @@ class Model:
         def equation(inputvector):
             tempmodel = self.copy()
             i = 0
-            for _, point in tempmodel.points.items():
+            for point in tempmodel.points.values():
                 if not isinstance(point, DependPoint):
                     point.x = inputvector[i]
                     point.y = inputvector[i + 1]
@@ -158,14 +158,14 @@ class Model:
             X = []
             j = 0
             while X:
-                X  = tempmodel.getCongruencyClass(j)
+                X = tempmodel.getCongruencyClass(j)
                 avglen = sum([el.length for el in X]) / len(X)
                 print(sum([abs(el.length - avglen) for el in X]))
                 y[j] = sum([abs(el.length - avglen) for el in X])
                 j += 1
             return y
         inputvector = []
-        pointlist = [v for v in self.points.values()]
+        pointlist = list(self.points.values())
         for i in pointlist:
             inputvector.append(i.x)
             inputvector.append(i.y)
