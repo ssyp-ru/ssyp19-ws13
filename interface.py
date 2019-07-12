@@ -199,7 +199,6 @@ class MainWindow(QMainWindow):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.flag = True
-            self.drawingObjects(event)
         elif event.button() == Qt.RightButton:
             self.update()
 
