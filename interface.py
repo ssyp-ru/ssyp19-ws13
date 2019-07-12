@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
         self.zoomValue = 100
         self.operations = []
 
+        self.competitorFirstElement = None
         self.table = False
 
         self.initUI()
@@ -77,6 +78,9 @@ class MainWindow(QMainWindow):
         if alloperationsInserting:
             self.model.alloperations.append(geometry.Circle(segment))
         return circle
+
+    def newCompetitor(self, segment1, segment2):
+        pass
 
     def newBrush(self, brush):
         self.brushes.append(brush)
@@ -121,6 +125,9 @@ class MainWindow(QMainWindow):
     def pointInObjectCreating(self, x, y):
         self.newPoint(x, y)
         self.messageSend("Point succesfully placed" + " " * 10 + str(x) + ", " + str(y))
+
+    def pointIntersectionCreating(self, parent1, parent2):
+        pass
 
     def segmentCreating(self, point1, point2):
         n_point1, n_point2 = self.model.correcting_points(point1, point2)
@@ -185,7 +192,24 @@ class MainWindow(QMainWindow):
             self.pointCoords = []
 
     def competitorControl(self, event):
-        pass
+        if self.pointCoords == []:
+            newPoint = geometry.Point(event.x(), event.y())
+            for segment in self.model.segments.values():
+                if segment.pointBelongs(newPoint):
+                    self.pointCoords = [event.x(), event.y()]
+                    self.competitorFirstElement = segment
+                    self.messageSend("First segment selected")
+        else:
+            newPoint = geometry.Point(event.x(), event.y())
+            for segment in self.model.segments.values():
+                if segment.pointBelongs(newPoint):
+                    if segment == self.competitorFirstElement:
+                        self.messageSend("Error")
+                    else:
+                        self.newCompetitor(self.competitorFirstElement, segment)
+                        self.competitorFirstElement = None
+                        self.pointCoords = []
+                        self.messageSend("Second segment selected")
 
     def pointDrawing(self, qp, x, y, name):
         qp.setBrush(self.pointBrushColor)
@@ -465,7 +489,7 @@ class MainWindow(QMainWindow):
         self.competitorNormalBrush.setToolTip("Set <b>competitor</b>")
         self.competitorNormalBrush.triggered.connect(lambda event: self.setUnderType("competitor", self.competitorNormalBrush, self.competitorBrush))
         self.competitorNormalBrush.setChecked(True)
-        self.newUnderType(self.competitorNormalBrush)
+        self.newUnderType(self.competitorBrush, self.competitorNormalBrush)
 
     def editActionsCreating(self):
         self.backCommand = QAction("&Back", self)
@@ -612,6 +636,7 @@ class MainWindow(QMainWindow):
         self.pointBrushActionsCreating()
         self.segmentBrushActionsCreating()
         self.circlesBrushActionsCreating()
+        self.competitorBrushActionCreating()
         self.editActionsCreating()
         self.viewActionsCreating()
         self.helpActionsCreating()
@@ -648,7 +673,6 @@ class Console(QTextEdit):
                 self.moveCursor(QTextCursor.End)
         else:
             super().keyPressEvent(event)
-
 
 class MainWidget(QWidget):
     pass
