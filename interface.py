@@ -278,7 +278,7 @@ class MainWindow(QMainWindow):
 
     def prove(self):
         solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
-        solutions = set(solutions)
+        # solutions = set(solutions)
         for solution in solutions:
             # print(solution)
             print(f"{solution['X']} == {solution['Y']}")

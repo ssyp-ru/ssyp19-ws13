@@ -16,6 +16,7 @@ class Model:
 
     def add_point(self, x: float, y: float, Fixed = False, parent1 = None, parent2 = None):
         name = self.generate_name()
+        point = Point(x, y, name)
         if not Fixed:
             point = Point(x, y, name)
             print(str(point))
