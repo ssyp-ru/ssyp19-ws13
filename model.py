@@ -19,7 +19,6 @@ class Model:
         name = self.generate_name()
         point = Point(x, y, name)
         if not Fixed:
-            point = Point(x, y, name)
             # print(str(point))
             self.points[name] = point
             self.translator.connector.prolog.assertz(f'point({name})')
@@ -33,12 +32,13 @@ class Model:
                         name = self.generate_name()
                         self.translator.connector.prolog.assertz(f'point({name})')
                 return point
-            else:
-                point = DependPoint(name, parent1, parent2)
-                if isinstance(self.pointExist(point), Point):
-                    self.points[name] = point
-                    name = self.generate_name()
-                    self.translator.connector.prolog.assertz(f'point({name})')
+            # else:
+            #     print(1)
+            #     point = DependPoint(name, parent1, parent2)
+            #     if isinstance(self.pointExist(point), Point):
+            #         self.points[name] = point
+            #         name = self.generate_name()
+            #         self.translator.connector.prolog.assertz(f'point({name})')
         else:
             point = DependPoint(name, parent1, parent2)
             self.points[name] = point
@@ -47,21 +47,30 @@ class Model:
             if segment.pointBelongs(point):
                 self.translator.connector.prolog.assertz(\
                     f'laysBetween({segment.point1.name}, {segment.point2.name}, {point.name})')
-                print(self.translator.connector.get_n_ans_new(\
-                    f'isCongruent({segment.point1.name}, {segment.point2.name})'))
         return point 
 
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
-        for segment in self.segments.values():
+        split = {}
+        for k, segment in self.segments.items():
             interpoint = new_segment.intersection(segment)
             if interpoint:
                 if isinstance(self.pointExist(interpoint), Point):
-                    self.add_point(1, 1, True, new_segment, segment)
+                    n_point = self.add_point(1, 1, True, new_segment, segment)
+                    split[k] = (n_point, new_segment.point1, new_segment.point2, segment.point1, segment.point2)
+                    break
+        if split:
+            del self.segments[k]
+        for k, v in split.items():
+            for point in v[1::]:
+                self.add_segment(v[0], point)
+        if split:
+            return None
         for circle in self.circles.values():
             interpoint = circle.intersectionSegment(Segment(new_segment.point1, new_segment.point2))
             if interpoint:
                 self.add_point(1, 1, True, new_segment, circle)
+
         for segment in self.segments.values():
             if -10 < segment.length - new_segment.length < 10:
                 segment1 = f'segment({segment.point1.name}, {segment.point2.name})'

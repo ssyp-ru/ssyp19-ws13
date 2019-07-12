@@ -133,7 +133,8 @@ class MainWindow(QMainWindow):
         if n_point2 is point2:
             n_point2 = self.newPoint(point2.x, point2.y)
         segment = self.newSegment(n_point1, n_point2)
-        self.messageSend(f"Segment With Points succesfully placed {' ' * 10}{segment.point1}-{segment.point2}")
+        if segment is not None:
+            self.messageSend(f"Segment With Points succesfully placed {' ' * 10}{segment.point1}-{segment.point2}")
 
     def circleWithRadiusCreating(self, center, point2):
         n_center, n_point2 = self.model.correcting_points(center, point2)
@@ -152,7 +153,8 @@ class MainWindow(QMainWindow):
             point = self.model.correctingPoints(geometry.Point(event.x(), event.y()),\
                                                 self.model.segments,
                                                 self.model.circles)
-            self.pointInObjectCreating(point.x, point.y)
+            if point is not None:
+                self.pointInObjectCreating(point.x, point.y)
         self.update()
 
     def segmentContol(self, event):
@@ -347,6 +349,10 @@ class MainWindow(QMainWindow):
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_QuoteLeft:
             self.console.show()
+        elif event.key() == Qt.Key_D:
+            print(len(self.model.segments))
+            for v in self.model.segments.values():
+                print(v)
 
 
     def mouseReleaseEvent(self, event):
