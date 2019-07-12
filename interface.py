@@ -106,6 +106,7 @@ class MainWindow(QMainWindow):
                 self.toolbar.removeAction(action)
         self.brushtype = typeOfBrush
         self.brushMessage()
+        self.competitorFirstElement = None
         for brush in self.brushes:
             brush.setChecked(False)
         brushObject.setChecked(True)
@@ -177,6 +178,7 @@ class MainWindow(QMainWindow):
 
     def reset(self):
         self.pointCoords = []
+        self.competitorFirstElement = None
 
     def prove(self):
         solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
@@ -188,10 +190,8 @@ class MainWindow(QMainWindow):
         if event.key() == Qt.Key_QuoteLeft:
             self.console.show()
 
-
     def mouseReleaseEvent(self, event):
         self.update()
-
 
     def centering(self):
         qr = self.frameGeometry()
@@ -203,6 +203,7 @@ class MainWindow(QMainWindow):
         #self.model.reset_prolog()
         self.paint = QPainter(self.image)
         self.paint.setBrush(QBrush(self.backgroundColor))
+        self.competitorFirstElement = None
         for point in list(self.model.points.keys()):
             del(self.model.points[point])
         for segment in list(self.model.segments.keys()):
@@ -684,6 +685,8 @@ class Canvas(QWidget):
 
     def circleDrawing(self, qp, centerX, centerY, distance):
         alphaColor = QColor.fromRgbF(0, 0, 0, 0)
+        qp.setBrush(self.segmentBrushColor)
+        qp.setPen(QPen(self.segmentBrushColor, 2))
         qp.setBrush(alphaColor)
         qp.drawEllipse(float(centerX) - distance, float(centerY) - distance, float(distance) * 2, float(distance) * 2)
         qp.setBrush(self.pointBrushColor)
