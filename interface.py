@@ -466,7 +466,7 @@ class MainWindow(QMainWindow):
         self.toolbarFilling()
 
         self.console.move(0, 600)
-        self.canvas.move(0, 0)
+        self.canvas.move(0, 25)
 
         QApplication.setOverrideCursor(Qt.CrossCursor)
 
@@ -547,7 +547,7 @@ class Canvas(QWidget):
         paint = QPainter(self)
         paint.drawImage(0,0, self.parent.image)
         paint.setBrush(QBrush(self.backgroundColor))
-        paint.drawRect(-20, 20, self.parent.fieldWidth+30, self.parent.fieldHeight+30)
+        paint.drawRect(-20, 0, self.parent.fieldWidth+30, self.parent.fieldHeight+30)
         paint.setBrush(self.pointBrushColor)
         paint.setPen(QPen(self.segmentBrushColor, 2))
         for segment in self.parent.model.segments.values():
