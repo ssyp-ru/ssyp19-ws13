@@ -5,6 +5,7 @@ import sys
 import webbrowser
 import geom as geometry
 from model import Model
+from Translator import HashableSegment
 
 class WidgetWithText(QWidget):
     def __init__(self, text, title):
@@ -278,10 +279,11 @@ class MainWindow(QMainWindow):
 
     def prove(self):
         solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
-        solutions = set(solutions)
-        for solution in solutions:
-            # print(solution)
-            print(f"{solution['X']} == {solution['Y']}")
+        congruent = set()
+        for el in solutions:
+            congruent.add(HashableSegment(el['X'].args[0], el['X'].args[1]),HashableSegment(el['Y'].args[0], el['Y'].args[1]))
+        for i in congruent:
+            print(i)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

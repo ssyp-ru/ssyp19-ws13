@@ -135,4 +135,4 @@ class Model:
 
     def correctingScheme(self):
         solutions = self.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
-        solutions = set(solutions[2::])
+        

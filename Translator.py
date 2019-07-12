@@ -10,7 +10,10 @@ class HashableSegment:
         self.end = end
 
     def __hash__(self):
-        return hash(start) ^ hash(end)
+        return hash(self.start) ^ hash(self.end)
+
+    def __str__(self):
+        return f"({self.start}, {self.end})"
 
 
 class Translator:
