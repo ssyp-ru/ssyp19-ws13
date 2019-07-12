@@ -125,6 +125,11 @@ class PrologConnector:
         for i in ins.split(';'):
             self.prolog.assertz(i)
 
-    def retract_code(self, ins: str):
-        for i in ins.split(';'):
-            self.prolog.retract(i)
+    def retract_code(self, ins: str, all=False):
+        g = ins.split(';')
+        if all:
+            for i in g:
+                self.prolog.retractall(i)
+        else:
+            for i in g:
+                self.prolog.retract(i)

@@ -19,7 +19,7 @@ class Model:
         point = Point(x, y, name)
         if not Fixed:
             point = Point(x, y, name)
-            print(str(point))
+            # print(str(point))
             self.points[name] = point
             self.translator.connector.prolog.assertz(f'point({name})')
         elif isinstance(parent2, Circle) and isinstance(parent1, Segment):
@@ -126,8 +126,7 @@ class Model:
         return self.add_circle(segment)
 
     def reset_prolog(self):
-        del self.translator
-        self.translator = Translator()
+        self.translator.connector.retract_code('point(X);segment(A, B);laysBetween(A, B, C);congruent(A,B)', all=True)
 
     def pointExist(self, point):
         for _, i in self.points.items():

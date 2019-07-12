@@ -42,15 +42,18 @@ class MainWindow(QMainWindow):
         self.brushundertype = "point"
         self.flag = False
         self.pointBrushColor = QColor(255, 0, 0)
+        self.dependingPointBrushColor = QColor(255, 0, 255)
         self.segmentBrushColor = Qt.black
+        self.textColor = Qt.black
         self.backgroundColor = Qt.white
         self.lastname = -1
         self.pointCoords = []
-        self.fieldWidth = 700
+        self.fieldWidth = 900
         self.fieldHeight = 600
         self.zoomValue = 100
         self.operations = []
-
+        self.selected = {}
+        self.competitorFirstElement = None
         self.table = False
 
         self.initUI()
@@ -75,6 +78,9 @@ class MainWindow(QMainWindow):
         if alloperationsInserting:
             self.model.alloperations.append(geometry.Circle(segment))
         return circle
+
+    def newCompetitor(self, segment1, segment2):
+        pass
 
     def newBrush(self, brush):
         self.brushes.append(brush)
@@ -102,35 +108,28 @@ class MainWindow(QMainWindow):
         paint.setBrush(self.pointBrushColor)
         paint.setPen(QPen(self.segmentBrushColor, 2))
         for segment in self.model.segments.values():
-            paint.setBrush(self.segmentBrushColor)
-            paint.setPen(QPen(self.segmentBrushColor, 2))
-            paint.drawLine(QPoint(segment.point1.x, segment.point1.y), QPoint(segment.point2.x, segment.point2.y))
+            self.segmentDrawing(paint, segment.point1, segment.point2)
         for circle in self.model.circles.values():
-            circleX = circle.center.x
-            circleY = circle.center.y
-            distance = circle.radius
-            alphaColor = QColor.fromRgbF(0, 0, 0, 0)
-            paint.setBrush(alphaColor)
-            paint.drawEllipse(float(circleX) - distance, float(circleY) - distance, float(distance) * 2, float(distance) * 2)
-            paint.setBrush(self.pointBrushColor)
+            self.circleDrawing(paint, circle.center.x, circle.center.y, circle.radius)
         for point in self.model.points.values():
-            paint.setBrush(self.pointBrushColor)
-            paint.setPen(QPen(self.pointBrushColor, 2))
-            paint.drawEllipse(QPoint(point.x, point.y), 2, 2)
-            paint.setBrush(self.segmentBrushColor)
-            paint.setPen(QPen(self.segmentBrushColor, 2))
-            paint.drawText(point.x + 3, point.y - 3, str(point))
+            if str(type(point)) == "<class \'geom.Point\'>":
+                self.pointDrawing(paint, point.x, point.y, str(point))
+            else:
+                self.dependingPointDrawing(paint, point.x, point.y, str(point))
         self.update()
 
-    def pointDrawing(self, x, y):
+    def pointCreating(self, x, y):
         p = self.newPoint(x, y)
         self.messageSend("Point succesfully placed" + " " * 10 + str(p))
 
-    def pointInObjectDrawing(self, x, y):
+    def pointInObjectCreating(self, x, y):
         self.newPoint(x, y)
         self.messageSend("Point succesfully placed" + " " * 10 + str(x) + ", " + str(y))
 
-    def segmentDrawing(self, point1, point2):
+    def pointIntersectionCreating(self, parent1, parent2):
+        pass
+
+    def segmentCreating(self, point1, point2):
         n_point1, n_point2 = self.model.correcting_points(point1, point2)
         if n_point1 is point1:
             n_point1 = self.newPoint(point1.x, point1.y)
@@ -139,7 +138,7 @@ class MainWindow(QMainWindow):
         segment = self.newSegment(n_point1, n_point2)
         self.messageSend(f"Segment With Points succesfully placed {' ' * 10}{segment.point1}-{segment.point2}")
 
-    def circleWithRadiusDrawing(self, center, point2):
+    def circleWithRadiusCreating(self, center, point2):
         n_center, n_point2 = self.model.correcting_points(center, point2)
         if self.brushundertype == "radius":
             if n_center is center:
@@ -149,50 +148,98 @@ class MainWindow(QMainWindow):
             circle = self.newCircle(geometry.Segment(n_center, n_point2))
             self.messageSend(f"Circle succesfully placed with{' '*10}center: {circle.center}; radius: {circle.radius}; point: {circle.point}")
 
+    def pointControl(self, event):
+        if self.brushundertype == "point":
+            self.pointCreating(event.x(), event.y())
+        elif self.brushundertype == "pointinobject":
+            point = self.model.correctingPoints(geometry.Point(event.x(), event.y()),\
+                                                self.model.segments,
+                                                self.model.circles)
+            self.pointInObjectCreating(point.x, point.y)
+        self.update()
+
+    def segmentContol(self, event):
+        if not self.pointCoords:
+            self.pointCoords = [event.x(), event.y()]
+        else:
+            if self.pointCoords == [event.x(), event.y()]:
+                self.messageSend("Error")
+            else:
+                pointCoords = self.pointCoords
+                self.pointCoords = [event.x(), event.y()]
+                point1 = geometry.Point(pointCoords[0], pointCoords[1])
+                point2 = geometry.Point(self.pointCoords[0], self.pointCoords[1])
+                if self.brushundertype == "segment":
+                    self.segmentCreating(point1, point2)
+                elif self.brushundertype == "segmentwithpoints":
+                    self.segmentWithPointsCreating(point1, point2)
+                self.update()
+                self.pointCoords = []
+
+    def circleControl(self, event):
+        if self.pointCoords == []:
+            self.pointCoords = [event.x(), event.y()]
+        else:
+            firstPointCoords = self.pointCoords
+            self.pointCoords = [event.x(), event.y()]
+
+            center = geometry.Point(firstPointCoords[0], firstPointCoords[1])
+            pointOnCircle = geometry.Point(self.pointCoords[0], self.pointCoords[1])
+
+            self.circleWithRadiusCreating(center, pointOnCircle)
+
+            self.update()
+            self.pointCoords = []
+
+    def competitorControl(self, event):
+        newPoint = geometry.Point(event.x(), event.y())
+        for segment in self.model.segments.values():
+            if segment.pointBelongs(newPoint):
+                if segment not in self.selected:
+                    if not self.pointCoords:
+                        self.pointCoords = [event.x(), event.y()]
+                    self.selected.add(segment)
+                    self.messageSend("Segment selected")
+                else:
+                    self.messageSend('Error')
+
+    def pointDrawing(self, qp, x, y, name):
+        qp.setBrush(self.pointBrushColor)
+        qp.setPen(QPen(self.pointBrushColor, 2))
+        qp.drawEllipse(QPoint(x, y), 2, 2)
+        qp.setBrush(self.textColor)
+        qp.setPen(QPen(self.textColor, 2))
+        qp.drawText(x + 3, y - 3, name)
+
+    def dependingPointDrawing(self, qp, x, y, name):
+        qp.setBrush(self.dependingPointBrushColor)
+        qp.setPen(QPen(self.dependingPointBrushColor, 2))
+        qp.drawEllipse(QPoint(x, y), 3, 3)
+        qp.setBrush(self.textColor)
+        qp.setPen(QPen(self.textColor, 2))
+        qp.drawText(x + 3, y - 3, name)
+
+    def segmentDrawing(self, qp, point1, point2):
+        qp.setBrush(self.segmentBrushColor)
+        qp.setPen(QPen(self.segmentBrushColor, 2))
+        qp.drawLine(QPoint(point1.x, point1.y), QPoint(point2.x, point2.y))
+
+    def circleDrawing(self, qp, centerX, centerY, distance):
+        alphaColor = QColor.fromRgbF(0, 0, 0, 0)
+        qp.setBrush(alphaColor)
+        qp.drawEllipse(float(centerX) - distance, float(centerY) - distance, float(distance) * 2, float(distance) * 2)
+        qp.setBrush(self.pointBrushColor)
+
     def drawingObjects(self, event):
         self.update()
         if self.brushtype == "point":
-            if self.brushundertype == "point":
-                self.pointDrawing(event.x(), event.y())
-            elif self.brushundertype == "pointinobject":
-                point = self.model.correctingPoints(geometry.Point(event.x(), event.y()),\
-                                                    self.model.segments,
-                                                    self.model.circles)
-                self.pointInObjectDrawing(point.x, point.y)
-            self.update()
-
+            self.pointControl(event)
         if self.brushtype == "segment":
-            if not self.pointCoords:
-                self.pointCoords = [event.x(), event.y()]
-            else:
-                if self.pointCoords == [event.x(), event.y()]:
-                    self.messageSend("Error")
-                else:
-                    pointCoords = self.pointCoords
-                    self.pointCoords = [event.x(), event.y()]
-                    point1 = geometry.Point(pointCoords[0], pointCoords[1])
-                    point2 = geometry.Point(self.pointCoords[0], self.pointCoords[1])
-                    self.pointCoords = []
-                    if self.brushundertype == "segment":
-                        self.segmentDrawing(point1, point2)
-                    elif self.brushundertype == "segmentwithpoints":
-                        self.segmentWithPointsDrawing(point1, point2)
-                    self.update()
-
+            self.segmentContol(event)
         if self.brushtype == "circle":
-            if self.pointCoords == []:
-                self.pointCoords = [event.x(), event.y()]
-            else:
-                firstPointCoords = self.pointCoords
-                self.pointCoords = [event.x(), event.y()]
-
-                center = geometry.Point(firstPointCoords[0], firstPointCoords[1])
-                pointOnCircle = geometry.Point(self.pointCoords[0], self.pointCoords[1])
-
-                self.circleWithRadiusDrawing(center, pointOnCircle)
-
-                self.update()
-                self.pointCoords = []
+            self.circleControl(event)
+        if self.brushtype == "competitor":
+            self.competitorControl(event)
         self.update()
 
     def createText(self, event, text):
@@ -278,9 +325,8 @@ class MainWindow(QMainWindow):
 
     def prove(self):
         solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
-        # solutions = set(solutions)
         for solution in solutions:
-            # print(solution)
+            print(solution)
             print(f"{solution['X']} == {solution['Y']}")
 
     def mousePressEvent(self, event):
@@ -291,7 +337,6 @@ class MainWindow(QMainWindow):
             self.update()
 
     def keyReleaseEvent(self, event):
-        # print(event.key())
         if event.key() == Qt.Key_QuoteLeft:
             self.console.show()
 
@@ -339,6 +384,16 @@ class MainWindow(QMainWindow):
         if color.isValid():
             self.segmentBrushColor = color
 
+    def foregroundTextColorSelect(self):
+        color = QColorDialog.getColor()
+        if color.isValid():
+            self.textColor = color
+
+    def foregroundDependingPointColorSelect(self):
+        color = QColorDialog.getColor()
+        if color.isValid():
+            self.dependingPointBrushColor = color
+
     def fileActionsCreating(self):
         self.newFileAct = QAction("&New", self)
         self.newFileAct.setShortcut("Ctrl+N")
@@ -375,6 +430,12 @@ class MainWindow(QMainWindow):
         self.pointInObjectBrush.setChecked(False)
         self.newUnderType(self.pointBrush, self.pointInObjectBrush)
 
+        self.pointIntersectionBrush = QAction("&Intersection", self, checkable=True)
+        self.pointIntersectionBrush.setStatusTip("Making Intersection")
+        self.pointIntersectionBrush.setToolTip("Making <b>Intersection</b>")
+        self.pointIntersectionBrush.triggered.connect(lambda event: self.setUnderType("intersection", self.pointIntersectionBrush, self.pointBrush))
+        self.newUnderType(self.pointBrush, self.pointIntersectionBrush)
+
     def segmentBrushActionsCreating(self):
         self.segmentBrush = QAction("&Segment", self, checkable=True)
         self.segmentBrush.setShortcut("Ctrl+2")
@@ -406,6 +467,21 @@ class MainWindow(QMainWindow):
         self.circleRadiusBrush.triggered.connect(lambda event: self.setUnderType("radius", self.circleRadiusBrush, self.circleBrush))
         self.circleRadiusBrush.setChecked(True)
         self.newUnderType(self.circleBrush, self.circleRadiusBrush)
+
+    def competitorBrushActionCreating(self):
+        self.competitorBrush = QAction("&Competitor", self, checkable=True)
+        self.competitorBrush.setStatusTip("Set competitor")
+        self.competitorBrush.setToolTip("Set <b>competitor</b>")
+        self.competitorBrush.triggered.connect(lambda event: self.setBrushType("competitor", self.competitorBrush))
+        self.competitorBrush.setChecked(False)
+        self.newBrush(self.competitorBrush)
+
+        self.competitorNormalBrush = QAction("&Competitor", self, checkable=True)
+        self.competitorNormalBrush.setStatusTip("Set competitor")
+        self.competitorNormalBrush.setToolTip("Set <b>competitor</b>")
+        self.competitorNormalBrush.triggered.connect(lambda event: self.setUnderType("competitor", self.competitorNormalBrush, self.competitorBrush))
+        self.competitorNormalBrush.setChecked(True)
+        self.newUnderType(self.competitorBrush, self.competitorNormalBrush)
 
     def editActionsCreating(self):
         self.backCommand = QAction("&Back", self)
@@ -441,16 +517,28 @@ class MainWindow(QMainWindow):
         self.backgroundColorCommand.triggered.connect(self.backgroundColorSelect)
 
         self.foregroundPointColorCommand = QAction("&Foreground Point", self)
-        self.foregroundPointColorCommand.setShortcut("Alt+F")
+        self.foregroundPointColorCommand.setShortcut("Shift+P")
         self.foregroundPointColorCommand.setStatusTip("Change your point color")
         self.foregroundPointColorCommand.setToolTip("Change your <b>point color</b>")
         self.foregroundPointColorCommand.triggered.connect(self.foregroundPointColorSelect)
 
+        self.foregroundDependingPointColorCommand = QAction("&Foreground Depending Point", self)
+        self.foregroundDependingPointColorCommand.setShortcut("Shift+D")
+        self.foregroundDependingPointColorCommand.setStatusTip("Change your depending point color")
+        self.foregroundDependingPointColorCommand.setToolTip("Change your <b>depending point color</b>")
+        self.foregroundDependingPointColorCommand.triggered.connect(self.foregroundDependingPointColorSelect)
+
         self.foregroundSegmentColorCommand = QAction("&Foreground Segment", self)
-        self.foregroundSegmentColorCommand.setShortcut("Shift+F")
+        self.foregroundSegmentColorCommand.setShortcut("Shift+S")
         self.foregroundSegmentColorCommand.setStatusTip("Change your segment color")
         self.foregroundSegmentColorCommand.setToolTip("Change your <b>segment color</b>")
         self.foregroundSegmentColorCommand.triggered.connect(self.foregroundSegmentColorSelect)
+
+        self.foregroundTextColorCommand = QAction("&Foreground Text", self)
+        self.foregroundTextColorCommand.setShortcut("Shift+T")
+        self.foregroundTextColorCommand.setStatusTip("Change your text color")
+        self.foregroundTextColorCommand.setToolTip("Change your <b>text color</b>")
+        self.foregroundTextColorCommand.triggered.connect(self.foregroundTextColorSelect)
 
     def helpActionsCreating(self):
         self.referenceCommand = QAction("&Reference", self)
@@ -478,6 +566,7 @@ class MainWindow(QMainWindow):
         self.typeBrushes.addAction(self.pointBrush)
         self.typeBrushes.addAction(self.segmentBrush)
         self.typeBrushes.addAction(self.circleBrush)
+        self.typeBrushes.addAction(self.competitorBrush)
 
         self.undertypeBrushes.addAction(self.pointPointBrush)
         self.undertypeBrushes.addAction(self.pointInObjectBrush)
@@ -493,11 +582,13 @@ class MainWindow(QMainWindow):
         self.viewMenu.addAction(self.backgroundColorCommand)
         self.viewMenu.addMenu(self.foregroundMenu)
         self.foregroundMenu.addAction(self.foregroundPointColorCommand)
+        self.foregroundMenu.addAction(self.foregroundDependingPointColorCommand)
         self.foregroundMenu.addAction(self.foregroundSegmentColorCommand)
+        self.foregroundMenu.addAction(self.foregroundTextColorCommand)
 
         self.helpMenu = self.menubar.addMenu("&Help")
         self.helpMenu.addAction(self.referenceCommand)
-        self.helpMenu.addAction(self.authorsCommand) 
+        self.helpMenu.addAction(self.authorsCommand)
 
     def toolbarFilling(self):
         self.toolbar = self.addToolBar("Toolbar")
@@ -508,6 +599,7 @@ class MainWindow(QMainWindow):
         self.toolbar.addAction(self.pointBrush)
         self.toolbar.addAction(self.segmentBrush)
         self.toolbar.addAction(self.circleBrush)
+        self.toolbar.addAction(self.competitorBrush)
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.backCommand)
         self.toolbar.addAction(self.forwardCommand)
@@ -518,6 +610,7 @@ class MainWindow(QMainWindow):
         self.toolbar.addAction(self.quitAct)
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.proveCommand)
+        self.toolbar.addSeparator()
 
     def initUI(self):
         self.setFixedSize(self.fieldWidth, self.fieldHeight)
@@ -535,6 +628,7 @@ class MainWindow(QMainWindow):
         self.pointBrushActionsCreating()
         self.segmentBrushActionsCreating()
         self.circlesBrushActionsCreating()
+        self.competitorBrushActionCreating()
         self.editActionsCreating()
         self.viewActionsCreating()
         self.helpActionsCreating()
@@ -571,7 +665,6 @@ class Console(QTextEdit):
                 self.moveCursor(QTextCursor.End)
         else:
             super().keyPressEvent(event)
-
 
 class MainWidget(QWidget):
     pass
