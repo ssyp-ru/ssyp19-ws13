@@ -169,13 +169,13 @@ class Model:
         for i in pointlist:
             inputvector.append(i.x)
             inputvector.append(i.y)
-        print(inputvector)
+        # print(inputvector)
         awnser, data, ok, msg = fsolve(equation, inputvector, full_output=True)
         if ok == 1:
             j = 0
             self.points = {}
             print(awnser)
-            for i in range(int(len(awnser) / 2)):
+            for i in range(len(awnser) // 2):
                 self.add_point(awnser[2 * j], awnser[(2 * j) + 1])
                 j += 1
     
