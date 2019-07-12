@@ -2,6 +2,7 @@ from Translator import Translator
 from geom import *
 from string import ascii_lowercase as dictionary
 from scipy.optimize import fsolve
+from itertools import cycle
 
 class Model:
 
@@ -20,7 +21,6 @@ class Model:
         name = self.generate_name()
         point = Point(x, y, name)
         if not Fixed:
-            # print(str(point))
             self.points[name] = point
             self.translator.connector.prolog.assertz(f'point({name})')
         elif isinstance(parent2, Circle) and isinstance(parent1, Segment):
@@ -51,11 +51,11 @@ class Model:
             if segment.pointBelongs(point):
                 self.translator.connector.prolog.assertz(\
                     f'laysBetween({segment.point1.name}, {segment.point2.name}, {point.name})')
-                #print(self.translator.connector.get_n_ans_new(\
-                #    f'isCongruent({segment.point1.name}, {segment.point2.name})'))
         return point 
 
     def add_segment(self, a: Point, b: Point):
+        if a.name > b.name:
+            a, b  = b, a
         new_segment = Segment(a, b)
         split = {}
         for k, segment in self.segments.items():
@@ -148,57 +148,82 @@ class Model:
             return True
         return point
 
+    def updateCongruencyClasses(self):
+        """
+            UNUSED. (I hope.)
+        """
+        solutions = self.translator.connector.get_n_ans_new("congruented(X, Y)")[0]
+        for el in solutions:
+            point1 = self.findPointFromName(el['X'].args[0])
+            point2 = self.findPointFromName(el['X'].args[1])
+            point3 = self.findPointFromName(el['Y'].args[0])
+            point4 = self.findPointFromName(el['Y'].args[1])
+            Xsegment = Segment(point1, point2)
+            Ysegment = Segment(point3, point4)
+            if Xsegment not in self.CongruentSegments:
+                self.CongruentSegments[Xsegment] = set()
+            self.CongruentSegments[Xsegment].add(Ysegment)
+
+    def updateEverything(self):
+        toUpdate = []
+        for segment in self.segments.values():
+            if not isinstance(segment.point1, DependPoint) or\
+               not isinstance(segment.point2, DependPoint):
+                   toUpdate.append(segment)
+
     def correctingScheme(self):
+        def modelToVector():
+            vector = []
+            for point in sorted(self.points):
+                vector.append(self.points[point].x)
+                vector.append(self.points[point].y)
+            return vector
+        def vectorToModel(vector):
+            index = 0
+            for point in sorted(self.points):
+                self.points[point].x, self.points[point].y = vector[index:index+2]
+                index += 2
+            self.updateEverything()
+        def makeConstraints():
+            solutions = self.translator.connector.get_n_ans_new("congruented(X, Y)")[0]
+            result = {}
+            for sol in solutions:
+                a,b = sol['X'].args
+                c,d = sol['Y'].args
+                point1 = self.findPointFromName(a)
+                point2 = self.findPointFromName(b)
+                point3 = self.findPointFromName(c)
+                point4 = self.findPointFromName(d)
+                result[point1, point2] = point3, point4
+            return result        
+        constraints = makeConstraints() 
         def equation(inputvector):
-            tempmodel = self.copy()
-            i = 0
-            for point in tempmodel.points.values():
-                point.x = inputvector[i]
-                point.y = inputvector[i + 1]
-                i += 2
+            N = len(inputvector)
+            vectorToModel(inputvector)
             y = [0] * len(inputvector)
-            X = []
-            j = 0
-            for j in range(len(inputvector)):
-                X = tempmodel.getCongruencyClass(j)
-                print(X)
-                if not X:
-                    break
-                avglen = sum([float(el.length) for el in X]) / len(X)
-                print(sum([abs(el.length - avglen) for el in X]))
-                y[j] = sum([abs(el.length - avglen) for el in X])
-            print('Residual', y)
+            for j, cons in zip(range(N), cycle(constraints.items())):
+                ab, cd = cons
+                a, b = ab
+                c, d = cd
+                y[j] = abs(abs(a-b)-abs(c-d))
             return y
-        print(self.CongruentSegments)
-        inputvector = []
-        pointlist = list(self.points.values())
-        for i in pointlist:
-            inputvector.append(i.x)
-            inputvector.append(i.y)
-        awnser, data, ok, msg = fsolve(equation, inputvector, full_output=True)
-        if ok == 1:      
-            self.points = {}
-            j = 0
-            for i in range(int(len(awnser) / 2)):
-                self.add_point(awnser[2 * j], awnser[(2 * j) + 1])
-                j += 1
+        initial = modelToVector()
+
+        answer, data, ok, msg = fsolve(equation, initial, full_output=True)
+        if not ok:
+            vectorToModel(initial)
+            return
+        vectorToModel(answer)
+        self.updateEverything()
 
     
     def findPointFromName(self, name):
         res = self.points.get(str(name))
         return res
 
-    def getCongruencyClass(self, index):
-        i = 0
-        if not index > len(self.CongruentSegments):
-            for key, val in self.CongruentSegments.items():
-                if i == index:
-                    val.add(key)
-                    return val
-                i += 1
-        return []
     def copy(self):
         model = Model()
         model.points = self.points.copy()
         model.CongruentSegments = self.CongruentSegments.copy()
         return model
+

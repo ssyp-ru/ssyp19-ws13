@@ -1,6 +1,4 @@
 import math
-# from Translator import Translator
-# translator = Translator()
 error = 1.0
 
 class LineError(ValueError):
@@ -145,6 +143,13 @@ class Line():
             Snumerator = (line.A * self.C) - (line.C * self.A)
             return Point(Fnumerator / denom, Snumerator / denom)
 
+    def updateVector(self):
+        self.A = self.point2.y - self.point1.y
+        self.B = -(self.point2.x - self.point1.x)
+        Nvector = Vector(self.A, self.B)
+        self.C = Nvector.dotproduct(self.point1)
+        self.normalize()
+
     def __init__(self, *args):
         if isinstance(args[0], Point):
             point1, point2 = args
@@ -152,11 +157,7 @@ class Line():
                 raise(LineError("That points are the same"))
             self.point1 = point1
             self.point2 = point2
-            self.A = point2.y - point1.y
-            self.B = -(point2.x - point1.x)
-            Nvector = Vector(self.A, self.B)
-            self.C = Nvector.dotproduct(point1)
-            self.normalize()
+            self.updateVector()
         else:
             self.A, self.B, self.C, *_ = args
             self.normalize()
@@ -311,36 +312,36 @@ class Point(Vector):
     def __hash__(self):
         return hash(self.name)
 
-
 class BasicPoint(Point):
     pass
-
-
 class DependPoint(Point):
     def __init__(self, name, parent1, parent2, index=0):
+        super().__init__(0,0)
+        self.parent1 = parent1
+        self.parent2 = parent2
+        self.name = name
+        self.recalc()
+    def recalc(self):
+        """
+            Calculates coordinates from intersection of parents.
+        """
         if isinstance(parent1, Segment):
             if isinstance(parent2, Segment):
                 interpoint = parent1.intersection(parent2)
                 if interpoint:
                     super().__init__(interpoint.x, interpoint.y)
-                self.parent1 = parent1
-                self.parent2 = parent2
-                self.name = name
-
+                    self.x, self.y = interpoint.x, interpoint.y
             else:
                 interpoint = parent2.intersectionSegment(parent1)
                 i = interpoint[index]
-                super().__init__(i.x, i.y)
-                self.parent1 = parent1
-                self.parent2 = parent2
-                self.name = name
+                self.x, self.y = i.x, i.y
         else:
             if isinstance(point2, Segment):
                 interpoint = parent1.intersectionSegment(parent2)
                 i = interpoint[index]
-                super().__init__(i.x, i.y)
-                self.parent1 = parent1
-                self.parent2 = parent2
-                self.name = name
+                self.x, self.y = i.x, i.y
             else:
-                pass
+                interpoint = parent2.intersectionCircle(parent1)
+                i = interpoint[index]
+                self.x, self.y = i.x, i.y
+        
