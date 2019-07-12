@@ -64,7 +64,11 @@ class MainWidget(QMainWindow):
         return point
 
     def newSegment(self, pointstart: geometry.Point, pointend: geometry.Point, alloperationsInserting=True):
-        segment = self.model.add_segment(pointstart, pointend)
+        try:
+            segment = self.model.add_segment(pointstart, pointend)
+            print(str(segment))
+        except  IndexError:
+            print("Not 2 points intersection")
         self.model.operations.append(geometry.Segment(pointstart, pointend))
         if alloperationsInserting:
             self.model.alloperations.append(geometry.Segment(pointstart, pointend))
@@ -179,12 +183,12 @@ class MainWidget(QMainWindow):
                     self.pointCoords = [event.x(), event.y()]
                     point1 = geometry.Point(pointCoords[0], pointCoords[1])
                     point2 = geometry.Point(self.pointCoords[0], self.pointCoords[1])
+                    self.pointCoords = []
                     if self.brushundertype == "segment":
                         self.segmentDrawing(point1, point2)
                     elif self.brushundertype == "segmentwithpoints":
                         self.segmentWithPointsDrawing(point1, point2)
                     self.update()
-                    self.pointCoords = []
 
         if self.brushtype == "circle":
             if self.pointCoords == []:

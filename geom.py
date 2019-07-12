@@ -108,6 +108,7 @@ class Segment():
 
 class Line():
     error = 1.0
+
     def normalize(self):
         Nvector = Vector(self.A, self.B).unitDirectedVector()
         self.A = Nvector.x
@@ -132,7 +133,7 @@ class Line():
         Avector = Vector(self.A, self.B)
         denom = Avector.crossProduct(Vector(line.A, line.B))
         if not denom == 0:
-            Fnumerator = ((self.B * line.C) - (self.C * line.B) )
+            Fnumerator = ((self.B * line.C) - (self.C * line.B))
             Snumerator = (line.A * self.C) - (line.C * self.A)
             return Point(Fnumerator / denom, Snumerator / denom)
 
@@ -302,8 +303,8 @@ class BasicPoint(Point):
 
 
 class DependPoint(Point):
-    def __init__(self, name, parent1, parent2, index = 0):
-        if isinstance(parent1, Segment): 
+    def __init__(self, name, parent1, parent2, index=0):
+        if isinstance(parent1, Segment):
             if isinstance(parent2, Segment):
                 interpoint = parent1.intersection(parent2)
                 print(interpoint)
