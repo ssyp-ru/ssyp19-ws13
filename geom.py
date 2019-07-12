@@ -79,9 +79,10 @@ class Circle:
 
 
 class Segment():
-    def pointBelongs(self, point):
+
+    def pointBelongs(self, point, error=1):
         summ = point.distToPoint(self.point1) + point.distToPoint(self.point2)
-        return summ <= self.point1.distToPoint(self.point2) + 1
+        return summ <= self.point1.distToPoint(self.point2) + error
 
     def intersection(self, segment):
         Mline = Line(self.point1, self.point2)
@@ -101,6 +102,9 @@ class Segment():
 
     def __eq__(self, other, error=5):
         return abs(other.length - self.length) <= error
+
+    def __ne__(self, other):
+        return (self.point1 != other.point1 or self.point2 != other.point2) and (self.point2 != other.point1 or self.point1 != other.point2)
 
     def __str__(self):
         return f"({str(self.point1)}; {str(self.point2)})"
@@ -176,9 +180,6 @@ class Vector:
     def crossProduct(self, vector):
         return (self.x * vector.y) - (vector.x * self.y)
 
-    def length(self, point):
-        return point.distToPoint(Point(0, 0))
-
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -201,6 +202,9 @@ class Vector:
     def __str__(self):
         return f"({self.x}, {self.y})"
 
+    def __abs__(self):
+        return math.hypot(self.x, self.y)
+
     def __le__(self, other):
         if isinstance(other, Point) or isinstance(other, Vector):
             return self.x <= other.x and self.y <= other.y
@@ -221,16 +225,17 @@ class Vector:
         else:
             return Point(self.x + other, self.y + other)
 
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
 
 class Point(Vector):
+
     def __init__(self, x, y, name=None):
         super().__init__(x, y)
         self.name = name
 
     def isInCircle(self, circleslist):
-        for _, i in circleslist.items():
-            if (self.distToPoint(i.center) < i.radius):
-                pass
+        pass
                 # translator.connector.call(...)
                 # Here i need Vsevolod's code for request in prolog
 
@@ -249,9 +254,8 @@ class Point(Vector):
         if segment.pointBelongs(projectPoint):
             return projectPoint
         return
-
-    def distToPoint(self, point):
-        return (self - point).length
+    def distToPoint(self, other):
+        return abs(self-other)
 
     def distToLine(self, line):
         inclined = Vector(line.point1.x - self.x, line.point1.y - self.y)
@@ -262,7 +266,7 @@ class Point(Vector):
         inclined = Vector(self.x - segment.point1.x, self.y - segment.point1.y)
         if (inclined.dotproduct(segment.point2 - segment.point1)) < 0:
             return (min(self.distToPoint(segment.point1),
-                    self.distToPoint(segment.point2)))
+                        self.distToPoint(segment.point2)))
         else:
             return self.distToLine(segment)
 
@@ -271,7 +275,6 @@ class Point(Vector):
             return Point(self.x + other.x, self.y + other.y)
         else:
             return Point(self.x + other, self.y + other)
-
     def __truediv__(self, other):
         return Point(self.x / other, self.y / other)
 
@@ -307,7 +310,6 @@ class DependPoint(Point):
         if isinstance(parent1, Segment):
             if isinstance(parent2, Segment):
                 interpoint = parent1.intersection(parent2)
-                print(interpoint)
                 if interpoint:
                     super().__init__(interpoint.x, interpoint.y)
                 self.parent1 = parent1

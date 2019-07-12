@@ -1,6 +1,6 @@
 from Translator import Translator
 from geom import *
-from string import ascii_uppercase as dictionary
+from string import ascii_lowercase as dictionary
 
 
 class Model:
@@ -15,54 +15,64 @@ class Model:
         self.error = 8
 
     def add_point(self, x: float, y: float, Fixed = False, parent1 = None, parent2 = None):
-        name = self.generate_name(Point)
-        self.translator.connector.assert_code(f'point({name})')
+        name = self.generate_name()
+        self.translator.connector.prolog.assertz(f'point({name})')
         if not Fixed:
-            p = Point(x, y, name)
-            self.points[name] = p
-            return p
-        elif isinstance(parent1, Circle) or isinstance(parent2, Circle):
-            point = DependPoint(name, parent1, parent2, 0)
+            point = Point(x, y, name)
             self.points[name] = point
-            name = self.generate_name(Point)
-            point = DependPoint(name, parent1, parent2, 1)
-            self.points[name] = point
+        elif isinstance(parent2, Circle) and isinstance(parent1, Segment):
+            points = parent2.intersectionSegment(parent1)
+            if len(points) > 1:
+                for i, _ in points:
+                    point = DependPoint(name, parent1, parent2, i)
+                    self.points[name] = point
+                    name = self.generate_name()
+                return point
+            else:
+                point = DependPoint(name, parent1, parent2)
+                self.points[name] = point
+                name = self.generate_name()
         else:
-            point = DependPoint(name, parent1, parent2, 0)
+            point = DependPoint(name, parent1, parent2)
             self.points[name] = point
+        for segment in self.segments.values():
+            if segment.pointBelongs(point):
+                self.translator.connector.prolog.assertz(\
+                    f'laysBetween({segment.point1.name}, {segment.point2.name}, {point.name})')
+                print(self.translator.connector.get_n_ans_new(\
+                    f'isCongruent({segment.point1.name}, {segment.point2.name})'))
+        return point 
 
     def add_segment(self, a: Point, b: Point):
         new_segment = Segment(a, b)
         for segment in self.segments.values():
             interpoint = new_segment.intersection(segment)
             if interpoint:
-                self.add_point(interpoint.x, interpoint.y, True, new_segment, segment)
+                self.add_point(1, 1, True, new_segment, segment)
             if segment.length == new_segment.length:
                 self.translator.connector.assert_code(f'congruent(segment({segment.point1.name},'
                                                       f' {segment.point2.name}),'
                                                       f' segment({new_segment.point1.name},'
                                                       f' {new_segment.point2.name}))')
-        self.segments[self.generate_name(Segment)] = new_segment
         for circle in self.circles.values():
             interpoint = circle.intersectionSegment(Segment(new_segment.point1, new_segment.point2))
             if interpoint:
                 self.add_point(1, 1, True, new_segment, circle)
+        for segment in self.segments.values():
+            if -100 < segment.length - new_segment.length < 100:
+                segment1 = f'segment({segment.point1.name}, {segment.point2.name})'
+                segment2 = f'segment({new_segment.point1.name}, {new_segment.point2.name})'
+                self.translator.connector.prolog.assertz(f'congruent({segment1}, {segment2})')
+        self.segments[a.name + b.name] = new_segment
         return new_segment
 
     def add_circle(self, segment: Segment):
         circle = Circle(segment)
-        self.circles[self.generate_name(Circle)] = circle
+        self.circles[segment.point1.name+segment.point2.name] = circle
         return circle
 
-    def generate_name(self, type: int) -> str:
-        if type is Circle:
-            num = len(self.circles)
-        elif type is Segment:
-            num = len(self.segments)
-        elif type is Point:
-            num = len(self.points)
-        else:
-            num = type
+    def generate_name(self) -> str:
+        num = len(self.points)
         if num <= 25:
             return dictionary[num]
         else:
@@ -79,24 +89,33 @@ class Model:
                     end = i
         return start, end
 
-    @staticmethod
-    def correcting_points_warning(point, segments, circles):
-        error = 4
-        for _, i in circles.items():
-            print(str(i))
-            list = i.intersectionLine(Line(i.center, point))
-            if not list:
-                return point
-            for j in list:
-                condition = -error <= point - j <= error
-                print(str(j), str(point))
-                if condition:
-                    point.x = j.x
-                    point.y = j.y
+    def correctingPoints(self, point, segments, circles):
+        error = 8
+
+        for circle in circles.values():
+            radial = point-circle.center
+            if (abs(radial)-circle.radius) < error:
+                unit = radial/abs(radial)
+                point = circle.center + unit*circle.radius
+                point.parent1 = circle
+            return point
+        for i in segments.values():
+            if point.distToSegment(i) < error:
+                return point.projectionOnSegment(i)
         return point
 
-    def correcting_online_points(self, point: Point) -> Point:
-        for segment in self.segments.values():
-            if segment.pointBelongs(Point, self.error):
-                pass
-                # return point + point.asd(segment)
+    def check_segment(self, point1, point2):
+        names = (point1.name + point2.name, point2.name + point1.name)
+        for name in names:
+            if name in self.segments.keys():
+                return self.segments[name]
+        return self.add_segment(point1, point2)
+
+    def check_circle(self, segment, error=10):
+        for circle in self.circles.values():
+            if circle.center == segment.point1 and abs(circle.radius - segment.length) <= error:
+                return circle
+        return self.add_circle(segment)
+
+    def reset_prolog(self):
+        self.translator = Translator()

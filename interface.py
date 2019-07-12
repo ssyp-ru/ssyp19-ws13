@@ -1,12 +1,9 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen, QBrush
+from PyQt5.QtGui import QPainter, QColor, QFont, QImage, QPen, QBrush, QTextCursor
 from PyQt5.QtCore import Qt, QPoint, QRect
-from random import *
 import sys
 import webbrowser
 import geom as geometry
-import math
-from correctingPoints import correctingPoints
 from model import Model
 
 class WidgetWithText(QWidget):
@@ -33,10 +30,12 @@ class WidgetWithText(QWidget):
         self.show()
         self.centering()
 
-class MainWidget(QMainWindow):
+
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.model = Model()
+        self.console = Console(self.model)
         self.brushes = []
         self.brushundertypes = {}
         self.brushtype = "point"
@@ -44,7 +43,7 @@ class MainWidget(QMainWindow):
         self.flag = False
         self.pointBrushColor = QColor(255, 0, 0)
         self.segmentBrushColor = Qt.black
-        self.backgorundColor = Qt.white
+        self.backgroundColor = Qt.white
         self.lastname = -1
         self.pointCoords = []
         self.fieldWidth = 700
@@ -64,22 +63,18 @@ class MainWidget(QMainWindow):
         return point
 
     def newSegment(self, pointstart: geometry.Point, pointend: geometry.Point, alloperationsInserting=True):
-        try:
-            segment = self.model.add_segment(pointstart, pointend)
-            print(str(segment))
-        except  IndexError:
-            print("Not 2 points intersection")
+        segment = self.model.check_segment(pointstart, pointend)
         self.model.operations.append(geometry.Segment(pointstart, pointend))
         if alloperationsInserting:
             self.model.alloperations.append(geometry.Segment(pointstart, pointend))
         return segment
 
-    def newCircle(self, segment, alloperationsInserting=True):
-        self.model.add_circle(segment)
+    def newCircle(self, segment: geometry.Segment, alloperationsInserting=True):
+        circle = self.model.check_circle(segment)
         self.model.operations.append(geometry.Circle(segment))
         if alloperationsInserting:
             self.model.alloperations.append(geometry.Circle(segment))
-        return geometry.Circle(segment)
+        return circle
 
     def newBrush(self, brush):
         self.brushes.append(brush)
@@ -102,7 +97,7 @@ class MainWidget(QMainWindow):
     def paintEvent(self, event):
         paint = QPainter(self)
         paint.drawImage(0,0, self.image)
-        paint.setBrush(QBrush(self.backgorundColor))
+        paint.setBrush(QBrush(self.backgroundColor))
         paint.drawRect(-20, 20, self.fieldWidth+30, self.fieldHeight+30)
         paint.setBrush(self.pointBrushColor)
         paint.setPen(QPen(self.segmentBrushColor, 2))
@@ -136,22 +131,14 @@ class MainWidget(QMainWindow):
         self.messageSend("Point succesfully placed" + " " * 10 + str(x) + ", " + str(y))
 
     def segmentDrawing(self, point1, point2):
-        list = self.model.correcting_points(point1, point2)
-        if list:
-            newSegment = geometry.Segment(list[0], list[1])
-        else:
-            newSegment = geometry.Segment(point1, point2)
-        self.newSegment(newSegment.point1, newSegment.point2)
-        self.messageSend("Segment succesfully placed" + " " * 10 + "[" + str(newSegment.point1.x) + ", " + str(newSegment.point1.y) + "] , [" + str(newSegment.point2.x) + ", " + str(newSegment.point2.y) + "]")
-
-    def segmentWithPointsDrawing(self, point1, point2):
         n_point1, n_point2 = self.model.correcting_points(point1, point2)
         if n_point1 is point1:
             n_point1 = self.newPoint(point1.x, point1.y)
         if n_point2 is point2:
             n_point2 = self.newPoint(point2.x, point2.y)
-        self.newSegment(n_point1, n_point2)
-        self.messageSend(f"Segment With Points succesfully placed {' ' * 10}{n_point1}-{n_point2}")
+        segment = self.newSegment(n_point1, n_point2)
+        self.messageSend(f"Segment With Points succesfully placed {' ' * 10}{segment.point1}-{segment.point2}")
+
     def circleWithRadiusDrawing(self, center, point2):
         n_center, n_point2 = self.model.correcting_points(center, point2)
         if self.brushundertype == "radius":
@@ -168,7 +155,9 @@ class MainWidget(QMainWindow):
             if self.brushundertype == "point":
                 self.pointDrawing(event.x(), event.y())
             elif self.brushundertype == "pointinobject":
-                point = correctingPoints(geometry.Point(event.x(), event.y()), self.model.segments, self.model.circles)
+                point = self.model.correctingPoints(geometry.Point(event.x(), event.y()),\
+                                                    self.model.segments,
+                                                    self.model.circles)
                 self.pointInObjectDrawing(point.x, point.y)
             self.update()
 
@@ -199,9 +188,9 @@ class MainWidget(QMainWindow):
 
                 center = geometry.Point(firstPointCoords[0], firstPointCoords[1])
                 pointOnCircle = geometry.Point(self.pointCoords[0], self.pointCoords[1])
-                
+
                 self.circleWithRadiusDrawing(center, pointOnCircle)
-                
+
                 self.update()
                 self.pointCoords = []
         self.update()
@@ -287,12 +276,24 @@ class MainWidget(QMainWindow):
     def reset(self):
         self.pointCoords = []
 
+    def prove(self):
+        solutions = self.model.translator.connector.get_n_ans_new("isCongruent(X, Y)")[0]
+        for solution in solutions:
+            print(solution)
+            print(f"{solution['X']} == {solution['Y']}")
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.flag = True
             self.drawingObjects(event)
         elif event.button() == Qt.RightButton:
             self.update()
+
+    def keyReleaseEvent(self, event):
+        print(event.key())
+        if event.key() == Qt.Key_QuoteLeft:
+            self.console.show()
+
 
     def mouseReleaseEvent(self, event):
         self.update()
@@ -305,8 +306,9 @@ class MainWidget(QMainWindow):
         self.move(qr.topLeft())
 
     def clear(self):
+        self.model.reset_prolog()
         self.paint = QPainter(self.image)
-        self.paint.setBrush(QBrush(self.backgorundColor))
+        self.paint.setBrush(QBrush(self.backgroundColor))
         for point in list(self.model.points.keys()):
             del(self.model.points[point])
         for segment in list(self.model.segments.keys()):
@@ -324,7 +326,7 @@ class MainWidget(QMainWindow):
     def backgroundColorSelect(self):
         color = QColorDialog.getColor()
         if color.isValid():
-            self.backgorundColor = color
+            self.backgroundColor = color
 
     def foregroundPointColorSelect(self):
         color = QColorDialog.getColor()
@@ -388,13 +390,6 @@ class MainWidget(QMainWindow):
         self.segmentSegmentBrush.setChecked(True)
         self.newUnderType(self.segmentBrush, self.segmentSegmentBrush)
 
-        self.segmentWithPointsBrush = QAction("&Segment With Points", self, checkable=True)
-        self.segmentWithPointsBrush.setStatusTip("Making Segment With Points")
-        self.segmentWithPointsBrush.setToolTip("Making <b>Segment With Points</b>")
-        self.segmentWithPointsBrush.triggered.connect(lambda event: self.setUnderType("segmentwithpoints", self.segmentWithPointsBrush, self.segmentBrush))
-        self.segmentWithPointsBrush.setChecked(False)
-        self.newUnderType(self.segmentBrush, self.segmentWithPointsBrush)
-
     def circlesBrushActionsCreating(self):
         self.circleBrush = QAction("&Circle", self, checkable=True)
         self.circleBrush.setShortcut("Ctrl+3")
@@ -429,6 +424,13 @@ class MainWidget(QMainWindow):
         self.resetCommand.setStatusTip("Reset point")
         self.resetCommand.setToolTip("<b>Reset</b> point")
         self.resetCommand.triggered.connect(self.reset)
+
+        self.proveCommand = QAction("&Prove", self)
+        self.proveCommand.setShortcut("Ctrl+P")
+        self.proveCommand.setStatusTip("Proved")
+        self.proveCommand.setToolTip("<b>Prove</b>")
+        self.proveCommand.triggered.connect(self.prove)
+
 
     def viewActionsCreating(self):
         self.backgroundColorCommand = QAction("&Background", self)
@@ -483,6 +485,7 @@ class MainWidget(QMainWindow):
         self.editMenu.addAction(self.backCommand)
         self.editMenu.addAction(self.forwardCommand)
         self.editMenu.addAction(self.resetCommand)
+        self.editMenu.addAction(self.proveCommand)
 
         self.viewMenu = self.menubar.addMenu("&View")
         self.foregroundMenu = QMenu("&Foreground", self)
@@ -513,6 +516,7 @@ class MainWidget(QMainWindow):
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.quitAct)
         self.toolbar.addSeparator()
+        self.toolbar.addAction(self.proveCommand)
 
     def initUI(self):
         self.setFixedSize(self.fieldWidth, self.fieldHeight)
@@ -539,6 +543,38 @@ class MainWidget(QMainWindow):
         self.setBrushType("point", self.pointBrush)
         self.messageSend("Paint")
 
+
+class Console(QTextEdit):
+
+    def __init__(self, model):
+        super().__init__()
+        self.resize(600, 300)
+        self.setAlignment(Qt.AlignTop)
+        self.setWindowTitle('Console')
+        self.setFont(QFont('Hack', 14))
+        self.model = model
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Return:
+            s = self.toPlainText()
+            try:
+                query = s.rsplit('\n', maxsplit=1)[-1]
+                s += '\n'
+                answer = self.model.translator.connector.prolog.query(query)
+                for sol in answer:
+                    s += '; '.join(list(map(str, sol.values()))) + '\n'
+            except Exception as f:
+                s += str(f) + '\n'
+            finally:
+                self.setText(s)
+                self.moveCursor(QTextCursor.End)
+        else:
+            super().keyPressEvent(event)
+
+
+class MainWidget(QWidget):
+    pass
+
 app = QApplication(sys.argv)
-interface = MainWidget()
+interface = MainWindow()
 sys.exit(app.exec_())
