@@ -98,13 +98,15 @@ class Segment():
         self.length = point1.distToPoint(point2)
 
     def __eq__(self, other, error=5):
-        return abs(other.length - self.length) <= error
+        # return abs(other.length - self.length) <= error
+        return self.point1 == other.point1 and self.point2 == other.point1
 
     def __ne__(self, other):
         return (self.point1 != other.point1 or self.point2 != other.point2) and (self.point2 != other.point1 or self.point1 != other.point2)
 
     def __str__(self):
         return f"({str(self.point1)}; {str(self.point2)})."
+
     def __repr__(self):
         return f"({str(self.point1)}; {str(self.point2)})."
 

@@ -610,10 +610,12 @@ class Canvas(QWidget):
             newPoint = geometry.Point(event.x(), event.y())
             for segment in self.parent.model.segments.values():
                 if segment.pointBelongs(newPoint):
+                    print(segment, 'belongs')
                     if segment not in self.parent.select:
                         if not self.parent.pointCoords:
                             self.parent.pointCoords = [event.x(), event.y()]
                         self.parent.select.append(segment)
+                        print(self.parent.select)
                         self.parent.messageSend("Segment selected")
                     else:
                         self.parent.messageSend("Error")
