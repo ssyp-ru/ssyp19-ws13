@@ -44,7 +44,6 @@ class Model:
                     self.translator.connector.prolog.assertz(f'point({name})')
         else:
             point = DependPoint(name, parent1, parent2)
-            print(name)
             self.dependpoints[name] = point
             self.translator.connector.prolog.assertz(f'point({name})')
         for segment in self.segments.values():
@@ -64,13 +63,13 @@ class Model:
                 if isinstance(self.pointExist(interpoint), Point):
                     self.add_point(1, 1, True, segment, new_segment)
                    # TODO: comment from here if error
-        #             break
-        # if split:
+        #            break
+        #if split:
         #    del self.segments[k]
-        # for k, v in split.items():
+        #for k, v in split.items():
         #    for point in v[1::]:
         #        self.add_segment(v[0], point)
-        # if split:
+        #if split:
         #    return None
         # to here
         for circle in self.circles.values():
