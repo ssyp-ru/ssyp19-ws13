@@ -4,10 +4,6 @@ import re
 import os
 from ast import literal_eval
 
-
-# Review: Most of your comments should be docstrings.
-# We want to be better than pyswip authors.
-
 class PrologConnector:
 
     def __init__(self):
@@ -37,14 +33,11 @@ class PrologConnector:
 
     # warning! can be broken if maxresult = -1
     def get_n_ans(self, instructions: str, maxresult=1, **kwargs) -> [dict]:
-
         # query for prolog
         return self.prolog.query(instructions, maxresult=maxresult, **kwargs)
 
-    # rewrite old way
-    # warning! may be unfinished
     def get_n_ans_new(self, instructions: str, maxresults=-1, solves=True) -> list:
-        # functors and items of predicates, variables
+        ' functors and items of predicates, variables'
         terms, vars, statements = self.parse_ins(instructions)
         vars_ans = [] if solves else {i[0]: []
                                       for i in vars}  # list/dict of variable values
@@ -67,7 +60,6 @@ class PrologConnector:
         return vars_ans, statements_ans
 
     @staticmethod
-    # parsing instruction.
     def parse_ins(instruction) -> list and list and list:
         if instruction[-1] != ';':
             instruction += ';'
@@ -108,8 +100,8 @@ class PrologConnector:
                     (Functor(pred, len(names))(*items), pred + atoms))
         return terms, vars, statements
 
-    # for all solves of only 1 request(may be unused)
     def make_req(self, command: str, solves=False, **kwargs):  # with custom parameters
+        'for all solves of only 1 request(may be unused)'
         a = self.get_n_ans_new(command, solves=solves, **kwargs)
         # getting only 1 result
         if a[0]:
@@ -120,8 +112,10 @@ class PrologConnector:
         else:
             return None
 
-    # for assertion facts(the same as consult_code)
     def assert_code(self, ins: str):
+        """
+            for assertion facts(the same as consult_code)
+        """
         for i in ins.split(';'):
             self.prolog.assertz(i)
 

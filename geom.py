@@ -243,8 +243,6 @@ class Point(Vector):
 
     def isInCircle(self, circleslist):
         pass
-                # translator.connector.call(...)
-                # Here i need Vsevolod's code for request in prolog
 
     def projectionOnLine(self, line):
         PminusQ = line.point1 - line.point2  # Shifting coordinate system to
@@ -289,7 +287,6 @@ class Point(Vector):
     def __eq__(self, other):
         return self.distToPoint(other) < error
 
-    # redefined sub func
     def __sub__(self, other):
         if isinstance(other, Point) or isinstance(other, Vector):
             return Point(self.x - other.x, self.y - other.y)
@@ -333,7 +330,6 @@ class DependPoint(Point):
             if isinstance(self.parent2, Segment):
                 interpoint = self.parent1.intersection(self.parent2)
                 if interpoint:
-                    # super().__init__(interpoint.x, interpoint.y)
                     self.x, self.y = interpoint.x, interpoint.y
             else:
                 interpoint = self.parent2.intersectionSegment(self.parent1)

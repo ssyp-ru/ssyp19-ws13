@@ -544,10 +544,6 @@ class Canvas(QWidget):
             self.pointDrawing(paint, point.x, point.y, str(point))
         for point in self.parent.model.dependpoints.values():
             self.dependingPointDrawing(paint, point.x, point.y, str(point))
-            # if str(type(point)) == "<class \'geom.Point\'>":
-            #     self.pointDrawing(paint, point.x, point.y, str(point))
-            # else:
-            #     self.dependingPointDrawing(paint, point.x, point.y, str(point))
         self.update()
 
     def mousePressEvent(self, event):
@@ -635,7 +631,6 @@ class Canvas(QWidget):
         if n_point2 is point2:
             n_point2 = self.parent.newPoint(point2.x, point2.y)
         segment = self.parent.newSegment(n_point1, n_point2)
-        # self.parent.messageSend(f"Segment With Points succesfully placed {' ' * 10}{segment.point1}-{segment.point2}")
 
     def circleWithRadiusCreating(self, center, point2):
         n_center, n_point2 = self.parent.model.correcting_points(center, point2)
