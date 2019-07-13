@@ -185,12 +185,11 @@ class MainWindow(QMainWindow):
         self.paint = QPainter(self.image)
         self.paint.setBrush(QBrush(self.canvas.backgroundColor))
         self.select = list()
-        for point in tuple(self.model.points.keys()):
-            del (self.model.points[point])
-        for segment in tuple(self.model.segments.keys()):
-            del (self.model.segments[segment])
-        for circle in tuple(self.model.circles.keys()):
-            del (self.model.circles[circle])
+        self.model.points = {}
+        self.model.circles = {}
+        self.model.segments = {}
+        self.model.dependpoints = {}
+        self.model.circles = {}
         self.paint.drawRect(-20, 20, self.fieldWidth + 30, self.fieldHeight + 30)
 
     def reference(self):
@@ -466,7 +465,8 @@ class Console(QTextEdit):
                 s += '\n'
                 answer = self.model.translator.connector.prolog.query(query)
                 for sol in answer:
-                    s += '; '.join(list(map(str, map(lambda x: self.model.points[x] if isinstance(x, geometry.Point) else x,sol.values())))) + '\n'
+                    print(self.model.dependpoints[sol['X']])
+                    s += '; '.join(list(map(str, map(lambda x: self.model.points[x] if x in self.model.points.keys() else self.model.dependpoints(x) if x in self.model.dependpoints.keys else x, sol.values())))) + '\n'
             except Exception as f:
                 s += str(f) + '\n'
             finally:

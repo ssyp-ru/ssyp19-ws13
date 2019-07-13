@@ -321,27 +321,27 @@ class DependPoint(Point):
         self.parent2 = parent2
         self.name = name
         self.recalc()
+        self.index = index
     def recalc(self):
         """
             Calculates coordinates from intersection of parents.
         """
-        if isinstance(parent1, Segment):
-            if isinstance(parent2, Segment):
-                interpoint = parent1.intersection(parent2)
+        if isinstance(self.parent1, Segment):
+            if isinstance(self.parent2, Segment):
+                interpoint = self.parent1.intersection(self.parent2)
                 if interpoint:
                     super().__init__(interpoint.x, interpoint.y)
                     self.x, self.y = interpoint.x, interpoint.y
             else:
-                interpoint = parent2.intersectionSegment(parent1)
-                i = interpoint[index]
+                interpoint = self.parent2.intersectionSegment(self.parent1)
+                i = interpoint[self.index]
                 self.x, self.y = i.x, i.y
         else:
-            if isinstance(point2, Segment):
-                interpoint = parent1.intersectionSegment(parent2)
-                i = interpoint[index]
+            if isinstance(self.point2, Segment):
+                interpoint = self.parent1.intersectionSegment(self.parent2)
+                i = interpoint[self.index]
                 self.x, self.y = i.x, i.y
             else:
-                interpoint = parent2.intersectionCircle(parent1)
-                i = interpoint[index]
+                interpoint = self.parent2.intersectionCircle(self.parent1)
+                i = interpoint[self.index]
                 self.x, self.y = i.x, i.y
-        
