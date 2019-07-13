@@ -314,34 +314,35 @@ class Point(Vector):
 
 class BasicPoint(Point):
     pass
+
+
 class DependPoint(Point):
     def __init__(self, name, parent1, parent2, index=0):
-        super().__init__(0,0)
+        super().__init__(0,0, name)
         self.parent1 = parent1
         self.parent2 = parent2
-        self.name = name
-        self.recalc()
-    def recalc(self):
+        self.recalc(index)
+
+    def recalc(self, index):
         """
             Calculates coordinates from intersection of parents.
         """
-        if isinstance(parent1, Segment):
-            if isinstance(parent2, Segment):
-                interpoint = parent1.intersection(parent2)
+        if isinstance(self.parent1, Segment):
+            if isinstance(self.parent2, Segment):
+                interpoint = self.parent1.intersection(self.parent2)
                 if interpoint:
-                    super().__init__(interpoint.x, interpoint.y)
                     self.x, self.y = interpoint.x, interpoint.y
             else:
-                interpoint = parent2.intersectionSegment(parent1)
+                interpoint = self.parent2.intersectionSegment(self.parent1)
                 i = interpoint[index]
                 self.x, self.y = i.x, i.y
         else:
             if isinstance(point2, Segment):
-                interpoint = parent1.intersectionSegment(parent2)
+                interpoint = self.parent1.intersectionSegment(self.parent2)
                 i = interpoint[index]
                 self.x, self.y = i.x, i.y
             else:
-                interpoint = parent2.intersectionCircle(parent1)
+                interpoint = self.parent2.intersectionCircle(self.parent1)
                 i = interpoint[index]
                 self.x, self.y = i.x, i.y
         

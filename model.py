@@ -43,8 +43,7 @@ class Model:
                     name = self.generate_name()
                     self.translator.connector.prolog.assertz(f'point({name})')
         else:
-            point = DependPoint(name, parent1, parent2)
-            print(str(point)) 
+            point = DependPoint(name, parent1, parent2) 
             self.dependpoints[name] = point
             self.translator.connector.prolog.assertz(f'point({name})')
         for segment in self.segments.values():
