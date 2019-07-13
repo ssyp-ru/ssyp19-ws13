@@ -36,10 +36,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.model = Model()
         self.console = Console(model=self.model, parent=self)
-        self.console.move(0, 600)
+        self.console.move(0, 500)
         self.console.resize(900, 100)
         self.canvas = Canvas(parent=self, model=self.model)
-        self.canvas.resize(900, 600)
+        self.canvas.resize(900, 500)
         self.brushes = []
         self.brushundertypes = {}
         self.brushtype = "point"
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         self.lastname = -1
         self.pointCoords = []
         self.fieldWidth = 900
-        self.fieldHeight = 735
+        self.fieldHeight = 635
         self.zoomValue = 100
         self.operations = []
         self.programTitle = "Prototype"
