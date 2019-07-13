@@ -465,8 +465,7 @@ class Console(QTextEdit):
                 s += '\n'
                 answer = self.model.translator.connector.prolog.query(query)
                 for sol in answer:
-                    print(self.model.dependpoints[sol['X']])
-                    s += '; '.join(list(map(str, map(lambda x: self.model.points[x] if x in self.model.points.keys() else self.model.dependpoints(x) if x in self.model.dependpoints.keys else x, sol.values())))) + '\n'
+                    s += '; '.join(list(map(str, sol.values()))) + '\n'
             except Exception as f:
                 s += str(f) + '\n'
             finally:
