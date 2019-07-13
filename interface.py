@@ -483,7 +483,7 @@ class Canvas(QWidget):
         self.segmentBrushColor = Qt.black
         self.textColor = Qt.black
         self.backgroundColor = Qt.white
-        self.selectionSegmentBrushColor = QColor(0, 255, 255)
+        self.selectionSegmentBrushColor = QColor('#b5b5b5')
         self.textFont = QFont("Helvetica", 12)
         self.parent = parent
         self.model = model
